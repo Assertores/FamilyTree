@@ -1,0 +1,40 @@
+# See following document for information about .clang-format
+# https://clang.llvm.org/docs/ClangFormatStyleOptions.html
+
+Language: Cpp
+ColumnLimit: 100
+DisableFormat: false
+
+BasedOnStyle: Google
+
+IncludeBlocks: Regroup
+IncludeCategories:
+  - Regex: '^".+"'
+    Priority: 10
+  - Regex: "^<[^.]+>"
+    Priority: 30
+  - Regex: "^<.+>"
+    Priority: 20
+SortIncludes: true
+
+AccessModifierOffset: -4
+AlignAfterOpenBracket: AlwaysBreak
+AllowAllArgumentsOnNextLine: false
+AlwaysBreakAfterReturnType: TopLevelDefinitions
+BinPackArguments: false
+BinPackParameters: false
+BreakBeforeBinaryOperators: NonAssignment
+BreakConstructorInitializers: BeforeComma
+BreakInheritanceList: BeforeComma
+ConstructorInitializerAllOnOneLineOrOnePerLine: false
+ConstructorInitializerIndentWidth: 4
+ContinuationIndentWidth: 4
+IndentCaseLabels: false
+IndentWidth: 4
+SpacesBeforeTrailingComments: 1
+Standard: c++17
+TabWidth: 4
+UseCRLF: false
+UseTab: Always
+PenaltyBreakComment: 0
+CommentPragmas: '^ NOLINT '
