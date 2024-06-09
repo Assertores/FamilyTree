@@ -2,6 +2,8 @@
 
 project ("FamilyTree" LANGUAGES C CXX)
 
+include(CTest)
+
 function(FT_declare libName)
 add_library(FT::${libName} ALIAS ${libName})
 target_include_directories(${libName}
@@ -61,7 +63,7 @@ target_link_libraries(FamilyTree
 		FT::LibFamilyTreeStatic
 )
 
-add_executable(FT_Test EXCLUDE_FROM_ALL "src_test/main.cpp")
+add_executable(FT_Test "src_test/main.cpp")
 
 target_sources(FT_Test
 	PRIVATE
@@ -91,3 +93,5 @@ target_link_libraries(FT_Test
 	PRIVATE
 		FT::LibFamilyTreeStatic
 )
+
+add_test(NAME FT_Test COMMAND FT_Test)
