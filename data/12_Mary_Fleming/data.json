@@ -1,0 +1,12 @@
+{
+	"person": 12,
+	"firstNames": [
+		"Mary",
+		"Kayleigh"
+	],
+	"lastNames": [
+		"Fleming"
+	],
+	"gender": "female",
+	"dateOfBirth": "01.01.1986"
+}

@@ -1,0 +1,11 @@
+{
+	"person": 3,
+	"firstNames": [
+		"Pippa"
+	],
+	"lastNames": [
+		"Ross"
+	],
+	"gender": "non-binary",
+	"dateOfBirth": "04.05.1996"
+}

@@ -1,0 +1,25 @@
+{
+	"person": 1,
+	"title": "Prof. Dr.",
+	"firstNames": [
+		"Philippa",
+		"Rosa",
+		"Polly"
+	],
+	"titleOfNobility": "von und zu",
+	"lastNames": [
+		"Perry",
+		"Figueroa",
+		"Russell"
+	],
+	"gender": "male",
+	"dateOfBirth": "04.05.1996",
+	"placeOfBirth": "PlaceA",
+	"death": "11.11.2021",
+	"placeOfDeath": "PlaceB",
+	"Audio": "Sunday_plans.mp3",
+	"Images":[
+		"Trohnsaal.png"
+	],
+	"Remarks": "RemarkA"
+}

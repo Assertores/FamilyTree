@@ -1,0 +1,12 @@
+{
+	"person": 18,
+	"firstNames": [
+		"Lee",
+		"Kye"
+	],
+	"lastNames": [
+		"Snyder"
+	],
+	"gender": "female",
+	"dateOfBirth": "01.01.1986"
+}

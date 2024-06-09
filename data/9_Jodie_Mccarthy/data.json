@@ -1,0 +1,12 @@
+{
+	"person": 9,
+	"firstNames": [
+		"Jodie",
+		"Gloria"
+	],
+	"lastNames": [
+		"Mccarthy"
+	],
+	"gender": "female",
+	"dateOfBirth": "01.01.1986"
+}
