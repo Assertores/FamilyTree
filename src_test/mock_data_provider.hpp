@@ -17,7 +17,7 @@ public:
 	operator IDataProvider*();
 	virtual ~AbstractDataProvider() = default;
 
-	virtual void GetPerson(PersonId aId, Person* aOutPerson) {}
+	virtual Person GetPerson(PersonId aId) { return {}; }
 	virtual void PlayPerson(PersonId aId) {}
 	virtual void ShowImages(PersonId aId) {}
 	virtual size_t GetAllIdsCount() { return 0; }
@@ -34,7 +34,7 @@ class MockDataProvider : public AbstractDataProvider {
 public:
 	MockDataProvider();
 
-	void GetPerson(PersonId aId, Person* aOutPerson) override;
+	Person GetPerson(PersonId aId) override;
 	size_t GetAllIdsCount() override;
 	void GetAllIds(PersonId* aOutId) override;
 	size_t GetAllRelationsOfIdCount(PersonId aId) override;

@@ -46,10 +46,10 @@ SharedDataProvider_GetAllIds(IDataProvider* aThis, PersonId* aOutId) {
 	self->myOriginal->GetAllIds(self->myOriginal, aOutId);
 }
 
-void
-SharedDataProvider_GetPerson(IDataProvider* aThis, PersonId aId, Person* aOutPerson) {
+Person
+SharedDataProvider_GetPerson(IDataProvider* aThis, PersonId aId) {
 	SharedDataProvider* self = (SharedDataProvider*)aThis;
-	self->myOriginal->GetPerson(self->myOriginal, aId, aOutPerson);
+	return self->myOriginal->GetPerson(self->myOriginal, aId);
 }
 
 void
@@ -204,10 +204,10 @@ SharedPersonals_GetAllIds(IPersonals* aThis, PersonId* aOutId) {
 	self->myOriginal->GetAllIds(self->myOriginal, aOutId);
 }
 
-void
-SharedPersonals_GetPerson(IPersonals* aThis, PersonId aId, Person* aOutPerson) {
+Person
+SharedPersonals_GetPerson(IPersonals* aThis, PersonId aId) {
 	SharedPersonals* self = (SharedPersonals*)aThis;
-	self->myOriginal->GetPerson(self->myOriginal, aId, aOutPerson);
+	return self->myOriginal->GetPerson(self->myOriginal, aId);
 }
 
 void

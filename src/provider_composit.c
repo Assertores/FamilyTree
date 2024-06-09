@@ -2,6 +2,7 @@
 #include "patch.h"
 
 #include <stdlib.h>
+#include <string.h>
 
 typedef struct IdTranslation {
 	PersonId externalId;
@@ -24,8 +25,8 @@ ProviderComposit_Copy(IDataProvider* aThis) {
 	return aThis;
 }
 
-void
-ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId, Person* aOutPerson) {
+Person
+ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -34,10 +35,13 @@ ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId, Person* aOutPerso
 		}
 
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
-		provider->GetPerson(provider, self->myTranslations[i].internalId, aOutPerson);
-		aOutPerson->id = self->myTranslations[i].externalId;
-		return;
+		Person result = provider->GetPerson(provider, self->myTranslations[i].internalId);
+		result.id = self->myTranslations[i].externalId;
+		return result;
 	}
+	Person result;
+	memset(&result, 0, sizeof(Person));
+	return result;
 }
 
 void

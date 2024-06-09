@@ -5,9 +5,9 @@ AbstractDataProvider_Copy(IDataProvider* aThis) {
 	return aThis;
 }
 
-void
-AbstractDataProvider_GetPerson(IDataProvider* aThis, PersonId aId, Person* aOutPerson) {
-	((C_DataProvider*)aThis)->myThis->GetPerson(aId, aOutPerson);
+Person
+AbstractDataProvider_GetPerson(IDataProvider* aThis, PersonId aId) {
+	return ((C_DataProvider*)aThis)->myThis->GetPerson(aId);
 }
 
 void
@@ -105,9 +105,9 @@ MockDataProvider::MockDataProvider() {
 	myChildRelations.push_back(r);
 }
 
-void
-MockDataProvider::GetPerson(PersonId aId, Person* aOutPerson) {
-	*aOutPerson = myPersons[aId];
+Person
+MockDataProvider::GetPerson(PersonId aId) {
+	return myPersons[aId];
 }
 
 size_t

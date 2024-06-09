@@ -47,8 +47,7 @@ PersonDataCanBeRetreaved() {
 	MockPlatform platform{};
 	AutoFree person = CreateJSONPerson("", platform);
 
-	Person result;
-	person->GetPerson(person, 5, &result);
+	Person result = person->GetPerson(person, 5);
 
 	CHECK(result.title, "Prof. Dr.");
 	CHECK(result.firstNameCount, 3);

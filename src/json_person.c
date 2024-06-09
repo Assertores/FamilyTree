@@ -214,11 +214,11 @@ JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId) {
 	}
 }
 
-void
-JsonPerson_GetPerson(IPersonals* aThis, PersonId aId, Person* aOutPerson) {
+Person
+JsonPerson_GetPerson(IPersonals* aThis, PersonId aId) {
 	JsonPerson* self = (JsonPerson*)aThis;
 
-	*aOutPerson = _GetPerson(self, aId)->person;
+	return _GetPerson(self, aId)->person;
 }
 
 void

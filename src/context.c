@@ -379,7 +379,7 @@ GetPerson(Context* aContext, PersonId aId) {
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
-	interface->GetPerson(interface, aId, &p);
+	p = interface->GetPerson(interface, aId);
 	PopulateNullValues(&p, aContext);
 	return p;
 }
@@ -419,7 +419,7 @@ GetPersonsMatchingPattern(
 	size_t count = 0;
 	int found = 0;
 	for (size_t i = 0; i < idCount; i++) {
-		data->GetPerson(data, ids[i], result + count);
+		result[count] = data->GetPerson(data, ids[i]);
 
 		// TODO: handle error
 
@@ -516,16 +516,19 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount) 
 	Relation* result = malloc(sizeof(Relation) * count);
 	data->GetAllRelationsOfId(data, aId, result);
 
+	for (size_t i = 0; i < count; i++) {
+		if (result[i].relationship == NULL) {
+			result[i].relationship = aContext->myDefaultString;
+		}
+		if (result[i].startDate == NULL) {
+			result[i].startDate = aContext->myDefaultString;
+		}
+		if (result[i].endDate == NULL) {
+			result[i].endDate = aContext->myDefaultString;
+		}
+	}
+
 	*aOutRelationsCount = count;
-	if (result->relationship == NULL) {
-		result->relationship = aContext->myDefaultString;
-	}
-	if (result->startDate == NULL) {
-		result->startDate = aContext->myDefaultString;
-	}
-	if (result->endDate == NULL) {
-		result->endDate = aContext->myDefaultString;
-	}
 	return result;
 }
 

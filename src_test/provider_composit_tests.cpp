@@ -13,8 +13,7 @@ ProviderCompositGetPersonDoesNotLeakInternalId() {
 	ProviderComposit_AddDataProvider(composit, dataProvider);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
-	Person person;
-	iface->GetPerson(iface, 0, &person);
+	auto person = iface->GetPerson(iface, 0);
 
 	CHECK(person.id, 0);
 	return true;

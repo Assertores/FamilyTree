@@ -15,11 +15,11 @@ ForwardingProvider_Copy(IDataProvider* aThis) {
 	return aThis;
 }
 
-void
-ForwardingProvider_GetPerson(IDataProvider* aThis, PersonId aId, Person* aOutPerson) {
+Person
+ForwardingProvider_GetPerson(IDataProvider* aThis, PersonId aId) {
 	ForwardingProvider* self = (ForwardingProvider*)aThis;
 
-	self->myPersonals->GetPerson(self->myPersonals, aId, aOutPerson);
+	return self->myPersonals->GetPerson(self->myPersonals, aId);
 }
 
 void

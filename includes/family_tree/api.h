@@ -78,9 +78,9 @@ FT_API IDataProvider* CreateDataProvider(
 //!   - @a id1 needs to be a number (refering to a person).
 //!   - @a id2 needs to be a number (refering to a person).
 //!   - @a type needs be one of 3 values:
-//!     - @a Unrestricted this relation has no generation restriction e.g. a marriage.
-//!     - @a StrictlyLower id2 is in a lower generation then id1 e.g. a child.
-//!     - @a StrictlyHigher id2 is in a higher generation then id1 e.g. a parent.
+//!     - @a Unrestricted @copybrief RelationType_Unrestricted
+//!     - @a StrictlyLower @copybrief RelationType_StrictlyLower
+//!     - @a StrictlyHigher @copybrief RelationType_StrictlyHigher
 //! all other fields may contain arbitrary string values.
 //! @param aPlatform this is used to read in the csv file.
 //! @return a fully setup object that can be used to retreave relation data information.
