@@ -1,7 +1,9 @@
 #include "algorythms.h"
 #include "family_tree/api.h"
 #include "internal_types.h"
+#include "patch.h"
 
+#include <limits.h>
 #include <stdlib.h>
 #include <string.h>
 

@@ -1,4 +1,5 @@
 #include "internal_types.h"
+#include "patch.h"
 
 #include <stdlib.h>
 
@@ -94,6 +95,9 @@ SharedDataProvider_Free(IDataProvider* aThis) {
 
 IDataProvider*
 CreateSharedDataProviderDecorator(IDataProvider* aElement) {
+	if (aElement == NULL) {
+		return NULL;
+	}
 	SharedDataProvider* result = calloc(1, sizeof(SharedDataProvider));
 
 	result->interface.Copy = SharedDataProvider_Copy;
@@ -163,6 +167,9 @@ SharedRelationals_Free(IRelationals* aThis) {
 
 IRelationals*
 CreateSharedRelationalsDecorator(IRelationals* aElement) {
+	if (aElement == NULL) {
+		return NULL;
+	}
 	SharedRelationals* result = calloc(1, sizeof(SharedRelationals));
 
 	result->interface.Copy = SharedRelationals_Copy;
@@ -228,6 +235,9 @@ SharedPersonals_Free(IPersonals* aThis) {
 
 IPersonals*
 CreateSharedPersonalsDecorator(IPersonals* aElement) {
+	if (aElement == NULL) {
+		return NULL;
+	}
 	SharedPersonals* result = calloc(1, sizeof(SharedPersonals));
 
 	result->interface.Copy = SharedPersonals_Copy;
@@ -294,6 +304,9 @@ SharedPlatform_Free(IPlatform* aThis) {
 
 IPlatform*
 CreateSharedPlatformDecorator(IPlatform* aElement) {
+	if (aElement == NULL) {
+		return NULL;
+	}
 	SharedPlatform* result = calloc(1, sizeof(SharedPlatform));
 
 	result->interface.Copy = SharedPlatform_Copy;

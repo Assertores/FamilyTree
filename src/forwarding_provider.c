@@ -1,4 +1,5 @@
 #include "internal_types.h"
+#include "patch.h"
 
 #include <stdlib.h>
 

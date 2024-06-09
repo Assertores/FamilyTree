@@ -32,6 +32,11 @@ if(WIN32)
 		PUBLIC
 			"src/windows_platform.c"
 	)
+else()
+	target_sources(${libName}
+		PUBLIC
+			"src/null_platform.c"
+	)
 endif()
 endfunction(FT_declare libName)
 
