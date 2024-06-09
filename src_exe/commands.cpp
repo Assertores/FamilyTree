@@ -3,6 +3,7 @@
 #include <family_tree/api.h>
 
 #include <iostream>
+#include <vector>
 
 std::set<ICommand*> ICommand::myCommands = {};
 bool ICommand::myQuitFlag = false;
@@ -83,7 +84,7 @@ PrintPerson::PrintPerson(Context* aContext)
 
 bool
 PrintPerson::IsCommand(std::string_view aCommand) {
-	return aCommand == "print-person" || aCommand == "d";
+	return aCommand == "print-person" || aCommand == "p";
 }
 
 void
@@ -114,7 +115,7 @@ PrintPerson::ExecuteCommand(const std::string& aLine) {
 
 void
 PrintPerson::PrintHelp() {
-	std::cout << "print-person [id], d [id]: prints the detailed informations of a person. id "
+	std::cout << "print-person [id], p [id]: prints the detailed informations of a person. id "
 				 "needs to be an interger\n";
 }
 
@@ -174,4 +175,124 @@ void
 ShowImages::PrintHelp() {
 	std::cout << "show-images [id], i [id]: opens all available images of a person. id needs to be "
 				 "an integer\n";
+}
+
+SearchPeople::SearchPeople(Context* aContext)
+	: myContext(aContext) {}
+
+bool
+SearchPeople::IsCommand(std::string_view aCommand) {
+	return aCommand == "search" || aCommand == "s";
+}
+
+void
+SearchPeople::ExecuteCommand(const std::string& aLine) {
+	size_t minMatches = 1;
+
+	std::string copy = aLine;
+	size_t begin = 0;
+	for (size_t i = 0; i < copy.size(); i++) {
+		if (std::isspace(copy[i])) {
+			copy[i] = '\0';
+			begin = i + 1;
+			break;
+		}
+	}
+	if (begin == 0) {
+		return;
+	}
+	minMatches = std::stoi(copy.c_str());
+
+	Person prototype{};
+	std::vector<const char*> firstNames;
+	std::vector<const char*> lastNames;
+	for (size_t i = begin; i < copy.size(); i++) {
+		if (copy.substr(i).rfind("-t=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.title = copy.c_str() + i + 3;
+			continue;
+		}
+		if (copy.substr(i).rfind("-n=", 0) == 0) {
+			copy[i - 1] = '\0';
+			firstNames.push_back(copy.c_str() + i + 3);
+			continue;
+		}
+		if (copy.substr(i).rfind("-a=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.titleOfNobility = copy.c_str() + i + 3;
+			continue;
+		}
+		if (copy.substr(i).rfind("-l=", 0) == 0) {
+			copy[i - 1] = '\0';
+			lastNames.push_back(copy.c_str() + i + 3);
+			continue;
+		}
+		if (copy.substr(i).rfind("-g=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.gender = copy.c_str() + i + 3;
+			continue;
+		}
+		if (copy.substr(i).rfind("-bd=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.dateOfBirth = copy.c_str() + i + 4;
+			continue;
+		}
+		if (copy.substr(i).rfind("-bp=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.placeOfBirth = copy.c_str() + i + 4;
+			continue;
+		}
+		if (copy.substr(i).rfind("-dd=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.dateOfDeath = copy.c_str() + i + 4;
+			continue;
+		}
+		if (copy.substr(i).rfind("-dp=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.placeOfDeath = copy.c_str() + i + 4;
+			continue;
+		}
+		if (copy.substr(i).rfind("-r=", 0) == 0) {
+			copy[i - 1] = '\0';
+			prototype.remark = copy.c_str() + i + 3;
+			continue;
+		}
+	}
+	prototype.firstNameCount = firstNames.size();
+	prototype.firstNames = firstNames.data();
+	prototype.lastNameCount = lastNames.size();
+	prototype.lastNames = lastNames.data();
+
+	size_t count = 0;
+	auto array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count);
+	std::vector<Person> matches{array, array + count};
+	bool first = true;
+	std::cout << "ids: ";
+	for (const auto& it : matches) {
+		if (!first) {
+			std::cout << ", ";
+		}
+		first = false;
+		std::cout << it.id;
+	}
+	std::cout << '\n';
+}
+
+void
+SearchPeople::PrintHelp() {
+	std::cout << "search [matches], s [matches]: searches for people who match at least [matches] "
+				 "amount of the parameters. not all parameters need to be given. [matches] needs "
+				 "to be an integer.\n"
+				 "    -t=[title]: the title of the person.\n"
+				 "    -n=[first name]: all people with that first name. this command can be given "
+				 "multiple times.\n"
+				 "    -a=[title of nobility]: all people who have this title of nobility.\n"
+				 "    -l=[last name]: all people with that last name. this command can be given "
+				 "multiple times.\n"
+				 "    -g=[gender]: all people who have this gender.\n"
+				 "    -bd=[birthday]: all people who where born at that day.\n"
+				 "    -bp=[birthplace]: all people who where born at that place.\n"
+				 "    -dd=[birthday]: all people who died at that day.\n"
+				 "    -dp=[birthplace]: all people who died at that place.\n"
+				 "    -r=[remarks]: all people who have this remark.\n";
 }

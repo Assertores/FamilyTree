@@ -19,6 +19,7 @@ main() {
 	PrintPerson printPerson(context);
 	ShowImages showImages(context);
 	PlayAudio playAudio(context);
+	SearchPeople searchPeople(context);
 
 	bool quit = false;
 	while (!quit) {

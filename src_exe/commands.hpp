@@ -86,3 +86,15 @@ public:
 private:
 	Context* myContext;
 };
+
+class SearchPeople : public ICommand {
+public:
+	SearchPeople(Context* aContext);
+
+	bool IsCommand(std::string_view aCommand);
+	void ExecuteCommand(const std::string& aLine);
+	void PrintHelp();
+
+private:
+	Context* myContext;
+};

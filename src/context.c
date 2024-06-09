@@ -400,7 +400,7 @@ ShowImagesOfPerson(Context* aContext, PersonId aId) {
 
 FT_API Person*
 GetPersonsMatchingPattern(
-	Context* aContext, Person aPrototype, int aMinMatches, size_t* aOutPersonsCount) {
+	Context* aContext, Person aPrototype, size_t aMinMatches, size_t* aOutPersonsCount) {
 	if (aContext == NULL) {
 		return NULL;
 	}
