@@ -213,8 +213,7 @@ ResetRelations(CsvRelation* self) {
 		size_t count = Explode(lines[i], ',', &cells);
 
 		// NOTE: change this once a proper format is found
-		if (count >= 3) {
-			self->myPlatform->FreeString(self->myPlatform, self->myFile);
+		if (count < 3) {
 			free(lines);
 			free(cells);
 			return;

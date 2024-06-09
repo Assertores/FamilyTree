@@ -95,7 +95,7 @@ MockPlatform::ReadFile(const char* aPath) {
 		auto backing = R"json({\"person\": 32})json";
 		return (new std::string(backing))->data();
 	}
-	auto backing = "id1,id2\n5,32";
+	auto backing = "id1,id2,type\n5,32,StrictlyLower";
 	return (new std::string(backing))->data();
 }
 
@@ -124,6 +124,6 @@ MockPlatform::OpenImage(const char* aPath) {
 
 char*
 CsvPlatform::ReadFile(const char* aPath) {
-	auto backing = "id1,id2\n5,32\n13,8\n5,13\n32,9";
+	auto backing = "id1,id2,type\n5,32,StrictlyLower\n13,8,StrictlyLower\n5,13,StrictlyLower\n32,9,StrictlyLower";
 	return (new std::string(backing))->data();
 }
