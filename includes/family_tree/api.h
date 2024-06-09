@@ -110,7 +110,7 @@ FT_API IRelationals* CreateCSVRelations(Context* aContext, const char* aPath, IP
 //! @endcode
 //! @note the files content needs to be a valid json format. it must contain the "person" key which
 //! must be a integer value. all other fields are optional and can be omitted.
-//! @param aPlatform
+//! @param aPlatform this is used to retreave the subfolders and read in the json files.
 //! @return a fully setup object that can be used to retreave personal data.
 //! @note the object will be freed once @ref Free is called.
 FT_API IPersonals* CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform);
@@ -165,7 +165,7 @@ FT_API Person* GetPersonsMatchingPattern(
 //! @todo this array is currently leaked.
 FT_API Relation* GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount);
 
-//! @brief retreaves the relative generation of @aTargetId
+//! @brief retreaves the relative generation of @a aTargetId
 //! @param aContext a pointer to the context.
 //! @param aRefId the id which is considered generation 0.
 //! @param aTargetId the id of the person interested in.

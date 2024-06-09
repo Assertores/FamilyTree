@@ -1,0 +1,25 @@
+name: Build Doxygen Documentation
+
+on:
+  push:
+    branches: [ "main" ]
+  pull_request:
+    branches: [ "main" ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout code
+      uses: actions/checkout@v4
+    - name: Run Doxygen
+      uses: mattnotmitt/doxygen-action@edge
+      with:
+        doxyfile-path: ./Doxyfile
+        enable-latex: false
+    - name: Upload Artifacts
+      uses: actions/upload-artifact@v4
+      with:
+        name: Documentation
+        path: ./doxygen_generated/html/
+
