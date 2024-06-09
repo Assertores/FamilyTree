@@ -2,8 +2,9 @@
 
 #include "auto_free.hpp"
 #include "check.hpp"
-#include "internal_types.h"
 #include "mock_platform.hpp"
+
+#include <internal_types.h>
 
 bool
 Equal(const Relation& aLhs, const Relation& aRhs) {

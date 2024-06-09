@@ -1,9 +1,10 @@
 #include "algorythms_test.hpp"
 
-#include "algorythms.h"
 #include "auto_free.hpp"
 #include "check.hpp"
 #include "mock_data_provider.hpp"
+
+#include <algorythms.h>
 
 bool
 ChildRelationIsCorrectlyUnderstood() {

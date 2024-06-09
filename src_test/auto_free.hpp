@@ -1,9 +1,8 @@
 #pragma once
 
 #include "algorythms.h"
-#include "family_tree/api.h"
 
-#include <stdlib.h>
+#include <family_tree/api.h>
 
 template <class T>
 class AutoFree {

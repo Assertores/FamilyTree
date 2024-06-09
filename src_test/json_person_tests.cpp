@@ -1,6 +1,6 @@
 #include "auto_free.hpp"
 #include "check.hpp"
-#include "internal_types.h"
+#include <internal_types.h>
 #include "mock_platform.hpp"
 
 #include <stdio.h>

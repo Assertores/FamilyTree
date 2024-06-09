@@ -2,8 +2,9 @@
 
 #include "auto_free.hpp"
 #include "check.hpp"
-#include "internal_types.h"
 #include "mock_data_provider.hpp"
+
+#include <internal_types.h>
 
 bool
 ProviderCompositGetPersonDoesNotLeakInternalId() {

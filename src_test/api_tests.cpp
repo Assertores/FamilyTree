@@ -2,8 +2,9 @@
 
 #include "auto_free.hpp"
 #include "check.hpp"
-#include "family_tree/api.h"
 #include "mock_platform.hpp"
+
+#include <family_tree/api.h>
 
 bool
 CanRetreavePersonThroughAPI() {

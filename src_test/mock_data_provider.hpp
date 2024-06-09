@@ -1,6 +1,6 @@
 #pragma once
 
-#include "family_tree/types.h"
+#include <family_tree/types.h>
 
 #include <map>
 #include <vector>
