@@ -399,7 +399,7 @@ ShowImagesOfPerson(Context* aContext, PersonId aId) {
 }
 
 FT_API Person*
-CreatePersonsMatchingPattern(
+GetPersonsMatchingPattern(
 	Context* aContext, Person aPrototype, int aMinMatches, size_t* aOutPersonsCount) {
 	if (aContext == NULL) {
 		return NULL;
@@ -501,7 +501,7 @@ CreatePersonsMatchingPattern(
 }
 
 FT_API Relation*
-CreatePersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount) {
+GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount) {
 	if (aContext == NULL) {
 		return NULL;
 	}

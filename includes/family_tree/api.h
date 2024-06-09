@@ -47,9 +47,9 @@ FT_API void ShowImagesOfPerson(Context* aContext, PersonId aId);
 
 // NOTE: ignores default constructed elements in aPrototype. if aMinMatches is 0 then all non
 // default elements need to match.
-FT_API Person* CreatePersonsMatchingPattern(
+FT_API Person* GetPersonsMatchingPattern(
 	Context* aContext, Person aPrototype, int aMinMatches, size_t* aOutPersonsCount);
-FT_API Relation* CreatePersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount);
+FT_API Relation* GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount);
 FT_API int GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId);
 FT_API int IsDefaultString(Context* aContext, const char* aStringToCheck);
 

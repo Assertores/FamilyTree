@@ -91,7 +91,7 @@ CanRetreaveRelationsOfPerson() {
 			CreateJSONPersonals(context, "", platform)));
 
 	size_t count = 0;
-	auto relations = CreatePersonRelations(context, 0, &count);
+	auto relations = GetPersonRelations(context, 0, &count);
 
 	return true;
 }
