@@ -82,7 +82,7 @@ CreateWithCSVAndJSON(const char* aPath) {
 		return context;
 	}
 
-	IPlatform* platform = CreateDefaultIo(context);
+	IPlatform* platform = CreateDefaultPlatform(context);
 	IRelationals* relations = CreateCSVRelations(context, aPath, platform);
 	IPersonals* personals = CreateJSONPersonals(context, aPath, platform);
 	IDataProvider* provider = CreateDataProvider(context, relations, personals);
@@ -298,7 +298,7 @@ CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform) 
 }
 
 FT_API IPlatform*
-CreateDefaultIo(Context* aContext) {
+CreateDefaultPlatform(Context* aContext) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -363,10 +363,10 @@ GetPerson(Context* aContext, PersonId aId) {
 	p.id = 0;
 	p.title = "";
 	p.firstNameCount = 0;
-	p.firstNames = NULL;
+	p.firstNames = &p.title;
 	p.titleOfNobility = "";
 	p.lastNameCount = 0;
-	p.lastNames = NULL;
+	p.lastNames = &p.title;
 	p.gender = "";
 	p.dateOfBirth = "";
 	p.placeOfBirth = "";
@@ -543,5 +543,5 @@ IsDefaultString(Context* aContext, const char* aStringToCheck) {
 	if (aContext == NULL) {
 		return 0;
 	}
-	return aContext->myDefaultString == aStringToCheck;
+	return aContext->myDefaultString == aStringToCheck ? 1 : 0;
 }

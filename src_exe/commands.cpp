@@ -60,7 +60,7 @@ Exit::PrintHelp() {
 
 AddData::AddData(Context* aContext)
 	: myContext(aContext)
-	, myPlatform(CreateDefaultIo(aContext)) {}
+	, myPlatform(CreateDefaultPlatform(aContext)) {}
 
 bool
 AddData::IsCommand(std::string_view aCommand) {
