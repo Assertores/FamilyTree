@@ -324,30 +324,36 @@ CreateDefaultIo(Context* aContext) {
 }
 
 void
-PopulateNullValues(Person* aPerson, const char* aDefault) {
+PopulateNullValues(Person* aPerson, Context* aContext) {
 	if (aPerson->title == NULL) {
-		aPerson->title = aDefault;
+		aPerson->title = aContext->myDefaultString;
+	}
+	if (aPerson->firstNameCount == 0) {
+		aPerson->firstNames = &aContext->myDefaultString;
 	}
 	if (aPerson->titleOfNobility == NULL) {
-		aPerson->titleOfNobility = aDefault;
+		aPerson->titleOfNobility = aContext->myDefaultString;
+	}
+	if (aPerson->lastNameCount == 0) {
+		aPerson->lastNames = &aContext->myDefaultString;
 	}
 	if (aPerson->gender == NULL) {
-		aPerson->gender = aDefault;
+		aPerson->gender = aContext->myDefaultString;
 	}
 	if (aPerson->dateOfBirth == NULL) {
-		aPerson->dateOfBirth = aDefault;
+		aPerson->dateOfBirth = aContext->myDefaultString;
 	}
 	if (aPerson->placeOfBirth == NULL) {
-		aPerson->placeOfBirth = aDefault;
+		aPerson->placeOfBirth = aContext->myDefaultString;
 	}
 	if (aPerson->dateOfDeath == NULL) {
-		aPerson->dateOfDeath = aDefault;
+		aPerson->dateOfDeath = aContext->myDefaultString;
 	}
 	if (aPerson->placeOfDeath == NULL) {
-		aPerson->placeOfDeath = aDefault;
+		aPerson->placeOfDeath = aContext->myDefaultString;
 	}
 	if (aPerson->remark == NULL) {
-		aPerson->remark = aDefault;
+		aPerson->remark = aContext->myDefaultString;
 	}
 }
 
@@ -374,7 +380,7 @@ GetPerson(Context* aContext, PersonId aId) {
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	interface->GetPerson(interface, aId, &p);
-	PopulateNullValues(&p, aContext->myDefaultString);
+	PopulateNullValues(&p, aContext);
 	return p;
 }
 
@@ -485,7 +491,7 @@ GetPersonsMatchingPattern(
 			matches++;
 		}
 		if (matches >= aMinMatches) {
-			PopulateNullValues(result + count, aContext->myDefaultString);
+			PopulateNullValues(result + count, aContext);
 			count++;
 			result = realloc(result, (count + 1) * sizeof(Person));
 			continue;

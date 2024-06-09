@@ -273,7 +273,7 @@ SearchPeople::ExecuteCommand(const std::string& aLine) {
 			std::cout << ", ";
 		}
 		first = false;
-		std::cout << it.id;
+		std::cout << it.id << " (" << it.firstNames[0] << ' ' << it.lastNames[0] << ')';
 	}
 	std::cout << '\n';
 }
