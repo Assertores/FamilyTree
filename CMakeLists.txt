@@ -48,6 +48,12 @@ target_compile_definitions(LibFamilyTreeStatic
 
 add_executable(FamilyTree EXCLUDE_FROM_ALL "src_exe/main.cpp")
 
+target_sources(FamilyTree
+	PRIVATE
+		"src_exe/commands.cpp"
+		"src_exe/commands.hpp"
+)
+
 target_compile_features(FamilyTree PRIVATE cxx_std_17)
 
 target_link_libraries(FamilyTree
