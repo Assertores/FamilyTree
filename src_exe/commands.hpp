@@ -62,3 +62,27 @@ private:
 
 	void PrivPrintName(size_t aCount, const char* const* aNames);
 };
+
+class PlayAudio : public ICommand {
+public:
+	PlayAudio(Context* aContext);
+
+	bool IsCommand(std::string_view aCommand);
+	void ExecuteCommand(const std::string& aLine);
+	void PrintHelp();
+
+private:
+	Context* myContext;
+};
+
+class ShowImages : public ICommand {
+public:
+	ShowImages(Context* aContext);
+
+	bool IsCommand(std::string_view aCommand);
+	void ExecuteCommand(const std::string& aLine);
+	void PrintHelp();
+
+private:
+	Context* myContext;
+};

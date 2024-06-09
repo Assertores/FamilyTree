@@ -137,3 +137,41 @@ PrintPerson::PrivPrintName(size_t aCount, const char* const* aNames) {
 		std::cout << ')';
 	}
 }
+
+PlayAudio::PlayAudio(Context* aContext)
+	: myContext(aContext) {}
+
+bool
+PlayAudio::IsCommand(std::string_view aCommand) {
+	return aCommand == "play-audio" || aCommand == "a";
+}
+
+void
+PlayAudio::ExecuteCommand(const std::string& aLine) {
+	PlayPerson(myContext, std::stoi(aLine));
+}
+
+void
+PlayAudio::PrintHelp() {
+	std::cout << "play-audio [id], a [id]: plays the available audio of a person. id needs "
+				 "to be an integer\n";
+}
+
+ShowImages::ShowImages(Context* aContext)
+	: myContext(aContext) {}
+
+bool
+ShowImages::IsCommand(std::string_view aCommand) {
+	return aCommand == "show-images" || aCommand == "i";
+}
+
+void
+ShowImages::ExecuteCommand(const std::string& aLine) {
+	ShowImagesOfPerson(myContext, std::stoi(aLine));
+}
+
+void
+ShowImages::PrintHelp() {
+	std::cout << "show-images [id], i [id]: opens all available images of a person. id needs to be "
+				 "an integer\n";
+}
