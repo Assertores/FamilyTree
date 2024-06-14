@@ -98,3 +98,27 @@ public:
 private:
 	Context* myContext;
 };
+
+class PeopleRelation : public ICommand {
+public:
+	PeopleRelation(Context* aContext);
+
+	bool IsCommand(std::string_view aCommand);
+	void ExecuteCommand(const std::string& aLine);
+	void PrintHelp();
+
+private:
+	Context* myContext;
+};
+
+class PrintTree : public ICommand {
+public:
+	PrintTree(Context* aContext);
+
+	bool IsCommand(std::string_view aCommand);
+	void ExecuteCommand(const std::string& aLine);
+	void PrintHelp();
+
+private:
+	Context* myContext;
+};

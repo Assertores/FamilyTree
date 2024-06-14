@@ -3,6 +3,9 @@
 #include <family_tree/api.h>
 
 #include <iostream>
+#include <list>
+#include <set>
+#include <sstream>
 #include <vector>
 
 std::set<ICommand*> ICommand::myCommands = {};
@@ -23,7 +26,7 @@ ICommand::Execute(std::string_view aCommand, const std::string& aLine) {
 	for (const auto& it : myCommands) {
 		it->PrintHelp();
 	}
-	return true;
+	return false;
 }
 
 bool
@@ -295,4 +298,98 @@ SearchPeople::PrintHelp() {
 				 "    -dd=[birthday]: all people who died at that day.\n"
 				 "    -dp=[birthplace]: all people who died at that place.\n"
 				 "    -r=[remarks]: all people who have this remark.\n";
+}
+
+PeopleRelation::PeopleRelation(Context* aContext)
+	: myContext(aContext) {}
+
+bool
+PeopleRelation::IsCommand(std::string_view aCommand) {
+	return aCommand == "show-relations" || aCommand == "r";
+}
+
+void
+PeopleRelation::ExecuteCommand(const std::string& aLine) {
+	size_t requestedIds = std::stoi(aLine);
+
+	size_t count = 0;
+	auto array = GetPersonRelations(myContext, requestedIds, &count);
+	std::vector<Relation> relations{array, array + count};
+	for (const auto& it : relations) {
+		std::cout << it.id1 << " --" << it.relationship << "-> " << it.id2 << ": (" << it.startDate
+				  << ", " << it.endDate << ")\n";
+	}
+}
+
+void
+PeopleRelation::PrintHelp() {
+	std::cout << "show-relations [id], r [id]: prints out all relations from a sertain person\n";
+}
+
+PrintTree::PrintTree(Context* aContext)
+	: myContext(aContext) {}
+
+bool
+PrintTree::IsCommand(std::string_view aCommand) {
+	return aCommand == "print-tree" || aCommand == "t";
+}
+
+void
+PrintTree::ExecuteCommand(const std::string& aLine) {
+	PersonId requestedIds = 0;
+	size_t distance = 0;
+	std::stringstream(aLine) >> requestedIds >> distance;
+
+	std::set<PersonId> peopleToShow{};
+	peopleToShow.insert(requestedIds);
+
+	for (size_t i = 0; i < distance; i++) {
+		std::set<PersonId> newPeopleToShow{};
+		for (const auto& id : peopleToShow) {
+			size_t count = 0;
+			auto array = GetPersonRelations(myContext, id, &count);
+			for (size_t j = 0; j < count; j++) {
+				newPeopleToShow.insert(array[j].id1);
+				newPeopleToShow.insert(array[j].id2);
+			}
+		}
+		peopleToShow.insert(newPeopleToShow.begin(), newPeopleToShow.end());
+	}
+
+	int firstGeneration = 0;
+	std::list<std::vector<PersonId>> generations;
+
+	for (const auto& id : peopleToShow) {
+		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, id);
+		while (othersGeneration < firstGeneration) {
+			generations.emplace_front(std::vector<PersonId>{});
+			firstGeneration--;
+		}
+		while (othersGeneration - firstGeneration >= generations.size()) {
+			generations.emplace_back(std::vector<PersonId>{});
+		}
+		auto it = generations.begin();
+		for (size_t i = 0; i < (othersGeneration - firstGeneration); i++) {
+			it++;
+		}
+		it->push_back(id);
+	}
+
+	for (const auto& generation : generations) {
+		bool first = true;
+		for (const auto& id : generation) {
+			if (!first) {
+				std::cout << ", ";
+			}
+			first = false;
+			std::cout << id;
+		}
+		std::cout << '\n';
+	}
+}
+
+void
+PrintTree::PrintHelp() {
+	std::cout << "print-tree [id] [dist], t [id] [dist]: prints a familytree around person [id] "
+				 "with all persons at max [dist] steps removed from that person.\n";
 }

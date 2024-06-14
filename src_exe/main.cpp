@@ -20,6 +20,8 @@ main() {
 	ShowImages showImages(context);
 	PlayAudio playAudio(context);
 	SearchPeople searchPeople(context);
+	PeopleRelation peopleRelation(context);
+	PrintTree printTree(context);
 
 	bool quit = false;
 	while (!quit) {
