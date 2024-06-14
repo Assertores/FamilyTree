@@ -12,7 +12,7 @@ extern "C" {
 typedef struct Context Context;
 
 //! @brief an identifyer for a person. this may not match the id in the data.
-typedef int PersonId;
+typedef size_t PersonId;
 
 //! @brief all detailed informations about a person.
 //! @note all const char* fields will be valid and may be filled with a default string. same goes
@@ -78,7 +78,13 @@ typedef enum {
 	RelationType_StrictlyHigher,
 } RelationType;
 
+//! @cond
 typedef struct IRelationals IRelationals;
+typedef struct IPersonals IPersonals;
+typedef struct IDataProvider IDataProvider;
+typedef struct IPlatform IPlatform;
+typedef struct ITrace ITrace;
+//! endcond
 
 //! @brief an interface through which relational data can be retreaved.
 struct IRelationals {
@@ -102,8 +108,6 @@ struct IRelationals {
 	void (*Free)(IRelationals* aThis);
 };
 
-typedef struct IPersonals IPersonals;
-
 //! @brief an interface through which personal data can be retreaved.
 struct IPersonals {
 	//! returns a copy of the object.
@@ -123,8 +127,6 @@ struct IPersonals {
 	//! frees the object itself and all data allocated by it.
 	void (*Free)(IPersonals* aThis);
 };
-
-typedef struct IDataProvider IDataProvider;
 
 //! @brief an interface combining @ref IRelationals and @ref IPersonals for conveniance.
 struct IDataProvider {
@@ -150,8 +152,6 @@ struct IDataProvider {
 	void (*Free)(IDataProvider* aThis);
 };
 
-typedef struct IPlatform IPlatform;
-
 //! @brief an interface through which all comunication to the operating system is done.
 struct IPlatform {
 	//! returns a copy of the object.
@@ -173,8 +173,6 @@ struct IPlatform {
 	//! frees the object itself and all data allocated by it.
 	void (*Free)(IPlatform* aThis);
 };
-
-typedef struct ITrace ITrace;
 
 //! @brief an interface that will reseave all relevant info about the flow of the code.
 //! @note this is ment for debuging purpises.
