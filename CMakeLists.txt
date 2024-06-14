@@ -60,6 +60,8 @@ target_sources(FamilyTree
 	PRIVATE
 		"src_exe/commands.cpp"
 		"src_exe/commands.hpp"
+		"src_exe/trace.cpp"
+		"src_exe/trace.hpp"
 )
 
 target_compile_features(FamilyTree PRIVATE cxx_std_17)
