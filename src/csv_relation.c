@@ -232,13 +232,13 @@ ResetRelations(CsvRelation* self) {
 		self->myRelations[i - 1].relation.relationship = NULL;
 		self->myRelations[i - 1].relation.startDate = NULL;
 		self->myRelations[i - 1].relation.endDate = NULL;
-		if (count > 3) {
+		if (count > 3 && strlen(cells[3]) > 0) {
 			self->myRelations[i - 1].relation.relationship = cells[3];
 		}
-		if (count > 4) {
+		if (count > 4 && strlen(cells[4]) > 0) {
 			self->myRelations[i - 1].relation.startDate = cells[4];
 		}
-		if (count > 5) {
+		if (count > 5 && strlen(cells[5]) > 0) {
 			self->myRelations[i - 1].relation.endDate = cells[5];
 		}
 

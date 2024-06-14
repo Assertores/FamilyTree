@@ -67,7 +67,7 @@ AddData::AddData(Context* aContext)
 
 bool
 AddData::IsCommand(std::string_view aCommand) {
-	return aCommand == "add";
+	return aCommand == "add" || aCommand == "data" || aCommand == "d";
 }
 
 void
@@ -79,7 +79,7 @@ AddData::ExecuteCommand(const std::string& aLine) {
 }
 void
 AddData::PrintHelp() {
-	std::cout << "add: adds a folder with data to this programms instance\n";
+	std::cout << "add, data, d: adds a folder with data to this programms instance\n";
 }
 
 PrintPerson::PrintPerson(Context* aContext)
@@ -316,8 +316,11 @@ PeopleRelation::ExecuteCommand(const std::string& aLine) {
 	auto array = GetPersonRelations(myContext, requestedIds, &count);
 	std::vector<Relation> relations{array, array + count};
 	for (const auto& it : relations) {
-		std::cout << it.id1 << " --" << it.relationship << "-> " << it.id2 << ": (" << it.startDate
-				  << ", " << it.endDate << ")\n";
+		std::cout << it.id1 << " --";
+		if (!IsDefaultString(myContext, it.relationship)) {
+			std::cout << it.relationship;
+		}
+		std::cout << "-> " << it.id2 << ": (" << it.startDate << ", " << it.endDate << ")\n";
 	}
 }
 
