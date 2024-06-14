@@ -84,7 +84,7 @@ typedef struct IPersonals IPersonals;
 typedef struct IDataProvider IDataProvider;
 typedef struct IPlatform IPlatform;
 typedef struct ITrace ITrace;
-//! endcond
+//! @endcond
 
 //! @brief an interface through which relational data can be retreaved.
 struct IRelationals {
