@@ -7,6 +7,17 @@
 #include <stdlib.h>
 #include <string.h>
 
+#define FreeTraceAndReturn    \
+	if (IsNoOpTrace) {        \
+		aTrace->Free(aTrace); \
+	}                         \
+	return
+
+#define Subtrace(aName, aCode)                        \
+	subtrace = aTrace->CreateSubTrace(aTrace, aName); \
+	aCode;                                            \
+	subtrace->Free(subtrace)
+
 struct Context {
 	ProviderComposit* myDataProvider;
 	MetaData myMedaData;
@@ -26,24 +37,40 @@ struct Context {
 
 FT_API Context*
 Create(ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	Context* context = calloc(1, sizeof(Context));
 	if (context == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	context->myDataProvider = CreateProviderComposit();
 	if (context->myDataProvider == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	context->myMedaData.myPersonCount = 0;
 	context->myMedaData.myPersons = NULL;
 	context->myDefaultString = "N/A";
-	return context;
+
+	FreeTraceAndReturn context;
 }
 
 FT_API void
 Free(Context* aContext, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
 	if (aContext == NULL) {
-		return;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn;
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
@@ -73,149 +100,176 @@ Free(Context* aContext, ITrace* aTrace) {
 	FreeMetaData(&aContext->myMedaData);
 
 	free(aContext);
+
+	FreeTraceAndReturn;
 }
 
 FT_API Context*
 CreateWithCSVAndJSON(const char* aPath, ITrace* aTrace) {
-	Context* context = Create(aTrace->CreateSubTrace(aTrace, "Create"));
-	if (context == NULL) {
-		return context;
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
 	}
 
-	IPlatform* platform =
-		CreateDefaultPlatform(context, aTrace->CreateSubTrace(aTrace, "CreateDefaultPlatform"));
-	IRelationals* relations = CreateCSVRelations(
-		context,
-		aPath,
-		platform,
-		aTrace->CreateSubTrace(aTrace, "CreateCSVRelations"));
-	IPersonals* personals = CreateJSONPersonals(
-		context,
-		aPath,
-		platform,
-		aTrace->CreateSubTrace(aTrace, "CreateJSONPersonals"));
-	IDataProvider* provider = CreateDataProvider(
-		context,
-		relations,
-		personals,
-		aTrace->CreateSubTrace(aTrace, "CreateDataProvider"));
-	AddDataProvider(context, provider, aTrace->CreateSubTrace(aTrace, "AddDataProvider"));
+	ITrace* subtrace;
+	Subtrace("Create", Context* context = Create(subtrace));
+	if (context == NULL) {
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn context;
+	}
 
-	return context;
+	Subtrace(
+		"CreateDefaultPlatform",
+		IPlatform* platform = CreateDefaultPlatform(context, subtrace));
+	Subtrace(
+		"CreateCSVRelations",
+		IRelationals* relations = CreateCSVRelations(context, aPath, platform, subtrace));
+	Subtrace(
+		"CreateJSONPersonals",
+		IPersonals* personals = CreateJSONPersonals(context, aPath, platform, subtrace));
+	Subtrace(
+		"CreateDataProvider",
+		IDataProvider* provider = CreateDataProvider(context, relations, personals, subtrace));
+	Subtrace("AddDataProvider", AddDataProvider(context, provider, subtrace));
+
+	FreeTraceAndReturn context;
 }
 
 FT_API Context*
 CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
-	Context* context = Create(aTrace->CreateSubTrace(aTrace, "Create"));
-	if (context == NULL) {
-		return context;
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
 	}
 
-	IRelationals* relations = CreateCSVRelations(
-		context,
-		aPath,
-		aPlatform,
-		aTrace->CreateSubTrace(aTrace, "CreateCSVRelations"));
-	IPersonals* personals = CreateJSONPersonals(
-		context,
-		aPath,
-		aPlatform,
-		aTrace->CreateSubTrace(aTrace, "CreateJSONPersonals"));
-	IDataProvider* provider = CreateDataProvider(
-		context,
-		relations,
-		personals,
-		aTrace->CreateSubTrace(aTrace, "CreateDataProvider"));
-	AddDataProvider(context, provider, aTrace->CreateSubTrace(aTrace, "AddDataProvider"));
+	ITrace* subtrace;
+	Subtrace("Create", Context* context = Create(subtrace));
+	if (context == NULL) {
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn context;
+	}
 
-	return context;
+	Subtrace(
+		"CreateCSVRelations",
+		IRelationals* relations = CreateCSVRelations(context, aPath, aPlatform, subtrace));
+	Subtrace(
+		"CreateJSONPersonals",
+		IPersonals* personals = CreateJSONPersonals(context, aPath, aPlatform, subtrace));
+	Subtrace(
+		"CreateDataProvider",
+		IDataProvider* provider = CreateDataProvider(context, relations, personals, subtrace));
+	Subtrace("AddDataProvider", AddDataProvider(context, provider, subtrace));
+
+	FreeTraceAndReturn context;
 }
 
 FT_API void
 AddDataProvider(Context* aContext, IDataProvider* aData, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn;
 	}
 	if (aData == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->Copy == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->GetAllIds == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->GetAllIdsCount == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->GetAllRelationsOfId == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->GetAllRelationsOfIdCount == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->GetPerson == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 	if (aData->PlayPerson == NULL) {
-		return;
+		FreeTraceAndReturn;
 	}
 
 	ProviderComposit_AddDataProvider(aContext->myDataProvider, aData->Copy(aData));
 	FreeMetaData(&aContext->myMedaData);
 	aContext->myMedaData = CreateMetaData(ProviderComposit_Cast(aContext->myDataProvider));
+
+	FreeTraceAndReturn;
 }
 
 FT_API IDataProvider*
 CreateDataProvider(
 	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->Copy == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->Free == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllIds == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllIdsCount == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllRelationsOfId == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllRelationsOfIdCount == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->Copy == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->Free == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetAllIds == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetAllIdsCount == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetPerson == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->PlayPerson == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->ShowImages == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IDataProvider* data = CreateSharedDataProviderDecorator(
 		CreateForwardingProvider(aRelations->Copy(aRelations), aPersonals->Copy(aPersonals)));
 	if (data == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IDataProvider** newArray = realloc(
@@ -224,14 +278,14 @@ CreateDataProvider(
 	if (newArray == NULL) {
 		data->Free(data);
 		free(data);
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	newArray[aContext->myCreatedDataProvidersSize] = data;
 	aContext->myCreatedDataProvidersSize++;
 	aContext->myCreatedDataProviders = newArray;
 
-	return data;
+	FreeTraceAndReturn data;
 }
 
 int
@@ -265,17 +319,25 @@ CheckIo(IPlatform* aPlatform) {
 
 FT_API IRelationals*
 CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	if (!CheckIo(aPlatform)) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IRelationals* relations =
 		CreateSharedRelationalsDecorator(CreateCSVRelation(aPath, aPlatform->Copy(aPlatform)));
 	if (relations == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IRelationals** newArray = realloc(
@@ -284,28 +346,36 @@ CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, I
 	if (newArray == NULL) {
 		relations->Free(relations);
 		free(relations);
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	newArray[aContext->myCreatedRelationsSize] = relations;
 	aContext->myCreatedRelationsSize++;
 	aContext->myCreatedRelations = newArray;
-	return relations;
+	FreeTraceAndReturn relations;
 }
 
 FT_API IPersonals*
 CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	if (!CheckIo(aPlatform)) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IPersonals* persons =
 		CreateSharedPersonalsDecorator(CreateJSONPerson(aPath, aPlatform->Copy(aPlatform)));
 	if (persons == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IPersonals** newArray = realloc(
@@ -314,24 +384,32 @@ CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform, 
 	if (newArray == NULL) {
 		persons->Free(persons);
 		free(persons);
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	newArray[aContext->myCreatedPersonalsSize] = persons;
 	aContext->myCreatedPersonalsSize++;
 	aContext->myCreatedPersonals = newArray;
-	return persons;
+	FreeTraceAndReturn persons;
 }
 
 FT_API IPlatform*
 CreateDefaultPlatform(Context* aContext, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 
 	IPlatform* platform = CreateSharedPlatformDecorator(CreatePlatform());
 	if (platform == NULL) {
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	IPlatform** newArray = realloc(
@@ -340,13 +418,13 @@ CreateDefaultPlatform(Context* aContext, ITrace* aTrace) {
 	if (newArray == NULL) {
 		platform->Free(platform);
 		free(platform);
-		return NULL;
+		FreeTraceAndReturn NULL;
 	}
 
 	newArray[aContext->myCreatedPlatformSize] = platform;
 	aContext->myCreatedPlatformSize++;
 	aContext->myCreatedPlatforms = newArray;
-	return platform;
+	FreeTraceAndReturn platform;
 }
 
 void
@@ -385,6 +463,13 @@ PopulateNullValues(Person* aPerson, Context* aContext) {
 
 FT_API Person
 GetPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	Person p;
 	p.id = 0;
 	p.title = "";
@@ -401,33 +486,52 @@ GetPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	p.remark = "";
 
 	if (aContext == NULL) {
-		return p;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn p;
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	p = interface->GetPerson(interface, aId);
 	PopulateNullValues(&p, aContext);
-	return p;
+	FreeTraceAndReturn p;
 }
 
 FT_API void
 PlayPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn;
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	interface->PlayPerson(interface, aId);
+	FreeTraceAndReturn;
 }
 
 FT_API void
 ShowImagesOfPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn;
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	interface->ShowImages(interface, aId);
+	FreeTraceAndReturn;
 }
 
 FT_API Person*
@@ -437,8 +541,16 @@ GetPersonsMatchingPattern(
 	size_t aMinMatches,
 	size_t* aOutPersonsCount,
 	ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	IDataProvider* data = ProviderComposit_Cast(aContext->myDataProvider);
 	size_t idCount = data->GetAllIdsCount(data);
@@ -533,13 +645,21 @@ GetPersonsMatchingPattern(
 	aContext->myCreatedPersons = result;
 
 	*aOutPersonsCount = count;
-	return result;
+	FreeTraceAndReturn result;
 }
 
 FT_API Relation*
 GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
 	if (aContext == NULL) {
-		return NULL;
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
 	}
 	IDataProvider* data = ProviderComposit_Cast(aContext->myDataProvider);
 	size_t count = data->GetAllRelationsOfIdCount(data, aId);
@@ -559,16 +679,24 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 	}
 
 	*aOutRelationsCount = count;
-	return result;
+	FreeTraceAndReturn result;
 }
 
 FT_API int
 GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace) {
-	if (aContext == NULL) {
-		return INT_MIN;
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
 	}
 
-	return ComputeRelativeGeneration(aContext->myMedaData, aRefId, aTargetId);
+	if (aContext == NULL) {
+		aTrace->AddEvent(aTrace, "Context is NULL");
+		FreeTraceAndReturn INT_MIN;
+	}
+
+	FreeTraceAndReturn ComputeRelativeGeneration(aContext->myMedaData, aRefId, aTargetId);
 }
 
 FT_API int

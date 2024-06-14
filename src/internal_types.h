@@ -13,6 +13,7 @@ IDataProvider* CreateForwardingProvider(IRelationals* aRelations, IPersonals* aP
 IRelationals* CreateCSVRelation(const char* aPath, IPlatform* aPlatform);
 IPersonals* CreateJSONPerson(const char* aPath, IPlatform* aPlatform);
 IPlatform* CreatePlatform();
+ITrace* CreateNoOpTrace();
 
 void ProviderComposit_AddDataProvider(ProviderComposit* aThis, IDataProvider* aProvider);
 IDataProvider* ProviderComposit_Cast(ProviderComposit* aThis);

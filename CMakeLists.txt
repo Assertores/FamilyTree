@@ -23,6 +23,7 @@ target_sources(${libName}
 		"src/forwarding_provider.c"
 		"src/internal_types.h"
 		"src/json_person.c"
+		"src/noop_trace.c"
 		"src/provider_composit.c"
 		"src/shared_type_decorator.c"
 )
