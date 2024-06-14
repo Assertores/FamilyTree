@@ -25,7 +25,7 @@ struct Context {
 };
 
 FT_API Context*
-Create() {
+Create(ITrace* aTrace) {
 	Context* context = calloc(1, sizeof(Context));
 	if (context == NULL) {
 		return NULL;
@@ -41,7 +41,7 @@ Create() {
 }
 
 FT_API void
-Free(Context* aContext) {
+Free(Context* aContext, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return;
 	}
@@ -76,38 +76,63 @@ Free(Context* aContext) {
 }
 
 FT_API Context*
-CreateWithCSVAndJSON(const char* aPath) {
-	Context* context = Create();
+CreateWithCSVAndJSON(const char* aPath, ITrace* aTrace) {
+	Context* context = Create(aTrace->CreateSubTrace(aTrace, "Create"));
 	if (context == NULL) {
 		return context;
 	}
 
-	IPlatform* platform = CreateDefaultPlatform(context);
-	IRelationals* relations = CreateCSVRelations(context, aPath, platform);
-	IPersonals* personals = CreateJSONPersonals(context, aPath, platform);
-	IDataProvider* provider = CreateDataProvider(context, relations, personals);
-	AddDataProvider(context, provider);
+	IPlatform* platform =
+		CreateDefaultPlatform(context, aTrace->CreateSubTrace(aTrace, "CreateDefaultPlatform"));
+	IRelationals* relations = CreateCSVRelations(
+		context,
+		aPath,
+		platform,
+		aTrace->CreateSubTrace(aTrace, "CreateCSVRelations"));
+	IPersonals* personals = CreateJSONPersonals(
+		context,
+		aPath,
+		platform,
+		aTrace->CreateSubTrace(aTrace, "CreateJSONPersonals"));
+	IDataProvider* provider = CreateDataProvider(
+		context,
+		relations,
+		personals,
+		aTrace->CreateSubTrace(aTrace, "CreateDataProvider"));
+	AddDataProvider(context, provider, aTrace->CreateSubTrace(aTrace, "AddDataProvider"));
 
 	return context;
 }
 
 FT_API Context*
-CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform) {
-	Context* context = Create();
+CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
+	Context* context = Create(aTrace->CreateSubTrace(aTrace, "Create"));
 	if (context == NULL) {
 		return context;
 	}
 
-	IRelationals* relations = CreateCSVRelations(context, aPath, aPlatform);
-	IPersonals* personals = CreateJSONPersonals(context, aPath, aPlatform);
-	IDataProvider* provider = CreateDataProvider(context, relations, personals);
-	AddDataProvider(context, provider);
+	IRelationals* relations = CreateCSVRelations(
+		context,
+		aPath,
+		aPlatform,
+		aTrace->CreateSubTrace(aTrace, "CreateCSVRelations"));
+	IPersonals* personals = CreateJSONPersonals(
+		context,
+		aPath,
+		aPlatform,
+		aTrace->CreateSubTrace(aTrace, "CreateJSONPersonals"));
+	IDataProvider* provider = CreateDataProvider(
+		context,
+		relations,
+		personals,
+		aTrace->CreateSubTrace(aTrace, "CreateDataProvider"));
+	AddDataProvider(context, provider, aTrace->CreateSubTrace(aTrace, "AddDataProvider"));
 
 	return context;
 }
 
 FT_API void
-AddDataProvider(Context* aContext, IDataProvider* aData) {
+AddDataProvider(Context* aContext, IDataProvider* aData, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return;
 	}
@@ -142,7 +167,8 @@ AddDataProvider(Context* aContext, IDataProvider* aData) {
 }
 
 FT_API IDataProvider*
-CreateDataProvider(Context* aContext, IRelationals* aRelations, IPersonals* aPersonals) {
+CreateDataProvider(
+	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -208,7 +234,7 @@ CreateDataProvider(Context* aContext, IRelationals* aRelations, IPersonals* aPer
 	return data;
 }
 
-FT_API int
+int
 CheckIo(IPlatform* aPlatform) {
 	if (aPlatform == NULL) {
 		return 0;
@@ -238,7 +264,7 @@ CheckIo(IPlatform* aPlatform) {
 }
 
 FT_API IRelationals*
-CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform) {
+CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -268,7 +294,7 @@ CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform) {
 }
 
 FT_API IPersonals*
-CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform) {
+CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -298,7 +324,7 @@ CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform) 
 }
 
 FT_API IPlatform*
-CreateDefaultPlatform(Context* aContext) {
+CreateDefaultPlatform(Context* aContext, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -358,7 +384,7 @@ PopulateNullValues(Person* aPerson, Context* aContext) {
 }
 
 FT_API Person
-GetPerson(Context* aContext, PersonId aId) {
+GetPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	Person p;
 	p.id = 0;
 	p.title = "";
@@ -385,7 +411,7 @@ GetPerson(Context* aContext, PersonId aId) {
 }
 
 FT_API void
-PlayPerson(Context* aContext, PersonId aId) {
+PlayPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return;
 	}
@@ -395,7 +421,7 @@ PlayPerson(Context* aContext, PersonId aId) {
 }
 
 FT_API void
-ShowImagesOfPerson(Context* aContext, PersonId aId) {
+ShowImagesOfPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return;
 	}
@@ -406,7 +432,11 @@ ShowImagesOfPerson(Context* aContext, PersonId aId) {
 
 FT_API Person*
 GetPersonsMatchingPattern(
-	Context* aContext, Person aPrototype, size_t aMinMatches, size_t* aOutPersonsCount) {
+	Context* aContext,
+	Person aPrototype,
+	size_t aMinMatches,
+	size_t* aOutPersonsCount,
+	ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -507,7 +537,7 @@ GetPersonsMatchingPattern(
 }
 
 FT_API Relation*
-GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount) {
+GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return NULL;
 	}
@@ -533,7 +563,7 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount) 
 }
 
 FT_API int
-GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId) {
+GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace) {
 	if (aContext == NULL) {
 		return INT_MIN;
 	}

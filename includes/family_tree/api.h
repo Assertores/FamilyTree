@@ -27,44 +27,56 @@ extern "C" {
 #endif // FT_API
 
 //! @brief creates a context instance.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a valid context.
-FT_API Context* Create();
+FT_API Context* Create(ITrace* aTrace);
 
 //! @brief frees the context and all allocations done with that conetxt.
 //! @param aContext the context to free.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @note also frees all strings and classes returned in other functions suche as @ref
 //! CreateCSVRelations or @ref GetPerson
-FT_API void Free(Context* aContext);
+FT_API void Free(Context* aContext, ITrace* aTrace);
 
 //! @brief creates a context instance.
 //! @param aPath the path to read in. this will be used for @ref CreateCSVRelations and @ref
 //! CreateJSONPersonals.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a fully setup context with csv relations and json persons already read in using the
 //! default Platform.
-FT_API Context* CreateWithCSVAndJSON(const char* aPath);
+FT_API Context* CreateWithCSVAndJSON(const char* aPath, ITrace* aTrace);
 
 //! @brief creates a context instance.
 //! @param aPath the path to read in. this will be used for @ref CreateCSVRelations and @ref
 //! CreateJSONPersonals.
 //! @param aPlatform the platform used by @ref CreateCSVRelations and @ref CreateJSONPersonals.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a fully setup context with csv relations and json persons already read in.
-FT_API Context* CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform);
+FT_API Context* CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 
 //! @brief adds a data provider to the context.
 //! @param aContext a pointer to the context.
 //! @param aDataProvider the data provider to add. @see AddDataProvider.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @note this will also recalculate the graph.
-FT_API void AddDataProvider(Context* aContext, IDataProvider* aDataProvider);
+FT_API void AddDataProvider(Context* aContext, IDataProvider* aDataProvider, ITrace* aTrace);
 
 //! @brief creates a data provider that can be used in @ref AddDataProvider
 //! @param aContext a pointer to the context.
 //! @param aRelations the relations to which the data provider shall forward.
 //! @param aPersonals the personal data to which the data provider shall forward.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a refcounted forwarding data provider.
 //! @note Copy will be called on @a aRelations and @a aPersonals.
 //! @note the object will be freed once @ref Free is called.
 FT_API IDataProvider* CreateDataProvider(
-	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals);
+	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace);
 
 //! @brief creates a relations object used in @ref CreateDataProvider
 //! @param aContext a pointer to the context.
@@ -83,9 +95,12 @@ FT_API IDataProvider* CreateDataProvider(
 //!     - @a StrictlyHigher @copybrief RelationType_StrictlyHigher
 //! all other fields may contain arbitrary string values.
 //! @param aPlatform this is used to read in the csv file.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a fully setup object that can be used to retreave relation data information.
 //! @note the object will be freed once @ref Free is called.
-FT_API IRelationals* CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform);
+FT_API IRelationals* CreateCSVRelations(
+	Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 
 //! @brief creates a personals object used in @ref CreateDataProvider
 //! @param aContext a pointer to the context.
@@ -111,38 +126,49 @@ FT_API IRelationals* CreateCSVRelations(Context* aContext, const char* aPath, IP
 //! @note the files content needs to be a valid json format. it must contain the "person" key which
 //! must be a integer value. all other fields are optional and can be omitted.
 //! @param aPlatform this is used to retreave the subfolders and read in the json files.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a fully setup object that can be used to retreave personal data.
 //! @note the object will be freed once @ref Free is called.
-FT_API IPersonals* CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform);
+FT_API IPersonals* CreateJSONPersonals(
+	Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 
 //! @brief Create a Platform used in @ref CreateCSVRelations and @ref CreateJSONPersonals
 //! @param aContext a pointer to the context.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a windows implimentation if compiled for windows, a linux implimentation for linux,
 //! otherwise NULL.
 //! @todo impliment linux
 //! @note the object will be freed once @ref Free is called.
-FT_API IPlatform* CreateDefaultPlatform(Context* aContext);
+FT_API IPlatform* CreateDefaultPlatform(Context* aContext, ITrace* aTrace);
 
 //! @brief retreaves the Person information
 //! @param aContext a pointer to the context.
 //! @param aId the id of the person interested in.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a filled struct with all details about the person requested in @a aId.
 //! all const char* fields in the struct are guaranteed to be set.
 //! the const char* const* fields have a guaranteed first element.
 //! use @ref IsDefaultString to check if a field was filed with the default string.
 //! @note the values in Person will be freed once @ref Free is called.
-FT_API Person GetPerson(Context* aContext, PersonId aId);
+FT_API Person GetPerson(Context* aContext, PersonId aId, ITrace* aTrace);
 
 //! @brief causes the Platform to play the audio if any such file is given in the data and exists.
 //! @param aContext a pointer to the context.
 //! @param aId the id of the person interested in.
-FT_API void PlayPerson(Context* aContext, PersonId aId);
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
+FT_API void PlayPerson(Context* aContext, PersonId aId, ITrace* aTrace);
 
 //! @brief causes the Platform to show all image files if any such file is given in the data and
 //! exists.
 //! @param aContext a pointer to the context.
 //! @param aId the id of the person interested in.
-FT_API void ShowImagesOfPerson(Context* aContext, PersonId aId);
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
+FT_API void ShowImagesOfPerson(Context* aContext, PersonId aId, ITrace* aTrace);
 
 //! @brief searches the data for matching people
 //! @param aContext a pointer to the context.
@@ -151,27 +177,39 @@ FT_API void ShowImagesOfPerson(Context* aContext, PersonId aId);
 //! @param aMinMatches the amount of fields that have to match at least to the @a aPrototype to be
 //! considered a match.
 //! @param aOutPersonsCount the size of the array returned.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a pointer to an array of @ref Person which match the given @a aPrototype.
 //! @note the object will be freed at the next call or once @ref Free is called.
 FT_API Person* GetPersonsMatchingPattern(
-	Context* aContext, Person aPrototype, size_t aMinMatches, size_t* aOutPersonsCount);
+	Context* aContext,
+	Person aPrototype,
+	size_t aMinMatches,
+	size_t* aOutPersonsCount,
+	ITrace* aTrace);
 
 //! @brief retreaves all relations of a person.
 //! @param aContext a pointer to the context.
 //! @param aId the id of the person interested in.
 //! @param aOutRelationsCount the size of the array returned.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return a pointer to an array of @ref Relation which contain @a aId.
 //! @note the values in Person will be freed once @ref Free is called.
 //! @todo this array is currently leaked.
-FT_API Relation* GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount);
+FT_API Relation* GetPersonRelations(
+	Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace);
 
 //! @brief retreaves the relative generation of @a aTargetId
 //! @param aContext a pointer to the context.
 //! @param aRefId the id which is considered generation 0.
 //! @param aTargetId the id of the person interested in.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
 //! @return the number of generations @a aTargetId is apart from @a aRefId. a positive number means
 //! lower in the graph. a negative number means higher in the graph. 0 means in the same generation.
-FT_API int GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId);
+FT_API int GetRelativeGeneration(
+	Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace);
 
 //! @brief checks if a given string points to the default value.
 //! @param aContext a pointer to the context.

@@ -174,6 +174,27 @@ struct IPlatform {
 	void (*Free)(IPlatform* aThis);
 };
 
+typedef struct ITrace ITrace;
+
+//! @brief an interface that will reseave all relevant info about the flow of the code.
+//! @note this is ment for debuging purpises.
+struct ITrace {
+	//! creates a subtrace that is caused by @a aThis
+	ITrace* (*CreateSubTrace)(ITrace* aThis, const char* aSubtraceName);
+	//! adds an event to @a aThis trace
+	void (*AddEvent)(ITrace* aThis, const char* aEvent);
+	//! Succeeds and frees the trace.
+	//!
+	//! This indecates a premature success. don't call this if the floow succeeded normaly.
+	//! @note don't call @ref ITrace.Free after calling @ref ITrace.Succeed
+	void (*Succeed)(ITrace* aThis);
+	//! Fails and frees the trace with a reason why it failed.
+	//! @note don't call @ref ITrace.Free after calling @ref ITrace.Fail
+	void (*Fail)(ITrace* aThis, const char* aReason);
+	//! frees the object itself and all data allocated by it.
+	void (*Free)(ITrace* aThis);
+};
+
 #ifdef __cplusplus
 }
 #endif

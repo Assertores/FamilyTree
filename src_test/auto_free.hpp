@@ -23,7 +23,7 @@ class AutoFree<Context> {
 public:
 	AutoFree(Context* aBacking)
 		: myBacking(aBacking) {}
-	~AutoFree() { Free(myBacking); }
+	~AutoFree() { Free(myBacking, NULL); }
 
 	operator Context*() { return myBacking; }
 	Context* operator->() { return myBacking; }
