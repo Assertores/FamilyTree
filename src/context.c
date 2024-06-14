@@ -44,13 +44,17 @@ Create(ITrace* aTrace) {
 		aTrace = CreateNoOpTrace();
 	}
 
+	aTrace->AddEvent(aTrace, "Allocate Context");
 	Context* context = calloc(1, sizeof(Context));
 	if (context == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
+
+	aTrace->AddEvent(aTrace, "Create Provider Composit");
 	context->myDataProvider = CreateProviderComposit();
 	if (context->myDataProvider == NULL) {
+		aTrace->Fail(aTrace, "Failed to Create Provider Composit");
 		FreeTraceAndReturn NULL;
 	}
 	context->myMedaData.myPersonCount = 0;
@@ -69,36 +73,44 @@ Free(Context* aContext, ITrace* aTrace) {
 		aTrace = CreateNoOpTrace();
 	}
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn;
 	}
 
+	aTrace->AddEvent(aTrace, "Free DataProvider");
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	interface->Free(interface);
 
+	aTrace->AddEvent(aTrace, "Free own DataProvider");
 	for (size_t i = 0; i < aContext->myCreatedDataProvidersSize; i++) {
 		aContext->myCreatedDataProviders[i]->Free(aContext->myCreatedDataProviders[i]);
 	}
 	free(aContext->myCreatedDataProviders);
 
+	aTrace->AddEvent(aTrace, "Free own Relations");
 	for (size_t i = 0; i < aContext->myCreatedRelationsSize; i++) {
 		aContext->myCreatedRelations[i]->Free(aContext->myCreatedRelations[i]);
 	}
 	free(aContext->myCreatedRelations);
 
+	aTrace->AddEvent(aTrace, "Free own Personals");
 	for (size_t i = 0; i < aContext->myCreatedPersonalsSize; i++) {
 		aContext->myCreatedPersonals[i]->Free(aContext->myCreatedPersonals[i]);
 	}
 	free(aContext->myCreatedPersonals);
 
+	aTrace->AddEvent(aTrace, "Free own Platforms");
 	for (size_t i = 0; i < aContext->myCreatedPlatformSize; i++) {
 		aContext->myCreatedPlatforms[i]->Free(aContext->myCreatedPlatforms[i]);
 	}
 	free(aContext->myCreatedPlatforms);
 
+	aTrace->AddEvent(aTrace, "Free Person array");
 	free(aContext->myCreatedPersons);
+	aTrace->AddEvent(aTrace, "Free Meta data for graph");
 	FreeMetaData(&aContext->myMedaData);
 
+	aTrace->AddEvent(aTrace, "Free context");
 	free(aContext);
 
 	FreeTraceAndReturn;
@@ -116,7 +128,7 @@ CreateWithCSVAndJSON(const char* aPath, ITrace* aTrace) {
 	ITrace* subtrace;
 	Subtrace("Create", Context* context = Create(subtrace));
 	if (context == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn context;
 	}
 
@@ -149,7 +161,7 @@ CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) 
 	ITrace* subtrace;
 	Subtrace("Create", Context* context = Create(subtrace));
 	if (context == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn context;
 	}
 
@@ -177,35 +189,46 @@ AddDataProvider(Context* aContext, IDataProvider* aData, ITrace* aTrace) {
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn;
 	}
 	if (aData == NULL) {
+		aTrace->Fail(aTrace, "aData is NULL");
 		FreeTraceAndReturn;
 	}
 	if (aData->Copy == NULL) {
+		aTrace->Fail(aTrace, "aData has no Copy");
 		FreeTraceAndReturn;
 	}
 	if (aData->GetAllIds == NULL) {
+		aTrace->Fail(aTrace, "aData has no GetAllIds");
 		FreeTraceAndReturn;
 	}
 	if (aData->GetAllIdsCount == NULL) {
+		aTrace->Fail(aTrace, "aData has no GetAllIdsCount");
 		FreeTraceAndReturn;
 	}
 	if (aData->GetAllRelationsOfId == NULL) {
+		aTrace->Fail(aTrace, "aData has no GetAllRelationsOfId");
 		FreeTraceAndReturn;
 	}
 	if (aData->GetAllRelationsOfIdCount == NULL) {
+		aTrace->Fail(aTrace, "aData has no GetAllRelationsOfIdCount");
 		FreeTraceAndReturn;
 	}
 	if (aData->GetPerson == NULL) {
+		aTrace->Fail(aTrace, "aData has no GetPerson");
 		FreeTraceAndReturn;
 	}
 	if (aData->PlayPerson == NULL) {
+		aTrace->Fail(aTrace, "aData has no PlayPerson");
 		FreeTraceAndReturn;
 	}
 
+	aTrace->AddEvent(aTrace, "add Copied aData to composit.");
 	ProviderComposit_AddDataProvider(aContext->myDataProvider, aData->Copy(aData));
+
+	aTrace->AddEvent(aTrace, "Recalculate MedaData for Graph");
 	FreeMetaData(&aContext->myMedaData);
 	aContext->myMedaData = CreateMetaData(ProviderComposit_Cast(aContext->myDataProvider));
 
@@ -223,59 +246,84 @@ CreateDataProvider(
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
+	}
+	if (aRelations == NULL) {
+		aTrace->Fail(aTrace, "aRelations is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->Copy == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no Copy");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->Free == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no Free");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllIds == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no GetAllIds");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllIdsCount == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no GetAllIdsCount");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllRelationsOfId == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no GetAllRelationsOfId");
 		FreeTraceAndReturn NULL;
 	}
 	if (aRelations->GetAllRelationsOfIdCount == NULL) {
+		aTrace->Fail(aTrace, "aRelations has no GetAllRelationsOfIdCount");
+		FreeTraceAndReturn NULL;
+	}
+	if (aPersonals == NULL) {
+		aTrace->Fail(aTrace, "aPersonals is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->Copy == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no Copy");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->Free == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no Free");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetAllIds == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no GetAllIds");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetAllIdsCount == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no GetAllIdsCount");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->GetPerson == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no GetPerson");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->PlayPerson == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no PlayPerson");
 		FreeTraceAndReturn NULL;
 	}
 	if (aPersonals->ShowImages == NULL) {
+		aTrace->Fail(aTrace, "aPersonals has no ShowImages");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Create Shared Forwarding Provider");
 	IDataProvider* data = CreateSharedDataProviderDecorator(
 		CreateForwardingProvider(aRelations->Copy(aRelations), aPersonals->Copy(aPersonals)));
 	if (data == NULL) {
+		aTrace->Fail(aTrace, "Unable to Create Data Provider");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Keep track of constructed objects.");
 	IDataProvider** newArray = realloc(
 		aContext->myCreatedDataProviders,
 		sizeof(IRelationals*) * (aContext->myCreatedDataProvidersSize + 1));
 	if (newArray == NULL) {
+		aTrace->Fail(aTrace, "Unable to realloc array");
 		data->Free(data);
 		free(data);
 		FreeTraceAndReturn NULL;
@@ -327,23 +375,28 @@ CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, I
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	if (!CheckIo(aPlatform)) {
+		aTrace->Fail(aTrace, "aPlatform is malformed");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Create Shared CSV Relation");
 	IRelationals* relations =
 		CreateSharedRelationalsDecorator(CreateCSVRelation(aPath, aPlatform->Copy(aPlatform)));
 	if (relations == NULL) {
+		aTrace->Fail(aTrace, "Unable to Create CSV Relation");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Keep track of constructed objects.");
 	IRelationals** newArray = realloc(
 		aContext->myCreatedRelations,
 		sizeof(IRelationals*) * (aContext->myCreatedRelationsSize + 1));
 	if (newArray == NULL) {
+		aTrace->Fail(aTrace, "Unable to realloc array");
 		relations->Free(relations);
 		free(relations);
 		FreeTraceAndReturn NULL;
@@ -365,23 +418,28 @@ CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform, 
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	if (!CheckIo(aPlatform)) {
+		aTrace->Fail(aTrace, "aPlatform is malformed");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Create Shared JSON Personals");
 	IPersonals* persons =
 		CreateSharedPersonalsDecorator(CreateJSONPerson(aPath, aPlatform->Copy(aPlatform)));
 	if (persons == NULL) {
+		aTrace->Fail(aTrace, "Unable to Create JSON Personals");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Keep track of constructed objects.");
 	IPersonals** newArray = realloc(
 		aContext->myCreatedPersonals,
 		sizeof(IRelationals*) * (aContext->myCreatedPersonalsSize + 1));
 	if (newArray == NULL) {
+		aTrace->Fail(aTrace, "Unable to realloc array");
 		persons->Free(persons);
 		free(persons);
 		FreeTraceAndReturn NULL;
@@ -403,19 +461,23 @@ CreateDefaultPlatform(Context* aContext, ITrace* aTrace) {
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Create Shared Default Platform");
 	IPlatform* platform = CreateSharedPlatformDecorator(CreatePlatform());
 	if (platform == NULL) {
+		aTrace->Fail(aTrace, "Unable to Create Platform");
 		FreeTraceAndReturn NULL;
 	}
 
+	aTrace->AddEvent(aTrace, "Keep track of constructed objects.");
 	IPlatform** newArray = realloc(
 		aContext->myCreatedPlatforms,
 		sizeof(IRelationals*) * (aContext->myCreatedPlatformSize + 1));
 	if (newArray == NULL) {
+		aTrace->Fail(aTrace, "Unable to realloc array");
 		platform->Free(platform);
 		free(platform);
 		FreeTraceAndReturn NULL;
@@ -486,12 +548,14 @@ GetPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	p.remark = "";
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn p;
 	}
 
 	IDataProvider* interface = ProviderComposit_Cast(aContext->myDataProvider);
 	p = interface->GetPerson(interface, aId);
+
+	aTrace->AddEvent(aTrace, "Populate Null Values");
 	PopulateNullValues(&p, aContext);
 	FreeTraceAndReturn p;
 }
@@ -506,7 +570,7 @@ PlayPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn;
 	}
 
@@ -525,7 +589,7 @@ ShowImagesOfPerson(Context* aContext, PersonId aId, ITrace* aTrace) {
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn;
 	}
 
@@ -549,10 +613,12 @@ GetPersonsMatchingPattern(
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	IDataProvider* data = ProviderComposit_Cast(aContext->myDataProvider);
+
+	aTrace->AddEvent(aTrace, "Retreave all Ids");
 	size_t idCount = data->GetAllIdsCount(data);
 	PersonId* ids = malloc(idCount * sizeof(PersonId));
 	data->GetAllIds(data, ids);
@@ -562,12 +628,14 @@ GetPersonsMatchingPattern(
 	int found = 0;
 	for (size_t i = 0; i < idCount; i++) {
 		result[count] = data->GetPerson(data, ids[i]);
+		ITrace* subtrace = aTrace->CreateSubTrace(subtrace, result[count].firstNames[0]);
 
 		// TODO: handle error
 
 		size_t matches = 0;
 
 		if (aPrototype.title != NULL && strcmp(aPrototype.title, result[count].title) == 0) {
+			subtrace->AddEvent(subtrace, "Title matches");
 			matches++;
 		}
 		found = 0;
@@ -578,6 +646,7 @@ GetPersonsMatchingPattern(
 						aPrototype.firstNames[prototypeIndex],
 						result[count].firstNames[realIndex])
 					== 0) {
+					subtrace->AddEvent(subtrace, "Firstname matches");
 					found = 1;
 					break;
 				}
@@ -591,6 +660,7 @@ GetPersonsMatchingPattern(
 		}
 		if (aPrototype.titleOfNobility != NULL
 			&& strcmp(aPrototype.titleOfNobility, result[count].titleOfNobility) == 0) {
+			subtrace->AddEvent(subtrace, "Title of Nobility matches");
 			matches++;
 		}
 		found = 0;
@@ -599,6 +669,7 @@ GetPersonsMatchingPattern(
 			for (size_t realIndex = 0; realIndex < result[count].lastNameCount; realIndex++) {
 				if (strcmp(aPrototype.lastNames[prototypeIndex], result[count].lastNames[realIndex])
 					== 0) {
+					subtrace->AddEvent(subtrace, "Lastname matches");
 					found = 1;
 					break;
 				}
@@ -611,40 +682,53 @@ GetPersonsMatchingPattern(
 			matches++;
 		}
 		if (aPrototype.gender != NULL && strcmp(aPrototype.gender, result[count].gender) == 0) {
+			subtrace->AddEvent(subtrace, "Gender matches");
 			matches++;
 		}
 		if (aPrototype.dateOfBirth != NULL
 			&& strcmp(aPrototype.dateOfBirth, result[count].dateOfBirth) == 0) {
+			subtrace->AddEvent(subtrace, "date of birth matches");
 			matches++;
 		}
 		if (aPrototype.placeOfBirth != NULL
 			&& strcmp(aPrototype.placeOfBirth, result[count].placeOfBirth) == 0) {
+			subtrace->AddEvent(subtrace, "place of birth matches");
 			matches++;
 		}
 		if (aPrototype.dateOfDeath != NULL
 			&& strcmp(aPrototype.dateOfDeath, result[count].dateOfDeath) == 0) {
+			subtrace->AddEvent(subtrace, "date of death matches");
 			matches++;
 		}
 		if (aPrototype.placeOfDeath != NULL
 			&& strcmp(aPrototype.placeOfDeath, result[count].placeOfDeath) == 0) {
+			subtrace->AddEvent(subtrace, "place of death matches");
 			matches++;
 		}
 		if (aPrototype.remark != NULL && strcmp(aPrototype.remark, result[count].remark) == 0) {
+			subtrace->AddEvent(subtrace, "remark matches");
 			matches++;
 		}
 		if (matches >= aMinMatches) {
+			subtrace->AddEvent(subtrace, "minimal matches reached");
+			subtrace->AddEvent(subtrace, "Populate Null Values");
 			PopulateNullValues(result + count, aContext);
 			count++;
+
+			subtrace->AddEvent(subtrace, "reallocate result array");
 			result = realloc(result, (count + 1) * sizeof(Person));
-			continue;
 		}
+		subtrace->Free(subtrace);
 	}
 	free(ids);
 
+	aTrace->AddEvent(aTrace, "store result for later free");
 	free(aContext->myCreatedPersons);
 	aContext->myCreatedPersons = result;
 
+	aTrace->AddEvent(aTrace, "set output variable");
 	*aOutPersonsCount = count;
+
 	FreeTraceAndReturn result;
 }
 
@@ -658,7 +742,7 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn NULL;
 	}
 	IDataProvider* data = ProviderComposit_Cast(aContext->myDataProvider);
@@ -666,6 +750,7 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 	Relation* result = malloc(sizeof(Relation) * count);
 	data->GetAllRelationsOfId(data, aId, result);
 
+	aTrace->AddEvent(aTrace, "Populate Null Values");
 	for (size_t i = 0; i < count; i++) {
 		if (result[i].relationship == NULL) {
 			result[i].relationship = aContext->myDefaultString;
@@ -678,6 +763,7 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 		}
 	}
 
+	aTrace->AddEvent(aTrace, "set output variable");
 	*aOutRelationsCount = count;
 	FreeTraceAndReturn result;
 }
@@ -692,7 +778,7 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 	}
 
 	if (aContext == NULL) {
-		aTrace->AddEvent(aTrace, "Context is NULL");
+		aTrace->Fail(aTrace, "Context is NULL");
 		FreeTraceAndReturn INT_MIN;
 	}
 

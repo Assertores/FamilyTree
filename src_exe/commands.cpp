@@ -63,7 +63,7 @@ Exit::PrintHelp() {
 
 AddData::AddData(Context* aContext)
 	: myContext(aContext)
-	, myPlatform(CreateDefaultPlatform(aContext)) {}
+	, myPlatform(CreateDefaultPlatform(aContext, NULL)) {}
 
 bool
 AddData::IsCommand(std::string_view aCommand) {
@@ -72,10 +72,10 @@ AddData::IsCommand(std::string_view aCommand) {
 
 void
 AddData::ExecuteCommand(const std::string& aLine) {
-	auto relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform);
-	auto person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform);
-	auto dataProvider = CreateDataProvider(myContext, relation, person);
-	AddDataProvider(myContext, dataProvider);
+	auto relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform, NULL);
+	auto person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform, NULL);
+	auto dataProvider = CreateDataProvider(myContext, relation, person, NULL);
+	AddDataProvider(myContext, dataProvider, NULL);
 }
 void
 AddData::PrintHelp() {
@@ -92,7 +92,7 @@ PrintPerson::IsCommand(std::string_view aCommand) {
 
 void
 PrintPerson::ExecuteCommand(const std::string& aLine) {
-	auto person = GetPerson(myContext, std::stoi(aLine));
+	auto person = GetPerson(myContext, std::stoi(aLine), NULL);
 
 	std::cout << "ID: " << person.id << '\n';
 	std::cout << "Name: ";
@@ -152,7 +152,7 @@ PlayAudio::IsCommand(std::string_view aCommand) {
 
 void
 PlayAudio::ExecuteCommand(const std::string& aLine) {
-	PlayPerson(myContext, std::stoi(aLine));
+	PlayPerson(myContext, std::stoi(aLine), NULL);
 }
 
 void
@@ -171,7 +171,7 @@ ShowImages::IsCommand(std::string_view aCommand) {
 
 void
 ShowImages::ExecuteCommand(const std::string& aLine) {
-	ShowImagesOfPerson(myContext, std::stoi(aLine));
+	ShowImagesOfPerson(myContext, std::stoi(aLine), NULL);
 }
 
 void
@@ -267,7 +267,7 @@ SearchPeople::ExecuteCommand(const std::string& aLine) {
 	prototype.lastNames = lastNames.data();
 
 	size_t count = 0;
-	auto array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count);
+	auto array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count, NULL);
 	std::vector<Person> matches{array, array + count};
 	bool first = true;
 	std::cout << "ids: ";
@@ -313,7 +313,7 @@ PeopleRelation::ExecuteCommand(const std::string& aLine) {
 	size_t requestedIds = std::stoi(aLine);
 
 	size_t count = 0;
-	auto array = GetPersonRelations(myContext, requestedIds, &count);
+	auto array = GetPersonRelations(myContext, requestedIds, &count, NULL);
 	std::vector<Relation> relations{array, array + count};
 	for (const auto& it : relations) {
 		std::cout << it.id1 << " --";
@@ -350,7 +350,7 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 		std::set<PersonId> newPeopleToShow{};
 		for (const auto& id : peopleToShow) {
 			size_t count = 0;
-			auto array = GetPersonRelations(myContext, id, &count);
+			auto array = GetPersonRelations(myContext, id, &count, NULL);
 			for (size_t j = 0; j < count; j++) {
 				newPeopleToShow.insert(array[j].id1);
 				newPeopleToShow.insert(array[j].id2);
@@ -363,7 +363,7 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 	std::list<std::vector<PersonId>> generations;
 
 	for (const auto& id : peopleToShow) {
-		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, id);
+		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, id, NULL);
 		while (othersGeneration < firstGeneration) {
 			generations.emplace_front(std::vector<PersonId>{});
 			firstGeneration--;

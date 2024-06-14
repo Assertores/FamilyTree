@@ -11,7 +11,7 @@
 
 int
 main() {
-	auto context = Create();
+	auto context = Create(NULL);
 
 	Help help;
 	Exit exit;
@@ -43,6 +43,6 @@ main() {
 		quit = ICommand::Execute(command, line);
 	}
 
-	Free(context);
+	Free(context, NULL);
 	return 0;
 }
