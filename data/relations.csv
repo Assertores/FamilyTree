@@ -16,3 +16,8 @@ personA,personB,type,relationship,start,end
 13,14,StrictlyLower
 12,14,StrictlyLower
 15,16,StrictlyLower
+14,16,StrictlyLower
+12,17,StrictlyLower
+11,17,StrictlyLower
+16,18,StrictlyLower
+17,18,StrictlyLower

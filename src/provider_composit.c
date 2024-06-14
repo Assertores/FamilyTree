@@ -123,17 +123,21 @@ ProviderComposit_GetAllRelationsOfId(IDataProvider* aThis, PersonId aId, Relatio
 	}
 
 	for (size_t i = 0; i < count; i++) {
+		PersonId id1 = -1;
+		PersonId id2 = -1;
 		for (size_t j = 0; j < self->myTranslationSize; j++) {
 			if (self->myTranslations[j].dataProvider != provider) {
 				continue;
 			}
 			if (aOutRelation[i].id1 == self->myTranslations[j].internalId) {
-				aOutRelation[i].id1 = self->myTranslations[j].externalId;
+				id1 = self->myTranslations[j].externalId;
 			}
 			if (aOutRelation[i].id2 == self->myTranslations[j].internalId) {
-				aOutRelation[i].id2 = self->myTranslations[j].externalId;
+				id2 = self->myTranslations[j].externalId;
 			}
 		}
+		aOutRelation[i].id1 = id1;
+		aOutRelation[i].id2 = id2;
 	}
 }
 
@@ -143,22 +147,26 @@ ProviderComposit_GetRelationType(IDataProvider* aThis, Relation aRelation) {
 
 	IDataProvider* dataProvider = NULL;
 
+	PersonId id1 = -1;
+	PersonId id2 = -1;
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
 		if (aRelation.id1 == self->myTranslations[i].externalId) {
-			aRelation.id1 = self->myTranslations[i].internalId;
+			id1 = self->myTranslations[i].internalId;
 			if (dataProvider != NULL) {
 				break;
 			}
 			dataProvider = self->myTranslations[i].dataProvider;
 		}
 		if (aRelation.id2 == self->myTranslations[i].externalId) {
-			aRelation.id2 = self->myTranslations[i].internalId;
+			id2 = self->myTranslations[i].internalId;
 			if (dataProvider != NULL) {
 				break;
 			}
 			dataProvider = self->myTranslations[i].dataProvider;
 		}
 	}
+	aRelation.id1 = id1;
+	aRelation.id2 = id2;
 	if (dataProvider == NULL) {
 		return RelationType_Unrestricted;
 	}

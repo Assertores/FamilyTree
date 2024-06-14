@@ -229,6 +229,9 @@ ResetRelations(CsvRelation* self) {
 		} else if (strcmp(cells[2], "StrictlyHigher") == 0) {
 			self->myRelations[i - 1].functionalType = RelationType_StrictlyHigher;
 		}
+		self->myRelations[i - 1].relation.relationship = NULL;
+		self->myRelations[i - 1].relation.startDate = NULL;
+		self->myRelations[i - 1].relation.endDate = NULL;
 		if (count > 3) {
 			self->myRelations[i - 1].relation.relationship = cells[3];
 		}
