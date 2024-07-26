@@ -10,12 +10,12 @@ typedef struct {
 } WindowsPlatform;
 
 IPlatform*
-WindowsPlatform_Copy(IPlatform* aThis) {
+WindowsPlatform_Copy(IPlatform* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 char*
-WindowsPlatform_GetFolders(IPlatform* aThis, const char* aPath) {
+WindowsPlatform_GetFolders(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	WIN32_FIND_DATA fdFile;
 	HANDLE hFind = NULL;
 
@@ -55,7 +55,7 @@ WindowsPlatform_GetFolders(IPlatform* aThis, const char* aPath) {
 }
 
 char*
-WindowsPlatform_ReadFile(IPlatform* aThis, const char* aPath) {
+WindowsPlatform_ReadFile(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	FILE* f = NULL;
 	fopen_s(&f, aPath, "r");
 	if (f == NULL) {
@@ -73,12 +73,12 @@ WindowsPlatform_ReadFile(IPlatform* aThis, const char* aPath) {
 }
 
 void
-WindowsPlatform_FreeString(IPlatform* aThis, char* aString) {
+WindowsPlatform_FreeString(IPlatform* aThis, char* aString, ITrace* aTrace) {
 	free(aString);
 }
 
 void
-WindowsPlatform_OpenAudio(IPlatform* aThis, const char* aPath) {
+WindowsPlatform_OpenAudio(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	size_t pathLength = strlen(aPath);
 
 	char* path = malloc(pathLength + 1);
@@ -96,7 +96,7 @@ WindowsPlatform_OpenAudio(IPlatform* aThis, const char* aPath) {
 }
 
 void
-WindowsPlatform_OpenImage(IPlatform* aThis, const char* aPath) {
+WindowsPlatform_OpenImage(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	size_t pathLength = strlen(aPath);
 
 	char* path = malloc(pathLength + 1);
@@ -114,12 +114,12 @@ WindowsPlatform_OpenImage(IPlatform* aThis, const char* aPath) {
 }
 
 void
-WindowsPlatform_Free(IPlatform* aThis) {
+WindowsPlatform_Free(IPlatform* aThis, ITrace* aTrace) {
 	free(aThis);
 }
 
 IPlatform*
-CreatePlatform() {
+CreatePlatform(ITrace* aTrace) {
 	WindowsPlatform* result = calloc(1, sizeof(WindowsPlatform));
 
 	result->i.Copy = WindowsPlatform_Copy;

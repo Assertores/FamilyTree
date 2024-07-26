@@ -2,6 +2,7 @@
 
 #include "patch.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 
 typedef struct PersonMeta_t {
@@ -15,25 +16,45 @@ typedef struct PersonMeta_t {
 	int myGeneration;
 } PersonMeta;
 
-void ResolveGenerationsRecursively(PersonMeta* element, int minGeneration, int aFromChild);
-void SquashUp(PersonMeta* element);
+void ResolveGenerationsRecursively(
+	PersonMeta* element, int minGeneration, int aFromChild, ITrace* aTrace);
+void SquashUp(PersonMeta* element, ITrace* aTrace);
 
 void
-ResolveGenerationsRecursively(PersonMeta* element, int minGeneration, int aFromChild) {
+ResolveGenerationsRecursively(
+	PersonMeta* element, int minGeneration, int aFromChild, ITrace* aTrace) {
+	char string[126];
+	sprintf(string, "Resolving generations for person: %zu", element->myPersonId);
+	aTrace->AddEvent(aTrace, string);
+
 	if (element->myGeneration < minGeneration) {
+		sprintf(
+			string,
+			"Person: %zu needs to move from generation: %d to generation: %d",
+			element->myPersonId,
+			element->myGeneration,
+			minGeneration);
+		aTrace->AddEvent(aTrace, string);
+
 		element->myGeneration = minGeneration;
 
+		ITrace* trace = aTrace->CreateSubTrace(aTrace, "Childrens");
 		for (size_t i = 0; i < element->myChildCount; i++) {
-			ResolveGenerationsRecursively(element->myChilds[i], element->myGeneration + 1, 0);
+			ResolveGenerationsRecursively(
+				element->myChilds[i],
+				element->myGeneration + 1,
+				0,
+				trace);
 		}
+		trace->Free(trace);
 	}
 	if (aFromChild != 1) {
-		SquashUp(element); // might be permanent loop
+		SquashUp(element, aTrace); // might be permanent loop
 	}
 }
 
 void
-SquashUp(PersonMeta* element) {
+SquashUp(PersonMeta* element, ITrace* aTrace) {
 	if (element->myParentCount == 0) {
 		return;
 	}
@@ -46,45 +67,71 @@ SquashUp(PersonMeta* element) {
 						: element->myParents[i]->myGeneration;
 	}
 
+	char string[126];
+	sprintf(
+		string,
+		"squashing up parents of person: %zu to generation: %d",
+		element->myPersonId,
+		maxNumber);
+	aTrace->AddEvent(aTrace, string);
+
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Parents");
 	// Childrens von Parents updaten lassen
 	for (size_t i = 0; i < element->myParentCount; i++) {
-		ResolveGenerationsRecursively(element->myParents[i], maxNumber, 1);
+		ResolveGenerationsRecursively(element->myParents[i], maxNumber, 1, trace);
 	}
+	trace->Free(trace);
 }
 
 void
-ResolveGraph(MetaData* aMetaData) {
+ResolveGraph(MetaData* aMetaData, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Resolve Graph");
 	for (size_t i = 0; i < aMetaData->myPersonCount; i++) {
 		if (aMetaData->myPersons[i].myParentCount == 0) {
-			ResolveGenerationsRecursively(aMetaData->myPersons + i, 0, 0);
+			char string[126];
+			sprintf(
+				string,
+				"Person: %zu has no parents and is therefore a starting point.",
+				aMetaData->myPersons[i].myPersonId);
+			trace->AddEvent(trace, string);
+
+			ResolveGenerationsRecursively(aMetaData->myPersons + i, 0, 0, trace);
 		}
 	}
+	trace->Free(trace);
 }
 
 MetaData
-CreateMetaData(IDataProvider* aDataProvider) {
+CreateMetaData(IDataProvider* aDataProvider, ITrace* aTrace) {
 	MetaData data;
+	char string[126];
 
-	data.myPersonCount = aDataProvider->GetAllIdsCount(aDataProvider);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "GatherData");
+
+	data.myPersonCount = aDataProvider->GetAllIdsCount(aDataProvider, trace);
 	data.myPersons = calloc(data.myPersonCount, sizeof(PersonMeta));
 	PersonId* ids = calloc(data.myPersonCount, sizeof(PersonId));
-	aDataProvider->GetAllIds(aDataProvider, ids);
+	aDataProvider->GetAllIds(aDataProvider, ids, trace);
 
 	for (size_t i = 0; i < data.myPersonCount; i++) {
 		data.myPersons[i].myPersonId = ids[i];
 		data.myPersons[i].myGeneration = -1;
 
-		size_t count = aDataProvider->GetAllRelationsOfIdCount(aDataProvider, ids[i]);
+		size_t count = aDataProvider->GetAllRelationsOfIdCount(aDataProvider, ids[i], trace);
 		Relation* relations = calloc(count, sizeof(Relation));
-		aDataProvider->GetAllRelationsOfId(aDataProvider, ids[i], relations);
+		aDataProvider->GetAllRelationsOfId(aDataProvider, ids[i], relations, trace);
 
 		for (size_t j = 0; j < count; j++) {
-			RelationType relation = aDataProvider->GetRelationType(aDataProvider, relations[j]);
+			RelationType relation =
+				aDataProvider->GetRelationType(aDataProvider, relations[j], trace);
 			if (relation == RelationType_Unrestricted) {
+				sprintf(string, "%zu and %zu are unrelaited", relations[j].id1, relations[j].id2);
+				trace->AddEvent(trace, string);
 				continue;
 			}
 			PersonId otherId = relations[j].id1 == ids[i] ? relations[j].id2 : relations[j].id1;
 			if (relations[j].id2 == ids[i]) {
+				trace->AddEvent(trace, "fliped relation for conveniance");
 				if (relation == RelationType_StrictlyHigher) {
 					relation = RelationType_StrictlyLower;
 				} else {
@@ -119,8 +166,9 @@ CreateMetaData(IDataProvider* aDataProvider) {
 
 		free(relations);
 	}
+	trace->Free(trace);
 
-	ResolveGraph(&data);
+	ResolveGraph(&data, aTrace);
 	free(ids);
 	return data;
 }
@@ -140,22 +188,25 @@ FreeMetaData(MetaData* aMetaData) {
 }
 
 int
-ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2) {
+ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2, ITrace* aTrace) {
 	int generationOfId1 = -2;
 	int generationOfId2 = -2;
 	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
 		if (aMetaData.myPersons[i].myPersonId == aId1) {
+			aTrace->AddEvent(aTrace, "found first person");
 			generationOfId1 = aMetaData.myPersons[i].myGeneration;
 			if (generationOfId2 != -2) {
 				break;
 			}
 		}
 		if (aMetaData.myPersons[i].myPersonId == aId2) {
+			aTrace->AddEvent(aTrace, "found second person");
 			generationOfId2 = aMetaData.myPersons[i].myGeneration;
 			if (generationOfId1 != -2) {
 				break;
 			}
 		}
 	}
+	aTrace->AddEvent(aTrace, "calculate difference");
 	return generationOfId2 - generationOfId1;
 }

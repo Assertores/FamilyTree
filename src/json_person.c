@@ -30,7 +30,7 @@ typedef struct {
 } JsonPerson;
 
 FullPerson*
-_GetPerson(JsonPerson* self, PersonId aId) {
+_GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		if (self->myPersons[i].person.id == aId) {
 			return self->myPersons + i;
@@ -63,7 +63,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 	self->myPersons = newArray;
 	memset(person, 0, sizeof(FullPerson));
 
-	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath);
+	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath, aTrace);
 	person->data = json;
 	person->folder = self->myFolders[folderIndex];
 
@@ -82,7 +82,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 		if (json[i] == ':') {
 			if (!isInKey) {
 				free(filePath);
-				self->myPlatform->FreeString(self->myPlatform, json);
+				self->myPlatform->FreeString(self->myPlatform, json, aTrace);
 				return NULL;
 			}
 			isInKey = 0;
@@ -117,7 +117,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 					realloc(firstNameBuffer, sizeof(char*) * (person->person.firstNameCount + 1));
 				if (firstNameBuffer == NULL) {
 					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json);
+					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
 					return NULL;
 				}
 				firstNameBuffer[person->person.firstNameCount] = json + begin;
@@ -127,7 +127,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 					realloc(lastNameBuffer, sizeof(char*) * (person->person.lastNameCount + 1));
 				if (lastNameBuffer == NULL) {
 					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json);
+					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
 					return NULL;
 				}
 				lastNameBuffer[person->person.lastNameCount] = json + begin;
@@ -153,7 +153,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 					realloc(person->imagePaths, sizeof(char*) * (person->imagePathCount + 1));
 				if (person->imagePaths == NULL) {
 					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json);
+					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
 					return NULL;
 				}
 				person->imagePaths[person->imagePathCount] = json + begin;
@@ -166,7 +166,7 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 		}
 		if (isInKey) {
 			free(filePath);
-			self->myPlatform->FreeString(self->myPlatform, json);
+			self->myPlatform->FreeString(self->myPlatform, json, aTrace);
 			return NULL;
 		}
 		if (json[i] == ',' && !isInArray) {
@@ -194,19 +194,19 @@ _GetPerson(JsonPerson* self, PersonId aId) {
 }
 
 IPersonals*
-JsonPerson_Copy(IPersonals* aThis) {
+JsonPerson_Copy(IPersonals* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 size_t
-JsonPerson_GetAllIdsCount(IPersonals* aThis) {
+JsonPerson_GetAllIdsCount(IPersonals* aThis, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 
 	return self->myFolderCount;
 }
 
 void
-JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId) {
+JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 
 	for (size_t i = 0; i < self->myFolderCount; i++) {
@@ -215,16 +215,16 @@ JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId) {
 }
 
 Person
-JsonPerson_GetPerson(IPersonals* aThis, PersonId aId) {
+JsonPerson_GetPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 
-	return _GetPerson(self, aId)->person;
+	return _GetPerson(self, aId, aTrace)->person;
 }
 
 void
-JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId) {
+JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-	FullPerson* person = _GetPerson(self, aId);
+	FullPerson* person = _GetPerson(self, aId, aTrace);
 
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
@@ -237,14 +237,14 @@ JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId) {
 	path[pathLength + 1 + folderLength] = '/';
 	strcpy_s(path + pathLength + 1 + folderLength + 1, fileLength + 1, person->audioPath);
 
-	self->myPlatform->OpenAudio(self->myPlatform, path);
+	self->myPlatform->OpenAudio(self->myPlatform, path, aTrace);
 	free(path);
 }
 
 void
-JsonPerson_ShowImages(IPersonals* aThis, PersonId aId) {
+JsonPerson_ShowImages(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-	FullPerson* person = _GetPerson(self, aId);
+	FullPerson* person = _GetPerson(self, aId, aTrace);
 
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
@@ -270,26 +270,26 @@ JsonPerson_ShowImages(IPersonals* aThis, PersonId aId) {
 			path + pathLength + 1 + folderLength + 1,
 			longestFileLength,
 			person->imagePaths[i]);
-		self->myPlatform->OpenImage(self->myPlatform, path);
+		self->myPlatform->OpenImage(self->myPlatform, path, aTrace);
 	}
 
 	free(path);
 }
 
 void
-JsonPerson_Free(IPersonals* aThis) {
+JsonPerson_Free(IPersonals* aThis, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 
 	if (self->myFolderCount > 0) {
-		self->myPlatform->FreeString(self->myPlatform, self->myFolders[0]);
+		self->myPlatform->FreeString(self->myPlatform, self->myFolders[0], aTrace);
 	}
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		free(self->myPersons[i].imagePaths);
 		free((void*)self->myPersons[i].person.firstNames);
 		free((void*)self->myPersons[i].person.lastNames);
-		self->myPlatform->FreeString(self->myPlatform, self->myPersons[i].data);
+		self->myPlatform->FreeString(self->myPlatform, self->myPersons[i].data, aTrace);
 	}
-	self->myPlatform->Free(self->myPlatform);
+	self->myPlatform->Free(self->myPlatform, aTrace);
 
 	free(self->myPath);
 	free(self->myFolders);
@@ -299,20 +299,20 @@ JsonPerson_Free(IPersonals* aThis) {
 }
 
 void
-ResetFolders(JsonPerson* self) {
+ResetFolders(JsonPerson* self, ITrace* aTrace) {
 	if (self->myFolderCount > 0) {
-		self->myPlatform->FreeString(self->myPlatform, self->myFolders[0]);
+		self->myPlatform->FreeString(self->myPlatform, self->myFolders[0], aTrace);
 	}
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		free(self->myPersons[i].imagePaths);
 		free((void*)self->myPersons[i].person.firstNames);
 		free((void*)self->myPersons[i].person.lastNames);
-		self->myPlatform->FreeString(self->myPlatform, self->myPersons[i].data);
+		self->myPlatform->FreeString(self->myPlatform, self->myPersons[i].data, aTrace);
 	}
 	self->myPersonCount = 0;
 	self->myPersons = realloc(self->myPersons, sizeof(FullPerson));
 
-	char* folders = self->myPlatform->GetFolders(self->myPlatform, self->myPath);
+	char* folders = self->myPlatform->GetFolders(self->myPlatform, self->myPath, aTrace);
 
 	int count = 0;
 	for (size_t i = 0;; i++) {
@@ -345,7 +345,7 @@ ResetFolders(JsonPerson* self) {
 }
 
 void
-ResetIds(JsonPerson* self) {
+ResetIds(JsonPerson* self, ITrace* aTrace) {
 	self->myIds = realloc(self->myIds, self->myFolderCount * sizeof(PersonId));
 
 	size_t longestFolderName = 0;
@@ -366,7 +366,7 @@ ResetIds(JsonPerson* self) {
 		memset(path + rootLength + 1, '\0', longestFolderName);
 		strcpy_s(path + rootLength + 1, longestFolderName + 1, self->myFolders[i]);
 		strcpy_s(path + rootLength + 1 + strlen(self->myFolders[i]), 11, "/data.json");
-		char* file = self->myPlatform->ReadFile(self->myPlatform, path);
+		char* file = self->myPlatform->ReadFile(self->myPlatform, path, aTrace);
 
 		size_t numberbegin = 0;
 		size_t numberlength = 0;
@@ -397,13 +397,13 @@ ResetIds(JsonPerson* self) {
 		file[numberbegin + numberlength + 1] = '\0';
 		self->myIds[i] = atoi(file + numberbegin);
 
-		self->myPlatform->FreeString(self->myPlatform, file);
+		self->myPlatform->FreeString(self->myPlatform, file, aTrace);
 	}
 	free(path);
 }
 
 IPersonals*
-CreateJSONPerson(const char* aPath, IPlatform* aPlatform) {
+CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	JsonPerson* result = calloc(1, sizeof(JsonPerson));
 
 	result->interface.Copy = JsonPerson_Copy;
@@ -422,8 +422,8 @@ CreateJSONPerson(const char* aPath, IPlatform* aPlatform) {
 
 	result->myPlatform = aPlatform;
 
-	ResetFolders(result);
-	ResetIds(result);
+	ResetFolders(result, aTrace);
+	ResetIds(result, aTrace);
 
 	return &result->interface;
 }

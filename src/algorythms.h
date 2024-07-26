@@ -13,9 +13,9 @@ typedef struct {
 	PersonMeta* myPersons;
 } MetaData;
 
-MetaData CreateMetaData(IDataProvider* aDataProvider);
+MetaData CreateMetaData(IDataProvider* aDataProvider, ITrace* aTrace);
 void FreeMetaData(MetaData* aMetaData);
-int ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2);
+int ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2, ITrace* aTrace);
 
 #ifdef __cplusplus
 }

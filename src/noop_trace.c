@@ -11,14 +11,10 @@ void
 NoOpTrace_AddEvent(ITrace* aThis, const char* aEvent) {}
 
 void
-NoOpTrace_Succeed(ITrace* aThis) {
-	free(aThis);
-}
+NoOpTrace_Succeed(ITrace* aThis) {}
 
 void
-NoOpTrace_Fail(ITrace* aThis, const char* aReason) {
-	free(aThis);
-}
+NoOpTrace_Fail(ITrace* aThis, const char* aReason) {}
 
 void
 NoOpTrace_Free(ITrace* aThis) {

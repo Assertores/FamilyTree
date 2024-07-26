@@ -9,11 +9,12 @@
 bool
 ProviderCompositGetPersonDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto composit = CreateProviderComposit();
-	ProviderComposit_AddDataProvider(composit, dataProvider);
+	auto trace = CreateNoOpTrace();
+	auto composit = CreateProviderComposit(trace);
+	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
-	auto person = iface->GetPerson(iface, 0);
+	auto person = iface->GetPerson(iface, 0, trace);
 
 	CHECK(person.id, 0);
 	return true;
@@ -22,12 +23,13 @@ ProviderCompositGetPersonDoesNotLeakInternalId() {
 bool
 ProviderCompositGetRelationsDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto composit = CreateProviderComposit();
-	ProviderComposit_AddDataProvider(composit, dataProvider);
+	auto trace = CreateNoOpTrace();
+	auto composit = CreateProviderComposit(trace);
+	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
 	Relation relations[2];
-	iface->GetAllRelationsOfId(iface, 0, relations);
+	iface->GetAllRelationsOfId(iface, 0, relations, trace);
 
 	CHECK_EXCLUDE(relations[0].id1, 234, 34, 9754, 26);
 	CHECK_EXCLUDE(relations[0].id2, 234, 34, 9754, 26);

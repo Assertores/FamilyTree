@@ -8,20 +8,22 @@ extern "C" {
 
 typedef struct ProviderComposit ProviderComposit;
 
-ProviderComposit* CreateProviderComposit();
-IDataProvider* CreateForwardingProvider(IRelationals* aRelations, IPersonals* aPersonals);
-IRelationals* CreateCSVRelation(const char* aPath, IPlatform* aPlatform);
-IPersonals* CreateJSONPerson(const char* aPath, IPlatform* aPlatform);
-IPlatform* CreatePlatform();
+ProviderComposit* CreateProviderComposit(ITrace* aTrace);
+IDataProvider* CreateForwardingProvider(
+	IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace);
+IRelationals* CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
+IPersonals* CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
+IPlatform* CreatePlatform(ITrace* aTrace);
 ITrace* CreateNoOpTrace();
 
-void ProviderComposit_AddDataProvider(ProviderComposit* aThis, IDataProvider* aProvider);
+void ProviderComposit_AddDataProvider(
+	ProviderComposit* aThis, IDataProvider* aProvider, ITrace* aTrace);
 IDataProvider* ProviderComposit_Cast(ProviderComposit* aThis);
 
-IDataProvider* CreateSharedDataProviderDecorator(IDataProvider* aElement);
-IRelationals* CreateSharedRelationalsDecorator(IRelationals* aElement);
-IPersonals* CreateSharedPersonalsDecorator(IPersonals* aElement);
-IPlatform* CreateSharedPlatformDecorator(IPlatform* aElement);
+IDataProvider* CreateSharedDataProviderDecorator(IDataProvider* aElement, ITrace* aTrace);
+IRelationals* CreateSharedRelationalsDecorator(IRelationals* aElement, ITrace* aTrace);
+IPersonals* CreateSharedPersonalsDecorator(IPersonals* aElement, ITrace* aTrace);
+IPlatform* CreateSharedPlatformDecorator(IPlatform* aElement, ITrace* aTrace);
 
 #ifdef __cplusplus
 }

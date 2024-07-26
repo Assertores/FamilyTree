@@ -1,6 +1,6 @@
 #include "internal_types.h"
 
 IPlatform*
-CreatePlatform() {
+CreatePlatform(ITrace* aTrace) {
 	return NULL;
 }

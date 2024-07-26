@@ -5,37 +5,37 @@
 #include <string_view>
 
 IPlatform*
-AbstractPlatform_Copy(IPlatform* aThis) {
+AbstractPlatform_Copy(IPlatform* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 char*
-AbstractPlatform_GetFolders(IPlatform* aThis, const char* aPath) {
+AbstractPlatform_GetFolders(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	return ((C_Platform*)aThis)->myThis->GetFolders(aPath);
 }
 
 char*
-AbstractPlatform_ReadFile(IPlatform* aThis, const char* aPath) {
+AbstractPlatform_ReadFile(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	return ((C_Platform*)aThis)->myThis->ReadFile(aPath);
 }
 
 void
-AbstractPlatform_FreeString(IPlatform* aThis, char* aString) {
+AbstractPlatform_FreeString(IPlatform* aThis, char* aString, ITrace* aTrace) {
 	((C_Platform*)aThis)->myThis->FreeString(aString);
 }
 
 void
-AbstractPlatform_OpenAudio(IPlatform* aThis, const char* aPath) {
+AbstractPlatform_OpenAudio(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	((C_Platform*)aThis)->myThis->OpenAudio(aPath);
 }
 
 void
-AbstractPlatform_OpenImage(IPlatform* aThis, const char* aPath) {
+AbstractPlatform_OpenImage(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	((C_Platform*)aThis)->myThis->OpenImage(aPath);
 }
 
 void
-AbstractPlatform_Free(IPlatform* aThis) {
+AbstractPlatform_Free(IPlatform* aThis, ITrace* aTrace) {
 	// TODO: figure this out
 }
 

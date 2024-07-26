@@ -1,53 +1,53 @@
 #include "mock_data_provider.hpp"
 
 IDataProvider*
-AbstractDataProvider_Copy(IDataProvider* aThis) {
+AbstractDataProvider_Copy(IDataProvider* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 Person
-AbstractDataProvider_GetPerson(IDataProvider* aThis, PersonId aId) {
+AbstractDataProvider_GetPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	return ((C_DataProvider*)aThis)->myThis->GetPerson(aId);
 }
 
 void
-AbstractDataProvider_PlayPerson(IDataProvider* aThis, PersonId aId) {
+AbstractDataProvider_PlayPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	((C_DataProvider*)aThis)->myThis->PlayPerson(aId);
 }
 
 void
-AbstractDataProvider_ShowImages(IDataProvider* aThis, PersonId aId) {
+AbstractDataProvider_ShowImages(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	((C_DataProvider*)aThis)->myThis->ShowImages(aId);
 }
 
 size_t
-AbstractDataProvider_GetAllIdsCount(IDataProvider* aThis) {
+AbstractDataProvider_GetAllIdsCount(IDataProvider* aThis, ITrace* aTrace) {
 	return ((C_DataProvider*)aThis)->myThis->GetAllIdsCount();
 }
 
 void
-AbstractDataProvider_GetAllIds(IDataProvider* aThis, PersonId* aOutId) {
+AbstractDataProvider_GetAllIds(IDataProvider* aThis, PersonId* aOutId, ITrace* aTrace) {
 	((C_DataProvider*)aThis)->myThis->GetAllIds(aOutId);
 }
 
 size_t
-AbstractDataProvider_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId) {
+AbstractDataProvider_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	return ((C_DataProvider*)aThis)->myThis->GetAllRelationsOfIdCount(aId);
 }
 
 void
 AbstractDataProvider_GetAllRelationsOfId(
-	IDataProvider* aThis, PersonId aId, Relation* aOutRelation) {
+	IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
 	((C_DataProvider*)aThis)->myThis->GetAllRelationsOfId(aId, aOutRelation);
 }
 
 RelationType
-AbstractDataProvider_GetRelationType(IDataProvider* aThis, Relation aRelation) {
+AbstractDataProvider_GetRelationType(IDataProvider* aThis, Relation aRelation, ITrace* aTrace) {
 	return ((C_DataProvider*)aThis)->myThis->GetRelationType(aRelation);
 }
 
 void
-AbstractDataProvider_Free(IDataProvider* aThis) {
+AbstractDataProvider_Free(IDataProvider* aThis, ITrace* aTrace) {
 	// TODO: figure this out
 }
 

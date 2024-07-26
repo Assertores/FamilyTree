@@ -89,89 +89,91 @@ typedef struct ITrace ITrace;
 //! @brief an interface through which relational data can be retreaved.
 struct IRelationals {
 	//! returns a copy of the object.
-	IRelationals* (*Copy)(IRelationals* aThis);
+	IRelationals* (*Copy)(IRelationals* aThis, ITrace* aTrace);
 	//! returns the amount of ellements that need to be able to fit in @a aOutId provided to @a
 	//! GetAllIds.
-	size_t (*GetAllIdsCount)(IRelationals* aThis);
+	size_t (*GetAllIdsCount)(IRelationals* aThis, ITrace* aTrace);
 	//! stores all known id's into @a aOutId call @a GetAllIdsCount upfront and make shure enough
 	//! memory is allocated.
-	void (*GetAllIds)(IRelationals* aThis, PersonId* aOutId);
+	void (*GetAllIds)(IRelationals* aThis, PersonId* aOutId, ITrace* aTrace);
 	//! returns the amount of ellements that need to be able to fit in @a aOutRelation provided to
 	//! @a GetAllRelationsOfId.
-	size_t (*GetAllRelationsOfIdCount)(IRelationals* aThis, PersonId aId);
+	size_t (*GetAllRelationsOfIdCount)(IRelationals* aThis, PersonId aId, ITrace* aTrace);
 	//! stores all known relations that contain @a aId into @a aOutRelation call @a
 	//! GetAllRelationsOfIdCount upfront and make shure enough memory is allocated.
-	void (*GetAllRelationsOfId)(IRelationals* aThis, PersonId aId, Relation* aOutRelation);
+	void (*GetAllRelationsOfId)(
+		IRelationals* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace);
 	//! returns the corresponding @ref RelationType for a given @a Relation
-	RelationType (*GetRelationType)(IRelationals* aThis, Relation aRelation);
+	RelationType (*GetRelationType)(IRelationals* aThis, Relation aRelation, ITrace* aTrace);
 	//! frees the object itself and all data allocated by it.
-	void (*Free)(IRelationals* aThis);
+	void (*Free)(IRelationals* aThis, ITrace* aTrace);
 };
 
 //! @brief an interface through which personal data can be retreaved.
 struct IPersonals {
 	//! returns a copy of the object.
-	IPersonals* (*Copy)(IPersonals* aThis);
+	IPersonals* (*Copy)(IPersonals* aThis, ITrace* aTrace);
 	//! returns the amount of ellements that need to be able to fit in @a aOutId provided to @a
 	//! GetAllIds.
-	size_t (*GetAllIdsCount)(IPersonals* aThis);
+	size_t (*GetAllIdsCount)(IPersonals* aThis, ITrace* aTrace);
 	//! stores all known id's into @a aOutId call @a GetAllIdsCount upfront and make shure enough
 	//! memory is allocated.
-	void (*GetAllIds)(IPersonals* aThis, PersonId* aOutId);
+	void (*GetAllIds)(IPersonals* aThis, PersonId* aOutId, ITrace* aTrace);
 	//! retreave details about a given @a aId
-	Person (*GetPerson)(IPersonals* aThis, PersonId aId);
+	Person (*GetPerson)(IPersonals* aThis, PersonId aId, ITrace* aTrace);
 	//! playes the audio of a given @a aId
-	void (*PlayPerson)(IPersonals* aThis, PersonId aId);
+	void (*PlayPerson)(IPersonals* aThis, PersonId aId, ITrace* aTrace);
 	//! shows all images of a given @a aId
-	void (*ShowImages)(IPersonals* aThis, PersonId aId);
+	void (*ShowImages)(IPersonals* aThis, PersonId aId, ITrace* aTrace);
 	//! frees the object itself and all data allocated by it.
-	void (*Free)(IPersonals* aThis);
+	void (*Free)(IPersonals* aThis, ITrace* aTrace);
 };
 
 //! @brief an interface combining @ref IRelationals and @ref IPersonals for conveniance.
 struct IDataProvider {
 	//! returns a copy of the object.
-	IDataProvider* (*Copy)(IDataProvider* aThis);
+	IDataProvider* (*Copy)(IDataProvider* aThis, ITrace* aTrace);
 	//! @copybrief IPersonals.GetPerson
-	Person (*GetPerson)(IDataProvider* aThis, PersonId aId);
+	Person (*GetPerson)(IDataProvider* aThis, PersonId aId, ITrace* aTrace);
 	//! @copybrief IPersonals.PlayPerson
-	void (*PlayPerson)(IDataProvider* aThis, PersonId aId);
+	void (*PlayPerson)(IDataProvider* aThis, PersonId aId, ITrace* aTrace);
 	//! @copybrief IPersonals.ShowImages
-	void (*ShowImages)(IDataProvider* aThis, PersonId aId);
+	void (*ShowImages)(IDataProvider* aThis, PersonId aId, ITrace* aTrace);
 	//! @copybrief IPersonals.GetAllIdsCount
-	size_t (*GetAllIdsCount)(IDataProvider* aThis);
+	size_t (*GetAllIdsCount)(IDataProvider* aThis, ITrace* aTrace);
 	//! @copybrief IPersonals.GetAllIds
-	void (*GetAllIds)(IDataProvider* aThis, PersonId* aOutId);
+	void (*GetAllIds)(IDataProvider* aThis, PersonId* aOutId, ITrace* aTrace);
 	//! @copybrief IRelationals.GetAllRelationsOfIdCount
-	size_t (*GetAllRelationsOfIdCount)(IDataProvider* aThis, PersonId aId);
+	size_t (*GetAllRelationsOfIdCount)(IDataProvider* aThis, PersonId aId, ITrace* aTrace);
 	//! @copybrief IRelationals.GetAllRelationsOfId
-	void (*GetAllRelationsOfId)(IDataProvider* aThis, PersonId aId, Relation* aOutRelation);
+	void (*GetAllRelationsOfId)(
+		IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace);
 	//! @copybrief IRelationals.GetRelationType
-	RelationType (*GetRelationType)(IDataProvider* aThis, Relation aRelation);
+	RelationType (*GetRelationType)(IDataProvider* aThis, Relation aRelation, ITrace* aTrace);
 	//! frees the object itself and all data allocated by it.
-	void (*Free)(IDataProvider* aThis);
+	void (*Free)(IDataProvider* aThis, ITrace* aTrace);
 };
 
 //! @brief an interface through which all comunication to the operating system is done.
 struct IPlatform {
 	//! returns a copy of the object.
-	IPlatform* (*Copy)(IPlatform* aThis);
+	IPlatform* (*Copy)(IPlatform* aThis, ITrace* aTrace);
 	//! returns subfoldernames seperated with nullterminators and ends the list with two
 	//! nullterminators. e.g. "FolderA\0FolderB\0FolderC\0\0". free the string with @ref
 	//! IPlatform.FreeString
-	char* (*GetFolders)(IPlatform* aThis, const char* aPath);
+	char* (*GetFolders)(IPlatform* aThis, const char* aPath, ITrace* aTrace);
 	//! returns the content of a file given by @a aPath. free the string with @ref
 	//! IPlatform.FreeString
-	char* (*ReadFile)(IPlatform* aThis, const char* aPath);
+	char* (*ReadFile)(IPlatform* aThis, const char* aPath, ITrace* aTrace);
 	//! frees a string that was befor allocated by @ref IPlatform.GetFolders or @ref
 	//! IPlatform.ReadFile.
-	void (*FreeString)(IPlatform* aThis, char* aString);
+	void (*FreeString)(IPlatform* aThis, char* aString, ITrace* aTrace);
 	//! plays back the audiofile pointed at by @a aPath
-	void (*OpenAudio)(IPlatform* aThis, const char* aPath);
+	void (*OpenAudio)(IPlatform* aThis, const char* aPath, ITrace* aTrace);
 	//! shows the image pointed at by @a aPath
-	void (*OpenImage)(IPlatform* aThis, const char* aPath);
+	void (*OpenImage)(IPlatform* aThis, const char* aPath, ITrace* aTrace);
 	//! frees the object itself and all data allocated by it.
-	void (*Free)(IPlatform* aThis);
+	void (*Free)(IPlatform* aThis, ITrace* aTrace);
 };
 
 //! @brief an interface that will reseave all relevant info about the flow of the code.

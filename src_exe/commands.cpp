@@ -1,5 +1,7 @@
 #include "commands.hpp"
 
+#include "trace.hpp"
+
 #include <family_tree/api.h>
 
 #include <iostream>
@@ -72,10 +74,11 @@ AddData::IsCommand(std::string_view aCommand) {
 
 void
 AddData::ExecuteCommand(const std::string& aLine) {
-	auto relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform, NULL);
-	auto person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform, NULL);
-	auto dataProvider = CreateDataProvider(myContext, relation, person, NULL);
-	AddDataProvider(myContext, dataProvider, NULL);
+	auto trace = AbstractTrace::CreatePrintingTrace();
+	auto relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform, *trace);
+	auto person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform, *trace);
+	auto dataProvider = CreateDataProvider(myContext, relation, person, *trace);
+	AddDataProvider(myContext, dataProvider, *trace);
 }
 void
 AddData::PrintHelp() {

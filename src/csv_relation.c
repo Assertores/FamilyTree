@@ -22,12 +22,12 @@ typedef struct {
 } CsvRelation;
 
 IRelationals*
-CsvRelation_Copy(IRelationals* aThis) {
+CsvRelation_Copy(IRelationals* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 size_t
-CsvRelation_GetAllIdsCount(IRelationals* aThis) {
+CsvRelation_GetAllIdsCount(IRelationals* aThis, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
 	size_t count = 0;
@@ -72,7 +72,7 @@ CsvRelation_GetAllIdsCount(IRelationals* aThis) {
 }
 
 void
-CsvRelation_GetAllIds(IRelationals* aThis, PersonId* aOutId) {
+CsvRelation_GetAllIds(IRelationals* aThis, PersonId* aOutId, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
 	size_t count = 0;
@@ -110,7 +110,7 @@ CsvRelation_GetAllIds(IRelationals* aThis, PersonId* aOutId) {
 }
 
 size_t
-CsvRelation_GetAllRelationsOfIdCount(IRelationals* aThis, PersonId aId) {
+CsvRelation_GetAllRelationsOfIdCount(IRelationals* aThis, PersonId aId, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
 	size_t count = 0;
@@ -123,7 +123,8 @@ CsvRelation_GetAllRelationsOfIdCount(IRelationals* aThis, PersonId aId) {
 }
 
 void
-CsvRelation_GetAllRelationsOfId(IRelationals* aThis, PersonId aId, Relation* aOutRelation) {
+CsvRelation_GetAllRelationsOfId(
+	IRelationals* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
 	size_t count = 0;
@@ -136,7 +137,7 @@ CsvRelation_GetAllRelationsOfId(IRelationals* aThis, PersonId aId, Relation* aOu
 }
 
 RelationType
-CsvRelation_GetRelationType(IRelationals* aThis, Relation aRelation) {
+CsvRelation_GetRelationType(IRelationals* aThis, Relation aRelation, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
 	for (size_t i = 0; i < self->myRelationCount; i++) {
@@ -152,11 +153,11 @@ CsvRelation_GetRelationType(IRelationals* aThis, Relation aRelation) {
 }
 
 void
-CsvRelation_Free(IRelationals* aThis) {
+CsvRelation_Free(IRelationals* aThis, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
 
-	self->myPlatform->FreeString(self->myPlatform, self->myFile);
-	self->myPlatform->Free(self->myPlatform);
+	self->myPlatform->FreeString(self->myPlatform, self->myFile, aTrace);
+	self->myPlatform->Free(self->myPlatform, aTrace);
 
 	free(self->myPath);
 	free(self->myRelations);
@@ -196,11 +197,11 @@ Explode(char* aSrc, char aDelimiter, char*** aOutArray) {
 }
 
 void
-ResetRelations(CsvRelation* self) {
+ResetRelations(CsvRelation* self, ITrace* aTrace) {
 	if (self->myFile != NULL) {
-		self->myPlatform->FreeString(self->myPlatform, self->myFile);
+		self->myPlatform->FreeString(self->myPlatform, self->myFile, aTrace);
 	}
-	self->myFile = self->myPlatform->ReadFile(self->myPlatform, self->myPath);
+	self->myFile = self->myPlatform->ReadFile(self->myPlatform, self->myPath, aTrace);
 	self->myRelationCount = 0;
 
 	char** lines = NULL;
@@ -250,7 +251,7 @@ ResetRelations(CsvRelation* self) {
 }
 
 IRelationals*
-CreateCSVRelation(const char* aPath, IPlatform* aPlatform) {
+CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	CsvRelation* result = calloc(1, sizeof(CsvRelation));
 
 	result->interface.Copy = CsvRelation_Copy;
@@ -270,7 +271,7 @@ CreateCSVRelation(const char* aPath, IPlatform* aPlatform) {
 
 	result->myPlatform = aPlatform;
 
-	ResetRelations(result);
+	ResetRelations(result, aTrace);
 
 	return &result->interface;
 }

@@ -21,9 +21,10 @@ operator<<(std::basic_ostream<char, T>& aOstr, const Relation& aVal) {
 bool
 CSVRelationsCanHandleEmptyFile() {
 	AbstractPlatform platform{};
-	AutoFree rel = CreateCSVRelation("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	auto size = rel->GetAllIdsCount(rel);
+	auto size = rel->GetAllIdsCount(rel, trace);
 
 	CHECK(size, 0);
 	return true;
@@ -32,9 +33,10 @@ CSVRelationsCanHandleEmptyFile() {
 bool
 CSVRelationsCanComputeCountOfAllUniqueIds() {
 	CsvPlatform platform{};
-	AutoFree rel = CreateCSVRelation("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	auto size = rel->GetAllIdsCount(rel);
+	auto size = rel->GetAllIdsCount(rel, trace);
 
 	CHECK(size, 5);
 	return true;
@@ -43,10 +45,11 @@ CSVRelationsCanComputeCountOfAllUniqueIds() {
 bool
 CSVRelationsCanComputeAllUniqueIds() {
 	CsvPlatform platform{};
-	AutoFree rel = CreateCSVRelation("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	PersonId ids[5];
-	rel->GetAllIds(rel, ids);
+	rel->GetAllIds(rel, ids, trace);
 
 	CHECK(ids[0], 5, 32, 13, 8, 9);
 	CHECK(ids[1], 5, 32, 13, 8, 9);
@@ -64,9 +67,10 @@ CSVRelationsCanComputeAllUniqueIds() {
 bool
 CSVRelationsCanComputeRelationsCount() {
 	CsvPlatform platform{};
-	AutoFree rel = CreateCSVRelation("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	auto size = rel->GetAllRelationsOfIdCount(rel, 13);
+	auto size = rel->GetAllRelationsOfIdCount(rel, 13, trace);
 
 	CHECK(size, 2);
 	return true;
@@ -75,10 +79,11 @@ CSVRelationsCanComputeRelationsCount() {
 bool
 CSVRelationsCanComputeRelationsOfPerson() {
 	CsvPlatform platform{};
-	AutoFree rel = CreateCSVRelation("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	Relation relations[2];
-	rel->GetAllRelationsOfId(rel, 13, relations);
+	rel->GetAllRelationsOfId(rel, 13, relations, trace);
 
 	CHECK(13, relations[0].id1, relations[0].id2);
 	CHECK(13, relations[1].id1, relations[1].id2);

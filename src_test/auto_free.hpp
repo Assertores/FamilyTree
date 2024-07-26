@@ -9,7 +9,7 @@ class AutoFree {
 public:
 	AutoFree(T* aBacking)
 		: myBacking(aBacking) {}
-	~AutoFree() { myBacking->Free(myBacking); }
+	~AutoFree() { myBacking->Free(myBacking, CreateNoOpTrace()); }
 
 	operator T*() { return myBacking; }
 	T* operator->() { return myBacking; }

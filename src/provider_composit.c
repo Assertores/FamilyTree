@@ -21,12 +21,12 @@ struct ProviderComposit {
 };
 
 IDataProvider*
-ProviderComposit_Copy(IDataProvider* aThis) {
+ProviderComposit_Copy(IDataProvider* aThis, ITrace* aTrace) {
 	return aThis;
 }
 
 Person
-ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId) {
+ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -35,7 +35,7 @@ ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId) {
 		}
 
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
-		Person result = provider->GetPerson(provider, self->myTranslations[i].internalId);
+		Person result = provider->GetPerson(provider, self->myTranslations[i].internalId, aTrace);
 		result.id = self->myTranslations[i].externalId;
 		return result;
 	}
@@ -45,7 +45,7 @@ ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId) {
 }
 
 void
-ProviderComposit_PlayPerson(IDataProvider* aThis, PersonId aId) {
+ProviderComposit_PlayPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -54,13 +54,13 @@ ProviderComposit_PlayPerson(IDataProvider* aThis, PersonId aId) {
 		}
 
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
-		provider->PlayPerson(provider, self->myTranslations[i].internalId);
+		provider->PlayPerson(provider, self->myTranslations[i].internalId, aTrace);
 		return;
 	}
 }
 
 void
-ProviderComposit_ShowImages(IDataProvider* aThis, PersonId aId) {
+ProviderComposit_ShowImages(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -69,20 +69,20 @@ ProviderComposit_ShowImages(IDataProvider* aThis, PersonId aId) {
 		}
 
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
-		provider->ShowImages(provider, self->myTranslations[i].internalId);
+		provider->ShowImages(provider, self->myTranslations[i].internalId, aTrace);
 		return;
 	}
 }
 
 size_t
-ProviderComposit_GetAllIdsCount(IDataProvider* aThis) {
+ProviderComposit_GetAllIdsCount(IDataProvider* aThis, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	return self->myTranslationSize;
 }
 
 void
-ProviderComposit_GetAllIds(IDataProvider* aThis, PersonId* aOutId) {
+ProviderComposit_GetAllIds(IDataProvider* aThis, PersonId* aOutId, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -91,7 +91,7 @@ ProviderComposit_GetAllIds(IDataProvider* aThis, PersonId* aOutId) {
 }
 
 size_t
-ProviderComposit_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId) {
+ProviderComposit_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myTranslationSize; i++) {
@@ -100,13 +100,17 @@ ProviderComposit_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId) {
 		}
 
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
-		return provider->GetAllRelationsOfIdCount(provider, self->myTranslations[i].internalId);
+		return provider->GetAllRelationsOfIdCount(
+			provider,
+			self->myTranslations[i].internalId,
+			aTrace);
 	}
 	return 0;
 }
 
 void
-ProviderComposit_GetAllRelationsOfId(IDataProvider* aThis, PersonId aId, Relation* aOutRelation) {
+ProviderComposit_GetAllRelationsOfId(
+	IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	IDataProvider* provider = NULL;
@@ -117,8 +121,15 @@ ProviderComposit_GetAllRelationsOfId(IDataProvider* aThis, PersonId aId, Relatio
 		}
 
 		provider = self->myTranslations[i].dataProvider;
-		count = provider->GetAllRelationsOfIdCount(provider, self->myTranslations[i].internalId);
-		provider->GetAllRelationsOfId(provider, self->myTranslations[i].internalId, aOutRelation);
+		count = provider->GetAllRelationsOfIdCount(
+			provider,
+			self->myTranslations[i].internalId,
+			aTrace);
+		provider->GetAllRelationsOfId(
+			provider,
+			self->myTranslations[i].internalId,
+			aOutRelation,
+			aTrace);
 		break;
 	}
 
@@ -142,7 +153,7 @@ ProviderComposit_GetAllRelationsOfId(IDataProvider* aThis, PersonId aId, Relatio
 }
 
 RelationType
-ProviderComposit_GetRelationType(IDataProvider* aThis, Relation aRelation) {
+ProviderComposit_GetRelationType(IDataProvider* aThis, Relation aRelation, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	IDataProvider* dataProvider = NULL;
@@ -171,15 +182,15 @@ ProviderComposit_GetRelationType(IDataProvider* aThis, Relation aRelation) {
 		return RelationType_Unrestricted;
 	}
 
-	return dataProvider->GetRelationType(dataProvider, aRelation);
+	return dataProvider->GetRelationType(dataProvider, aRelation, aTrace);
 }
 
 void
-ProviderComposit_Free(IDataProvider* aThis) {
+ProviderComposit_Free(IDataProvider* aThis, ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	for (size_t i = 0; i < self->myDataProviderSize; i++) {
-		self->myDataProviders[i]->Free(self->myDataProviders[i]);
+		self->myDataProviders[i]->Free(self->myDataProviders[i], aTrace);
 	}
 
 	free(self->myDataProviders);
@@ -188,7 +199,7 @@ ProviderComposit_Free(IDataProvider* aThis) {
 }
 
 ProviderComposit*
-CreateProviderComposit() {
+CreateProviderComposit(ITrace* aTrace) {
 	ProviderComposit* result = calloc(1, sizeof(ProviderComposit));
 
 	result->interface.Copy = ProviderComposit_Copy;
@@ -206,7 +217,7 @@ CreateProviderComposit() {
 }
 
 void
-AddDataProviderToArray(ProviderComposit* self, IDataProvider* aProvider) {
+AddDataProviderToArray(ProviderComposit* self, IDataProvider* aProvider, ITrace* aTrace) {
 	IDataProvider** newArray =
 		realloc(self->myDataProviders, sizeof(IRelationals*) * (self->myDataProviderSize + 1));
 	if (newArray == NULL) {
@@ -219,8 +230,8 @@ AddDataProviderToArray(ProviderComposit* self, IDataProvider* aProvider) {
 }
 
 void
-ExtendTranslationTable(ProviderComposit* self, IDataProvider* aProvider) {
-	size_t internalIdSize = aProvider->GetAllIdsCount(aProvider);
+ExtendTranslationTable(ProviderComposit* self, IDataProvider* aProvider, ITrace* aTrace) {
+	size_t internalIdSize = aProvider->GetAllIdsCount(aProvider, aTrace);
 
 	IdTranslation* newArray = realloc(
 		self->myTranslations,
@@ -230,7 +241,7 @@ ExtendTranslationTable(ProviderComposit* self, IDataProvider* aProvider) {
 	}
 
 	PersonId* internalIds = calloc(internalIdSize, sizeof(PersonId));
-	aProvider->GetAllIds(aProvider, internalIds);
+	aProvider->GetAllIds(aProvider, internalIds, aTrace);
 	for (size_t i = 0; i < internalIdSize; i++) {
 		newArray[self->myTranslationSize + i].dataProvider = aProvider;
 		newArray[self->myTranslationSize + i].internalId = internalIds[i];
@@ -245,9 +256,10 @@ ExtendTranslationTable(ProviderComposit* self, IDataProvider* aProvider) {
 }
 
 void
-ProviderComposit_AddDataProvider(ProviderComposit* aThis, IDataProvider* aProvider) {
-	AddDataProviderToArray(aThis, aProvider);
-	ExtendTranslationTable(aThis, aProvider);
+ProviderComposit_AddDataProvider(
+	ProviderComposit* aThis, IDataProvider* aProvider, ITrace* aTrace) {
+	AddDataProviderToArray(aThis, aProvider, aTrace);
+	ExtendTranslationTable(aThis, aProvider, aTrace);
 }
 
 IDataProvider*

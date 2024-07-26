@@ -10,9 +10,10 @@
 bool
 JSONPersonIsZeroIfNoFoldersExist() {
 	AbstractPlatform platform{};
-	AutoFree person = CreateJSONPerson("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree person = CreateJSONPerson("", platform, trace);
 
-	auto size = person->GetAllIdsCount(person);
+	auto size = person->GetAllIdsCount(person, trace);
 
 	CHECK(size, 0);
 	return true;
@@ -21,9 +22,10 @@ JSONPersonIsZeroIfNoFoldersExist() {
 bool
 JSONPersonIsAmountOfFolders() {
 	MockPlatform platform{};
-	AutoFree person = CreateJSONPerson("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree person = CreateJSONPerson("", platform, trace);
 
-	auto size = person->GetAllIdsCount(person);
+	auto size = person->GetAllIdsCount(person, trace);
 
 	CHECK(size, 2);
 	return true;
@@ -32,10 +34,11 @@ JSONPersonIsAmountOfFolders() {
 bool
 CanRetreavePersonIds() {
 	MockPlatform platform{};
-	AutoFree person = CreateJSONPerson("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	PersonId ids[2];
-	person->GetAllIds(person, ids);
+	person->GetAllIds(person, ids, trace);
 
 	CHECK(ids[0], 5);
 	CHECK(ids[1], 32);
@@ -45,9 +48,10 @@ CanRetreavePersonIds() {
 bool
 PersonDataCanBeRetreaved() {
 	MockPlatform platform{};
-	AutoFree person = CreateJSONPerson("", platform);
+	auto trace = CreateNoOpTrace();
+	AutoFree person = CreateJSONPerson("", platform, trace);
 
-	Person result = person->GetPerson(person, 5);
+	Person result = person->GetPerson(person, 5, trace);
 
 	CHECK(result.title, "Prof. Dr.");
 	CHECK(result.firstNameCount, 3);
@@ -71,11 +75,12 @@ PersonDataCanBeRetreaved() {
 bool
 PlayMusicTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
+	auto trace = CreateNoOpTrace();
 	int AudioLoadedCount = 0;
 	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { AudioLoadedCount++; };
 
-	AutoFree person = CreateJSONPerson("", platform);
-	person->PlayPerson(person, 5);
+	AutoFree person = CreateJSONPerson("", platform, trace);
+	person->PlayPerson(person, 5, trace);
 
 	return !platform.myUnexpectedAudio && AudioLoadedCount == 1;
 }
@@ -83,13 +88,14 @@ PlayMusicTriggersCorrectPathOnPlatform() {
 bool
 OpenImageTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
+	auto trace = CreateNoOpTrace();
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;
 	platform.myImageDeprecates["/abc/Trohnsaal.png"] = [&]() { firstImageLoadedCount++; };
 	platform.myImageDeprecates["/abc/Bauhaus.png"] = [&]() { secondImageLoadedCount++; };
 
-	AutoFree person = CreateJSONPerson("", platform);
-	person->ShowImages(person, 5);
+	AutoFree person = CreateJSONPerson("", platform, trace);
+	person->ShowImages(person, 5, trace);
 
 	return !platform.myUnexpectedImage && firstImageLoadedCount == 1 && secondImageLoadedCount == 1;
 }
