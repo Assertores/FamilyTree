@@ -404,8 +404,11 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 
 IPersonals*
 CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Construct JSON Persons");
+	trace->AddEvent(trace, "Allocate memory");
 	JsonPerson* result = calloc(1, sizeof(JsonPerson));
 
+	trace->AddEvent(trace, "Set Dispatch Table");
 	result->interface.Copy = JsonPerson_Copy;
 	result->interface.GetAllIdsCount = JsonPerson_GetAllIdsCount;
 	result->interface.GetAllIds = JsonPerson_GetAllIds;
@@ -414,7 +417,7 @@ CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	result->interface.ShowImages = JsonPerson_ShowImages;
 	result->interface.Free = JsonPerson_Free;
 
-	// NOTE: copy string to get in controle of livetime.
+	trace->AddEvent(trace, "Copy string to get in controle of livetime");
 	size_t length = strlen(aPath);
 	char* path = malloc(length + 1);
 	strcpy_s(path, length + 1, aPath);
@@ -422,8 +425,8 @@ CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 
 	result->myPlatform = aPlatform;
 
-	ResetFolders(result, aTrace);
-	ResetIds(result, aTrace);
+	ResetFolders(result, trace);
+	ResetIds(result, trace);
 
 	return &result->interface;
 }

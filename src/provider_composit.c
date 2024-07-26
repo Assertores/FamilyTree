@@ -200,8 +200,11 @@ ProviderComposit_Free(IDataProvider* aThis, ITrace* aTrace) {
 
 ProviderComposit*
 CreateProviderComposit(ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Construct Provider Composit");
+	trace->AddEvent(trace, "Allocate memory");
 	ProviderComposit* result = calloc(1, sizeof(ProviderComposit));
 
+	trace->AddEvent(trace, "Set Dispatch Table");
 	result->interface.Copy = ProviderComposit_Copy;
 	result->interface.GetPerson = ProviderComposit_GetPerson;
 	result->interface.PlayPerson = ProviderComposit_PlayPerson;

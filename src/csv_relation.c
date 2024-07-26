@@ -2,6 +2,7 @@
 #include "patch.h"
 
 #include <ctype.h>
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -29,6 +30,8 @@ CsvRelation_Copy(IRelationals* aThis, ITrace* aTrace) {
 size_t
 CsvRelation_GetAllIdsCount(IRelationals* aThis, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Count Unique Ids from CSV relations");
+	char string[126];
 
 	size_t count = 0;
 	PersonId* set = NULL;
@@ -50,23 +53,33 @@ CsvRelation_GetAllIdsCount(IRelationals* aThis, ITrace* aTrace) {
 			continue;
 		}
 		if (self->myRelations[i].relation.id1 == self->myRelations[i].relation.id2) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id1);
+			trace->AddEvent(trace, string);
 			set = realloc(set, sizeof(PersonId) * (count + 1));
 			set[count - 1] = self->myRelations[i].relation.id1;
 			count++;
 		}
 		set = realloc(set, sizeof(PersonId) * (count + (found1 || found2 ? 1 : 2)));
 		if (!found1) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id1);
+			trace->AddEvent(trace, string);
 			set[count] = self->myRelations[i].relation.id1;
 			count++;
 		}
 		if (!found2) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id2);
+			trace->AddEvent(trace, string);
 			set[count] = self->myRelations[i].relation.id2;
 			count++;
 		}
 	}
 	if (count == 0) {
+		trace->Free(trace);
 		return 0;
 	}
+
+	trace->AddEvent(trace, "Free Memory of Helping structure");
+	trace->Free(trace);
 	free(set);
 	return count;
 }
@@ -74,6 +87,8 @@ CsvRelation_GetAllIdsCount(IRelationals* aThis, ITrace* aTrace) {
 void
 CsvRelation_GetAllIds(IRelationals* aThis, PersonId* aOutId, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Retrieve Unique Ids from CSV relations");
+	char string[126];
 
 	size_t count = 0;
 	for (size_t i = 0; i < self->myRelationCount; i++) {
@@ -94,24 +109,34 @@ CsvRelation_GetAllIds(IRelationals* aThis, PersonId* aOutId, ITrace* aTrace) {
 			continue;
 		}
 		if (self->myRelations[i].relation.id1 == self->myRelations[i].relation.id2) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id1);
+			trace->AddEvent(trace, string);
 			aOutId[count] = self->myRelations[i].relation.id1;
 			count++;
 			continue;
 		}
 		if (!found1) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id1);
+			trace->AddEvent(trace, string);
 			aOutId[count] = self->myRelations[i].relation.id1;
 			count++;
 		}
 		if (!found2) {
+			sprintf(string, "Found new id: %zu", self->myRelations[i].relation.id2);
+			trace->AddEvent(trace, string);
 			aOutId[count] = self->myRelations[i].relation.id2;
 			count++;
 		}
 	}
+	trace->Free(trace);
 }
 
 size_t
 CsvRelation_GetAllRelationsOfIdCount(IRelationals* aThis, PersonId aId, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
+	char string[126];
+	sprintf(string, "Count relations for person: %zu", aId);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, string);
 
 	size_t count = 0;
 	for (size_t i = 0; i < self->myRelationCount; i++) {
@@ -119,6 +144,9 @@ CsvRelation_GetAllRelationsOfIdCount(IRelationals* aThis, PersonId aId, ITrace* 
 			count++;
 		}
 	}
+	sprintf(string, "Found %zu relations", count);
+	trace->AddEvent(trace, string);
+	trace->Free(trace);
 	return count;
 }
 
@@ -126,14 +154,19 @@ void
 CsvRelation_GetAllRelationsOfId(
 	IRelationals* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
 	CsvRelation* self = (CsvRelation*)aThis;
+	char string[126];
+	sprintf(string, "Retrieve relations for person: %zu", aId);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, string);
 
 	size_t count = 0;
 	for (size_t i = 0; i < self->myRelationCount; i++) {
 		if (self->myRelations[i].relation.id1 == aId || self->myRelations[i].relation.id2 == aId) {
+			trace->AddEvent(trace, "Found another one");
 			aOutRelation[count] = self->myRelations[i].relation;
 			count++;
 		}
 	}
+	trace->Free(trace);
 }
 
 RelationType
@@ -149,6 +182,7 @@ CsvRelation_GetRelationType(IRelationals* aThis, Relation aRelation, ITrace* aTr
 		}
 		return self->myRelations[i].functionalType;
 	}
+	aTrace->AddEvent(aTrace, "Provided relation is unrecogniced");
 	return RelationType_Unrestricted;
 }
 
@@ -198,12 +232,16 @@ Explode(char* aSrc, char aDelimiter, char*** aOutArray) {
 
 void
 ResetRelations(CsvRelation* self, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Reset Relations");
+
 	if (self->myFile != NULL) {
-		self->myPlatform->FreeString(self->myPlatform, self->myFile, aTrace);
+		trace->AddEvent(trace, "Freeing old file");
+		self->myPlatform->FreeString(self->myPlatform, self->myFile, trace);
 	}
-	self->myFile = self->myPlatform->ReadFile(self->myPlatform, self->myPath, aTrace);
+	self->myFile = self->myPlatform->ReadFile(self->myPlatform, self->myPath, trace);
 	self->myRelationCount = 0;
 
+	trace->AddEvent(trace, "Split file into lines");
 	char** lines = NULL;
 	size_t lineCount = Explode(self->myFile, '\n', &lines);
 
@@ -214,14 +252,22 @@ ResetRelations(CsvRelation* self, ITrace* aTrace) {
 		char** cells = NULL;
 		size_t count = Explode(lines[i], ',', &cells);
 
-		// NOTE: change this once a proper format is found
 		if (count < 3) {
+			char string[2048];
+			sprintf(
+				string,
+				"csv file %s has only %zu elements in line %zu, minimum elements is 3",
+				self->myPath,
+				count,
+				i);
+			trace->Fail(trace, string);
+			trace->Free(trace);
+
 			free(lines);
 			free(cells);
 			return;
 		}
 
-		// NOTE: change this once a proper format is found
 		self->myRelations[i - 1].relation.id1 = atoi(cells[0]);
 		self->myRelations[i - 1].relation.id2 = atoi(cells[1]);
 		self->myRelations[i - 1].functionalType = RelationType_Unrestricted;
@@ -247,13 +293,21 @@ ResetRelations(CsvRelation* self, ITrace* aTrace) {
 	}
 	self->myRelationCount = lineCount - 1;
 
+	char string[126];
+	sprintf(string, "Tracking %zu relations", self->myRelationCount);
+	trace->AddEvent(trace, string);
+
 	free(lines);
+	trace->Free(trace);
 }
 
 IRelationals*
 CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Construct CSV Relation");
+	trace->AddEvent(trace, "Allocate memory");
 	CsvRelation* result = calloc(1, sizeof(CsvRelation));
 
+	trace->AddEvent(trace, "Set Dispatch Table");
 	result->interface.Copy = CsvRelation_Copy;
 	result->interface.GetAllIdsCount = CsvRelation_GetAllIdsCount;
 	result->interface.GetAllIds = CsvRelation_GetAllIds;
@@ -262,7 +316,7 @@ CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	result->interface.GetRelationType = CsvRelation_GetRelationType;
 	result->interface.Free = CsvRelation_Free;
 
-	// NOTE: copy string to get in controle of livetime.
+	trace->AddEvent(trace, "Copy string to get in controle of livetime");
 	size_t length = strlen(aPath);
 	char* path = malloc(length + 15);
 	strcpy_s(path, length + 1, aPath);
@@ -271,7 +325,7 @@ CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 
 	result->myPlatform = aPlatform;
 
-	ResetRelations(result, aTrace);
+	ResetRelations(result, trace);
 
 	return &result->interface;
 }

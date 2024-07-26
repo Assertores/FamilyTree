@@ -30,7 +30,7 @@ typedef struct {
 IDataProvider*
 SharedDataProvider_Copy(IDataProvider* aThis, ITrace* aTrace) {
 	SharedDataProvider* self = (SharedDataProvider*)aThis;
-	aTrace->AddEvent(aTrace, "Intersept Copy and refcount instead");
+	aTrace->AddEvent(aTrace, "Intersept Copy of IDataProvider and refcount instead");
 	self->myCount++;
 	return aThis;
 }
@@ -89,7 +89,7 @@ SharedDataProvider_Free(IDataProvider* aThis, ITrace* aTrace) {
 	SharedDataProvider* self = (SharedDataProvider*)aThis;
 	self->myCount--;
 	if (self->myCount > 0) {
-		aTrace->AddEvent(aTrace, "Intersept Free because other references still exist");
+		aTrace->AddEvent(aTrace, "Intersept Free of IDataProvider because other references still exist");
 		return;
 	}
 	self->myOriginal->Free(self->myOriginal, aTrace);
@@ -117,14 +117,14 @@ CreateSharedDataProviderDecorator(IDataProvider* aElement, ITrace* aTrace) {
 	result->myCount = 1;
 	result->myOriginal = aElement;
 
-	aTrace->AddEvent(aTrace, "start refcount for IDataProvider");
+	aTrace->AddEvent(aTrace, "Start refcount for IDataProvider");
 	return &result->interface;
 }
 
 IRelationals*
 SharedRelationals_Copy(IRelationals* aThis, ITrace* aTrace) {
 	SharedRelationals* self = (SharedRelationals*)aThis;
-	aTrace->AddEvent(aTrace, "Intersept Copy and refcount instead");
+	aTrace->AddEvent(aTrace, "Intersept Copy of IRelationals and refcount instead");
 	self->myCount++;
 	return aThis;
 }
@@ -165,7 +165,7 @@ SharedRelationals_Free(IRelationals* aThis, ITrace* aTrace) {
 	SharedRelationals* self = (SharedRelationals*)aThis;
 	self->myCount--;
 	if (self->myCount > 0) {
-		aTrace->AddEvent(aTrace, "Intersept Free because other references still exist");
+		aTrace->AddEvent(aTrace, "Intersept Free of IRelationals because other references still exist");
 		return;
 	}
 	self->myOriginal->Free(self->myOriginal, aTrace);
@@ -190,14 +190,14 @@ CreateSharedRelationalsDecorator(IRelationals* aElement, ITrace* aTrace) {
 	result->myCount = 1;
 	result->myOriginal = aElement;
 
-	aTrace->AddEvent(aTrace, "start refcount for IRelationals");
+	aTrace->AddEvent(aTrace, "Start refcount for IRelationals");
 	return &result->interface;
 }
 
 IPersonals*
 SharedPersonals_Copy(IPersonals* aThis, ITrace* aTrace) {
 	SharedPersonals* self = (SharedPersonals*)aThis;
-	aTrace->AddEvent(aTrace, "Intersept Copy and refcount instead");
+	aTrace->AddEvent(aTrace, "Intersept Copy of IPersonals and refcount instead");
 	self->myCount++;
 	return aThis;
 }
@@ -236,7 +236,7 @@ SharedPersonals_Free(IPersonals* aThis, ITrace* aTrace) {
 	SharedPersonals* self = (SharedPersonals*)aThis;
 	self->myCount--;
 	if (self->myCount > 0) {
-		aTrace->AddEvent(aTrace, "Intersept Free because other references still exist");
+		aTrace->AddEvent(aTrace, "Intersept Free of IPersonals because other references still exist");
 		return;
 	}
 	self->myOriginal->Free(self->myOriginal, aTrace);
@@ -261,14 +261,14 @@ CreateSharedPersonalsDecorator(IPersonals* aElement, ITrace* aTrace) {
 	result->myCount = 1;
 	result->myOriginal = aElement;
 
-	aTrace->AddEvent(aTrace, "start refcount for IPersonals");
+	aTrace->AddEvent(aTrace, "Start refcount for IPersonals");
 	return &result->interface;
 }
 
 IPlatform*
 SharedPlatform_Copy(IPlatform* aThis, ITrace* aTrace) {
 	SharedPlatform* self = (SharedPlatform*)aThis;
-	aTrace->AddEvent(aTrace, "Intersept Copy and refcount instead");
+	aTrace->AddEvent(aTrace, "Intersept Copy of IPlatform and refcount instead");
 	self->myCount++;
 	return aThis;
 }
@@ -308,7 +308,7 @@ SharedPlatform_Free(IPlatform* aThis, ITrace* aTrace) {
 	SharedPlatform* self = (SharedPlatform*)aThis;
 	self->myCount--;
 	if (self->myCount > 0) {
-		aTrace->AddEvent(aTrace, "Intersept Free because other references still exist");
+		aTrace->AddEvent(aTrace, "Intersept Free of IPlatform because other references still exist");
 		return;
 	}
 	self->myOriginal->Free(self->myOriginal, aTrace);
@@ -333,6 +333,6 @@ CreateSharedPlatformDecorator(IPlatform* aElement, ITrace* aTrace) {
 	result->myCount = 1;
 	result->myOriginal = aElement;
 
-	aTrace->AddEvent(aTrace, "start refcount for IPlatform");
+	aTrace->AddEvent(aTrace, "Start refcount for IPlatform");
 	return &result->interface;
 }

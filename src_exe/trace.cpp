@@ -49,7 +49,9 @@ public:
 		return new PrintingTrace(myIndent);
 	}
 
-	void AddEvent(std::string_view aEvent) override { std::cout << myIndent << aEvent << '\n'; }
+	void AddEvent(std::string_view aEvent) override {
+		std::cout << myIndent << "Event: " << aEvent << '\n';
+	}
 
 	void Succeed() override { std::cout << myIndent << "SUCCESS" << '\n'; }
 

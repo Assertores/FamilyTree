@@ -124,8 +124,11 @@ ForwardingProvider_Free(IDataProvider* aThis, ITrace* aTrace) {
 
 IDataProvider*
 CreateForwardingProvider(IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Construct Forwardigng Data Provider");
+	trace->AddEvent(trace, "Allocate memory");
 	ForwardingProvider* result = calloc(1, sizeof(ForwardingProvider));
 
+	trace->AddEvent(trace, "Set Dispatch Table");
 	result->interface.Copy = ForwardingProvider_Copy;
 	result->interface.GetPerson = ForwardingProvider_GetPerson;
 	result->interface.PlayPerson = ForwardingProvider_PlayPerson;

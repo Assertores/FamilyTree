@@ -155,7 +155,7 @@ CreateCSVAndJSONWithIO(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) 
 	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
 		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
 		IsNoOpTrace = 1;
-		aTrace = CreateNoOpTrace(aTrace);
+		aTrace = CreateNoOpTrace();
 	}
 
 	ITrace* subtrace;
