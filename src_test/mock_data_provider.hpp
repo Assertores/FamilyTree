@@ -6,15 +6,16 @@
 #include <vector>
 
 class AbstractDataProvider;
-struct C_DataProvider {
-	IDataProvider myInterface;
-	AbstractDataProvider* myThis;
+struct CDataProvider {
+	IDataProvider myInterface{};
+	AbstractDataProvider* myThis{};
 };
 
 class AbstractDataProvider {
 public:
 	AbstractDataProvider();
-	operator IDataProvider*();
+	operator IDataProvider*(); // NOLINT(hicpp-explicit-conversions) to seamlessly interact with c
+							   // API
 	virtual ~AbstractDataProvider() = default;
 
 	virtual Person GetPerson(PersonId aId) { return {}; }
@@ -27,7 +28,7 @@ public:
 	virtual RelationType GetRelationType(Relation aRelation) { return RelationType_Unrestricted; }
 
 private:
-	C_DataProvider myInterface;
+	CDataProvider myInterface;
 };
 
 class MockDataProvider : public AbstractDataProvider {

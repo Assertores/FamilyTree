@@ -6,6 +6,8 @@
 
 #include <internal_types.h>
 
+#include <array>
+
 bool
 Equal(const Relation& aLhs, const Relation& aRhs) {
 	return (aLhs.id1 == aRhs.id1 && aLhs.id2 == aRhs.id2);
@@ -21,35 +23,36 @@ operator<<(std::basic_ostream<char, T>& aOstr, const Relation& aVal) {
 bool
 CSVRelationsCanHandleEmptyFile() {
 	AbstractPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	auto size = rel->GetAllIdsCount(rel, trace);
 
-	CHECK(size, 0);
+	CHECK(size, 0); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 CSVRelationsCanComputeCountOfAllUniqueIds() {
 	CsvPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	auto size = rel->GetAllIdsCount(rel, trace);
 
-	CHECK(size, 5);
+	CHECK(size, 5); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 CSVRelationsCanComputeAllUniqueIds() {
 	CsvPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	PersonId ids[5];
-	rel->GetAllIds(rel, ids, trace);
+	constexpr auto arraysize = 5;
+	std::array<PersonId, arraysize> ids{};
+	rel->GetAllIds(rel, ids.data(), trace);
 
 	CHECK(ids[0], 5, 32, 13, 8, 9);
 	CHECK(ids[1], 5, 32, 13, 8, 9);
@@ -67,23 +70,23 @@ CSVRelationsCanComputeAllUniqueIds() {
 bool
 CSVRelationsCanComputeRelationsCount() {
 	CsvPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	auto size = rel->GetAllRelationsOfIdCount(rel, 13, trace);
+	auto size = rel->GetAllRelationsOfIdCount(rel, 13, trace); // NOLINT
 
-	CHECK(size, 2);
+	CHECK(size, 2); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 CSVRelationsCanComputeRelationsOfPerson() {
 	CsvPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
-	Relation relations[2];
-	rel->GetAllRelationsOfId(rel, 13, relations, trace);
+	std::array<Relation, 2> relations{};
+	rel->GetAllRelationsOfId(rel, 13, relations.data(), trace); // NOLINT
 
 	CHECK(13, relations[0].id1, relations[0].id2);
 	CHECK(13, relations[1].id1, relations[1].id2);

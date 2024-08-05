@@ -2,13 +2,14 @@
 
 #include <family_tree/types.h>
 
-#include <string_view>
 #include <memory>
+#include <string_view>
+
 
 class AbstractTrace;
-struct C_Trace {
-	ITrace myInterface;
-	AbstractTrace* myThis;
+struct CTrace {
+	ITrace myInterface{};
+	AbstractTrace* myThis{};
 };
 
 class AbstractTrace {
@@ -16,7 +17,7 @@ public:
 	static std::shared_ptr<AbstractTrace> CreatePrintingTrace();
 
 	AbstractTrace();
-	operator ITrace*();
+	operator ITrace*(); // NOLINT(hicpp-explicit-conversions) to seamlessly interact with c API
 	virtual ~AbstractTrace() = default;
 
 	virtual AbstractTrace* CreateSubTrace(std::string_view aSubtraceName) = 0;
@@ -26,5 +27,7 @@ public:
 	virtual void Free() = 0;
 
 private:
-	C_Trace myInterface;
+	CTrace myInterface;
+
+	static int abcd;
 };

@@ -2,30 +2,32 @@
 
 #include <family_tree/types.h>
 
+#include <array>
 #include <functional>
 #include <map>
 #include <string>
 
 class AbstractPlatform;
-struct C_Platform {
-	IPlatform myInterface;
-	AbstractPlatform* myThis;
+struct CPlatform {
+	IPlatform myInterface{};
+	AbstractPlatform* myThis{};
 };
 
 class AbstractPlatform {
 public:
 	AbstractPlatform();
-	operator IPlatform*();
+	operator IPlatform*(); // NOLINT(hicpp-explicit-conversions) to seamlessly interact with c API
 	virtual ~AbstractPlatform() = default;
 
-	virtual char* GetFolders(const char* aPath) { return "\0"; }
-	virtual char* ReadFile(const char* aPath) { return ""; }
+	// TODO: fix default implimentation
+	virtual char* GetFolders(const char* aPath) { return "\0"; } // NOLINT
+	virtual char* ReadFile(const char* aPath) { return ""; }	 // NOLINT
 	virtual void FreeString(char* aString) {}
 	virtual void OpenAudio(const char* aPath) {}
 	virtual void OpenImage(const char* aPath) {}
 
 private:
-	C_Platform myInterface;
+	CPlatform myInterface;
 };
 
 class MockPlatform : public AbstractPlatform {

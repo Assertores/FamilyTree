@@ -8,19 +8,19 @@
 
 bool
 CanRetreavePersonThroughAPI() {
-	AutoFree context = Create(NULL);
+	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
 
 	AddDataProvider(
 		context,
 		CreateDataProvider(
 			context,
-			CreateCSVRelations(context, "", platform, NULL),
-			CreateJSONPersonals(context, "", platform, NULL),
-			NULL),
-		NULL);
+			CreateCSVRelations(context, "", platform, nullptr),
+			CreateJSONPersonals(context, "", platform, nullptr),
+			nullptr),
+		nullptr);
 
-	Person person = GetPerson(context, 0, NULL);
+	Person person = GetPerson(context, 0, nullptr);
 	CHECK(person.title, "Prof. Dr.");
 	CHECK(person.firstNameCount, 3);
 	CHECK(person.firstNames[0], "Philippa");
@@ -42,28 +42,28 @@ CanRetreavePersonThroughAPI() {
 
 bool
 CanPlayMusicThroughAPI() {
-	AutoFree context = Create(NULL);
+	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
-	int AudioLoadedCount = 0;
-	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { AudioLoadedCount++; };
+	int audioLoadedCount = 0;
+	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { audioLoadedCount++; };
 
 	AddDataProvider(
 		context,
 		CreateDataProvider(
 			context,
-			CreateCSVRelations(context, "", platform, NULL),
-			CreateJSONPersonals(context, "", platform, NULL),
-			NULL),
-		NULL);
+			CreateCSVRelations(context, "", platform, nullptr),
+			CreateJSONPersonals(context, "", platform, nullptr),
+			nullptr),
+		nullptr);
 
-	PlayPerson(context, 0, NULL);
+	PlayPerson(context, 0, nullptr);
 
-	return !platform.myUnexpectedAudio && AudioLoadedCount == 1;
+	return !platform.myUnexpectedAudio && audioLoadedCount == 1;
 }
 
 bool
 CanShowImagesThroughAPI() {
-	AutoFree context = Create(NULL);
+	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;
@@ -74,32 +74,33 @@ CanShowImagesThroughAPI() {
 		context,
 		CreateDataProvider(
 			context,
-			CreateCSVRelations(context, "", platform, NULL),
-			CreateJSONPersonals(context, "", platform, NULL),
-			NULL),
-		NULL);
+			CreateCSVRelations(context, "", platform, nullptr),
+			CreateJSONPersonals(context, "", platform, nullptr),
+			nullptr),
+		nullptr);
 
-	ShowImagesOfPerson(context, 0, NULL);
+	ShowImagesOfPerson(context, 0, nullptr);
 
 	return !platform.myUnexpectedImage && firstImageLoadedCount == 1 && secondImageLoadedCount == 1;
 }
 
 bool
 CanRetreaveRelationsOfPerson() {
-	AutoFree context = Create(NULL);
+	AutoFree context = Create(nullptr);
 	CsvPlatform platform{};
 
 	AddDataProvider(
 		context,
 		CreateDataProvider(
 			context,
-			CreateCSVRelations(context, "", platform, NULL),
-			CreateJSONPersonals(context, "", platform, NULL),
-			NULL),
-		NULL);
+			CreateCSVRelations(context, "", platform, nullptr),
+			CreateJSONPersonals(context, "", platform, nullptr),
+			nullptr),
+		nullptr);
 
 	size_t count = 0;
-	auto relations = GetPersonRelations(context, 0, &count, NULL);
+	// NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
+	auto* relations = GetPersonRelations(context, 0, &count, nullptr);
 
 	return true;
 }

@@ -2,29 +2,30 @@
 
 #include <iostream>
 
+// NOLINTBEGIN
 ITrace*
 AbstractTrace_CreateSubTrace(ITrace* aThis, const char* aSubtraceName) {
-	return *((C_Trace*)aThis)->myThis->CreateSubTrace(aSubtraceName);
+	return *((CTrace*)aThis)->myThis->CreateSubTrace(aSubtraceName);
 }
 
 void
 AbstractTrace_AddEvent(ITrace* aThis, const char* aEvent) {
-	((C_Trace*)aThis)->myThis->AddEvent(aEvent);
+	((CTrace*)aThis)->myThis->AddEvent(aEvent);
 }
 
 void
 AbstractTrace_Succeed(ITrace* aThis) {
-	((C_Trace*)aThis)->myThis->Succeed();
+	((CTrace*)aThis)->myThis->Succeed();
 }
 
 void
 AbstractTrace_Fail(ITrace* aThis, const char* aReason) {
-	((C_Trace*)aThis)->myThis->Fail(aReason);
+	((CTrace*)aThis)->myThis->Fail(aReason);
 }
 
 void
 AbstractTrace_Free(ITrace* aThis) {
-	((C_Trace*)aThis)->myThis->Free();
+	((CTrace*)aThis)->myThis->Free();
 }
 
 AbstractTrace::AbstractTrace() {
@@ -35,6 +36,7 @@ AbstractTrace::AbstractTrace() {
 	myInterface.myInterface.Free = AbstractTrace_Free;
 	myInterface.myThis = this;
 }
+// NOLINTEND
 
 AbstractTrace::operator ITrace*() { return &myInterface.myInterface; }
 

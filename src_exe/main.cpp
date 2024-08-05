@@ -10,8 +10,8 @@
 #include <iostream>
 
 int
-main() {
-	auto context = Create(NULL);
+main() { // NOLINT(bugprone-exception-escape)
+	auto* context = Create(nullptr);
 
 	Help help;
 	Exit exit;
@@ -33,7 +33,7 @@ main() {
 
 		size_t nonWhitespaceCharacter = 0;
 		for (size_t i = 0; i < line.size(); i++) {
-			if (!std::isspace(line[i])) {
+			if (std::isspace(line[i]) == 0) {
 				nonWhitespaceCharacter = i;
 				break;
 			}
@@ -43,6 +43,6 @@ main() {
 		quit = ICommand::Execute(command, line);
 	}
 
-	Free(context, NULL);
+	Free(context, nullptr);
 	return 0;
 }

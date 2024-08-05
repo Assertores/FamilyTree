@@ -3,42 +3,44 @@
 #include "mock_platform.hpp"
 
 #include <internal_types.h>
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
+
+#include <array>
+#include <cstdio>
+#include <cstdlib>
+#include <cstring>
 
 bool
 JSONPersonIsZeroIfNoFoldersExist() {
 	AbstractPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	auto size = person->GetAllIdsCount(person, trace);
 
-	CHECK(size, 0);
+	CHECK(size, 0); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 JSONPersonIsAmountOfFolders() {
 	MockPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	auto size = person->GetAllIdsCount(person, trace);
 
-	CHECK(size, 2);
+	CHECK(size, 2); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 CanRetreavePersonIds() {
 	MockPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
-	PersonId ids[2];
-	person->GetAllIds(person, ids, trace);
+	std::array<PersonId, 2> ids{};
+	person->GetAllIds(person, ids.data(), trace);
 
 	CHECK(ids[0], 5);
 	CHECK(ids[1], 32);
@@ -48,10 +50,10 @@ CanRetreavePersonIds() {
 bool
 PersonDataCanBeRetreaved() {
 	MockPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
-	Person result = person->GetPerson(person, 5, trace);
+	Person result = person->GetPerson(person, 5, trace); // NOLINT
 
 	CHECK(result.title, "Prof. Dr.");
 	CHECK(result.firstNameCount, 3);
@@ -75,27 +77,27 @@ PersonDataCanBeRetreaved() {
 bool
 PlayMusicTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
-	auto trace = CreateNoOpTrace();
-	int AudioLoadedCount = 0;
-	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { AudioLoadedCount++; };
+	auto* trace = CreateNoOpTrace();
+	int audioLoadedCount = 0;
+	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { audioLoadedCount++; };
 
 	AutoFree person = CreateJSONPerson("", platform, trace);
-	person->PlayPerson(person, 5, trace);
+	person->PlayPerson(person, 5, trace); // NOLINT
 
-	return !platform.myUnexpectedAudio && AudioLoadedCount == 1;
+	return !platform.myUnexpectedAudio && audioLoadedCount == 1;
 }
 
 bool
 OpenImageTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
-	auto trace = CreateNoOpTrace();
+	auto* trace = CreateNoOpTrace();
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;
 	platform.myImageDeprecates["/abc/Trohnsaal.png"] = [&]() { firstImageLoadedCount++; };
 	platform.myImageDeprecates["/abc/Bauhaus.png"] = [&]() { secondImageLoadedCount++; };
 
 	AutoFree person = CreateJSONPerson("", platform, trace);
-	person->ShowImages(person, 5, trace);
+	person->ShowImages(person, 5, trace); // NOLINT
 
 	return !platform.myUnexpectedImage && firstImageLoadedCount == 1 && secondImageLoadedCount == 1;
 }

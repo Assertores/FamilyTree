@@ -10,23 +10,20 @@
 #include <sstream>
 #include <vector>
 
-std::set<ICommand*> ICommand::myCommands = {};
-bool ICommand::myQuitFlag = false;
-
 ICommand::ICommand() { myCommands.insert(this); }
 ICommand::~ICommand() { myCommands.erase(this); }
 
 bool
 ICommand::Execute(std::string_view aCommand, const std::string& aLine) {
-	for (const auto& it : myCommands) {
-		if (it->IsCommand(aCommand)) {
-			it->ExecuteCommand(aLine);
+	for (const auto& command : myCommands) {
+		if (command->IsCommand(aCommand)) {
+			command->ExecuteCommand(aLine);
 			return myQuitFlag;
 		}
 	}
 	std::cout << "Command not found: " << aCommand << '\n';
-	for (const auto& it : myCommands) {
-		it->PrintHelp();
+	for (const auto& command : myCommands) {
+		command->PrintHelp();
 	}
 	return false;
 }
@@ -38,8 +35,8 @@ Help::IsCommand(std::string_view aCommand) {
 
 void
 Help::ExecuteCommand(const std::string& aLine) {
-	for (const auto& it : myCommands) {
-		it->PrintHelp();
+	for (const auto& command : myCommands) {
+		command->PrintHelp();
 	}
 }
 
@@ -65,7 +62,7 @@ Exit::PrintHelp() {
 
 AddData::AddData(Context* aContext)
 	: myContext(aContext)
-	, myPlatform(CreateDefaultPlatform(aContext, NULL)) {}
+	, myPlatform(CreateDefaultPlatform(aContext, nullptr)) {}
 
 bool
 AddData::IsCommand(std::string_view aCommand) {
@@ -75,9 +72,9 @@ AddData::IsCommand(std::string_view aCommand) {
 void
 AddData::ExecuteCommand(const std::string& aLine) {
 	auto trace = AbstractTrace::CreatePrintingTrace();
-	auto relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform, *trace);
-	auto person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform, *trace);
-	auto dataProvider = CreateDataProvider(myContext, relation, person, *trace);
+	auto* relation = CreateCSVRelations(myContext, aLine.c_str(), myPlatform, *trace);
+	auto* person = CreateJSONPersonals(myContext, aLine.c_str(), myPlatform, *trace);
+	auto* dataProvider = CreateDataProvider(myContext, relation, person, *trace);
 	AddDataProvider(myContext, dataProvider, *trace);
 }
 void
@@ -95,19 +92,19 @@ PrintPerson::IsCommand(std::string_view aCommand) {
 
 void
 PrintPerson::ExecuteCommand(const std::string& aLine) {
-	auto person = GetPerson(myContext, std::stoi(aLine), NULL);
+	auto person = GetPerson(myContext, std::stoi(aLine), nullptr);
 
 	std::cout << "ID: " << person.id << '\n';
 	std::cout << "Name: ";
 	if (person.firstNameCount == 0 && person.lastNameCount == 0) {
 		std::cout << "Unnamed\n";
 	} else {
-		if (!IsDefaultString(myContext, person.title)) {
+		if (IsDefaultString(myContext, person.title) == 0) {
 			std::cout << person.title << ' ';
 		}
 		PrivPrintName(person.firstNameCount, person.firstNames);
 		std::cout << ", ";
-		if (!IsDefaultString(myContext, person.titleOfNobility)) {
+		if (IsDefaultString(myContext, person.titleOfNobility) == 0) {
 			std::cout << person.titleOfNobility << ' ';
 		}
 		PrivPrintName(person.lastNameCount, person.lastNames);
@@ -155,7 +152,7 @@ PlayAudio::IsCommand(std::string_view aCommand) {
 
 void
 PlayAudio::ExecuteCommand(const std::string& aLine) {
-	PlayPerson(myContext, std::stoi(aLine), NULL);
+	PlayPerson(myContext, std::stoi(aLine), nullptr);
 }
 
 void
@@ -174,7 +171,7 @@ ShowImages::IsCommand(std::string_view aCommand) {
 
 void
 ShowImages::ExecuteCommand(const std::string& aLine) {
-	ShowImagesOfPerson(myContext, std::stoi(aLine), NULL);
+	ShowImagesOfPerson(myContext, std::stoi(aLine), nullptr);
 }
 
 void
@@ -198,7 +195,7 @@ SearchPeople::ExecuteCommand(const std::string& aLine) {
 	std::string copy = aLine;
 	size_t begin = 0;
 	for (size_t i = 0; i < copy.size(); i++) {
-		if (std::isspace(copy[i])) {
+		if (std::isspace(copy[i]) != 0) {
 			copy[i] = '\0';
 			begin = i + 1;
 			break;
@@ -207,79 +204,21 @@ SearchPeople::ExecuteCommand(const std::string& aLine) {
 	if (begin == 0) {
 		return;
 	}
-	minMatches = std::stoi(copy.c_str());
+	minMatches = std::stoi(copy);
 
-	Person prototype{};
-	std::vector<const char*> firstNames;
-	std::vector<const char*> lastNames;
-	for (size_t i = begin; i < copy.size(); i++) {
-		if (copy.substr(i).rfind("-t=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.title = copy.c_str() + i + 3;
-			continue;
-		}
-		if (copy.substr(i).rfind("-n=", 0) == 0) {
-			copy[i - 1] = '\0';
-			firstNames.push_back(copy.c_str() + i + 3);
-			continue;
-		}
-		if (copy.substr(i).rfind("-a=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.titleOfNobility = copy.c_str() + i + 3;
-			continue;
-		}
-		if (copy.substr(i).rfind("-l=", 0) == 0) {
-			copy[i - 1] = '\0';
-			lastNames.push_back(copy.c_str() + i + 3);
-			continue;
-		}
-		if (copy.substr(i).rfind("-g=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.gender = copy.c_str() + i + 3;
-			continue;
-		}
-		if (copy.substr(i).rfind("-bd=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.dateOfBirth = copy.c_str() + i + 4;
-			continue;
-		}
-		if (copy.substr(i).rfind("-bp=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.placeOfBirth = copy.c_str() + i + 4;
-			continue;
-		}
-		if (copy.substr(i).rfind("-dd=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.dateOfDeath = copy.c_str() + i + 4;
-			continue;
-		}
-		if (copy.substr(i).rfind("-dp=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.placeOfDeath = copy.c_str() + i + 4;
-			continue;
-		}
-		if (copy.substr(i).rfind("-r=", 0) == 0) {
-			copy[i - 1] = '\0';
-			prototype.remark = copy.c_str() + i + 3;
-			continue;
-		}
-	}
-	prototype.firstNameCount = firstNames.size();
-	prototype.firstNames = firstNames.data();
-	prototype.lastNameCount = lastNames.size();
-	prototype.lastNames = lastNames.data();
+	Person prototype = PrivCreatePrototype(aLine, begin);
 
 	size_t count = 0;
-	auto array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count, NULL);
+	auto* array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count, nullptr);
 	std::vector<Person> matches{array, array + count};
 	bool first = true;
 	std::cout << "ids: ";
-	for (const auto& it : matches) {
+	for (const auto& match : matches) {
 		if (!first) {
 			std::cout << ", ";
 		}
 		first = false;
-		std::cout << it.id << " (" << it.firstNames[0] << ' ' << it.lastNames[0] << ')';
+		std::cout << match.id << " (" << match.firstNames[0] << ' ' << match.lastNames[0] << ')';
 	}
 	std::cout << '\n';
 }
@@ -303,6 +242,70 @@ SearchPeople::PrintHelp() {
 				 "    -r=[remarks]: all people who have this remark.\n";
 }
 
+Person
+SearchPeople::PrivCreatePrototype(std::string aLine, size_t aBegin) {
+	Person prototype{};
+	std::vector<const char*> firstNames;
+	std::vector<const char*> lastNames;
+	for (size_t i = aBegin; i < aLine.size(); i++) {
+		if (aLine.substr(i).rfind("-t=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.title = aLine.c_str() + i + 3;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-n=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			firstNames.push_back(aLine.c_str() + i + 3);
+			continue;
+		}
+		if (aLine.substr(i).rfind("-a=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.titleOfNobility = aLine.c_str() + i + 3;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-l=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			lastNames.push_back(aLine.c_str() + i + 3);
+			continue;
+		}
+		if (aLine.substr(i).rfind("-g=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.gender = aLine.c_str() + i + 3;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-bd=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.dateOfBirth = aLine.c_str() + i + 4;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-bp=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.placeOfBirth = aLine.c_str() + i + 4;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-dd=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.dateOfDeath = aLine.c_str() + i + 4;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-dp=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.placeOfDeath = aLine.c_str() + i + 4;
+			continue;
+		}
+		if (aLine.substr(i).rfind("-r=", 0) == 0) {
+			aLine[i - 1] = '\0';
+			prototype.remark = aLine.c_str() + i + 3;
+			continue;
+		}
+	}
+	prototype.firstNameCount = firstNames.size();
+	prototype.firstNames = firstNames.data();
+	prototype.lastNameCount = lastNames.size();
+	prototype.lastNames = lastNames.data();
+	return prototype;
+}
+
 PeopleRelation::PeopleRelation(Context* aContext)
 	: myContext(aContext) {}
 
@@ -316,14 +319,15 @@ PeopleRelation::ExecuteCommand(const std::string& aLine) {
 	size_t requestedIds = std::stoi(aLine);
 
 	size_t count = 0;
-	auto array = GetPersonRelations(myContext, requestedIds, &count, NULL);
+	auto* array = GetPersonRelations(myContext, requestedIds, &count, nullptr);
 	std::vector<Relation> relations{array, array + count};
-	for (const auto& it : relations) {
-		std::cout << it.id1 << " --";
-		if (!IsDefaultString(myContext, it.relationship)) {
-			std::cout << it.relationship;
+	for (const auto& relation : relations) {
+		std::cout << relation.id1 << " --";
+		if (IsDefaultString(myContext, relation.relationship) == 0) {
+			std::cout << relation.relationship;
 		}
-		std::cout << "-> " << it.id2 << ": (" << it.startDate << ", " << it.endDate << ")\n";
+		std::cout << "-> " << relation.id2 << ": (" << relation.startDate << ", "
+				  << relation.endDate << ")\n";
 	}
 }
 
@@ -351,9 +355,9 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 
 	for (size_t i = 0; i < distance; i++) {
 		std::set<PersonId> newPeopleToShow{};
-		for (const auto& id : peopleToShow) {
+		for (const auto& personId : peopleToShow) {
 			size_t count = 0;
-			auto array = GetPersonRelations(myContext, id, &count, NULL);
+			auto* array = GetPersonRelations(myContext, personId, &count, nullptr);
 			for (size_t j = 0; j < count; j++) {
 				newPeopleToShow.insert(array[j].id1);
 				newPeopleToShow.insert(array[j].id2);
@@ -365,30 +369,30 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 	int firstGeneration = 0;
 	std::list<std::vector<PersonId>> generations;
 
-	for (const auto& id : peopleToShow) {
-		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, id, NULL);
+	for (const auto& personId : peopleToShow) {
+		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, personId, nullptr);
 		while (othersGeneration < firstGeneration) {
-			generations.emplace_front(std::vector<PersonId>{});
+			generations.emplace_front();
 			firstGeneration--;
 		}
 		while (othersGeneration - firstGeneration >= generations.size()) {
-			generations.emplace_back(std::vector<PersonId>{});
+			generations.emplace_back();
 		}
-		auto it = generations.begin();
+		auto iterator = generations.begin();
 		for (size_t i = 0; i < (othersGeneration - firstGeneration); i++) {
-			it++;
+			iterator++;
 		}
-		it->push_back(id);
+		iterator->push_back(personId);
 	}
 
 	for (const auto& generation : generations) {
 		bool first = true;
-		for (const auto& id : generation) {
+		for (const auto& personId : generation) {
 			if (!first) {
 				std::cout << ", ";
 			}
 			first = false;
-			std::cout << id;
+			std::cout << personId;
 		}
 		std::cout << '\n';
 	}

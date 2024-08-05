@@ -9,50 +9,49 @@
 #include <crtdbg.h>
 #endif
 
-#include <stdio.h>
-#include <string.h>
+#include <iostream>
 
 static bool
 Run(const char* aTestName, bool (*aTest)()) {
-	printf("[TEST   ] ===== %s\n", aTestName);
+	std::cout << "[TEST   ] ===== " << aTestName << '\n';
 	auto result = aTest();
-	printf("[%s] ///// %s\n", result ? "SUCCESS" : " FAILED", aTestName);
+	std::cout << "[" << aTestName << "] ///// " << (result ? "SUCCESS" : " FAILED") << '\n';
 	return result;
 }
-#define RUN(aTest) Run(#aTest, &aTest)
+#define RUN(aTest) Run(#aTest, &(aTest))
 
 int
-main(int argc, char** argv) {
+main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	bool result = true;
-	printf("[ SUITE ] JSONPerson\n");
+	std::cout << "[ SUITE ] JSONPerson\n";
 	result &= RUN(JSONPersonIsZeroIfNoFoldersExist);
 	result &= RUN(JSONPersonIsAmountOfFolders);
 	result &= RUN(CanRetreavePersonIds);
 	result &= RUN(PersonDataCanBeRetreaved);
 	result &= RUN(PlayMusicTriggersCorrectPathOnPlatform);
 	result &= RUN(OpenImageTriggersCorrectPathOnPlatform);
-	printf("\n[ SUITE ] API\n");
+	std::cout << "\n[ SUITE ] API\n";
 	result &= RUN(CanRetreavePersonThroughAPI);
 	result &= RUN(CanPlayMusicThroughAPI);
 	result &= RUN(CanShowImagesThroughAPI);
 	result &= RUN(CanRetreaveRelationsOfPerson);
-	printf("\n[ SUITE ] CSVRelations\n");
+	std::cout << "\n[ SUITE ] CSVRelations\n";
 	result &= RUN(CSVRelationsCanHandleEmptyFile);
 	result &= RUN(CSVRelationsCanComputeCountOfAllUniqueIds);
 	result &= RUN(CSVRelationsCanComputeAllUniqueIds);
 	result &= RUN(CSVRelationsCanComputeRelationsCount);
 	result &= RUN(CSVRelationsCanComputeRelationsOfPerson);
-	printf("\n[ SUITE ] DataProviderComposit\n");
+	std::cout << "\n[ SUITE ] DataProviderComposit\n";
 	result &= RUN(ProviderCompositGetPersonDoesNotLeakInternalId);
 	result &= RUN(ProviderCompositGetRelationsDoesNotLeakInternalId);
-	printf("\n[ SUITE ] Algorythems\n");
+	std::cout << "\n[ SUITE ] Algorythems\n";
 	result &= RUN(ChildRelationIsCorrectlyUnderstood);
 	result &= RUN(ParentRelationIsCorrectlyUnderstood);
 	result &= RUN(GrandParentAndChildRelationIsCorrectlyUnderstood);
 
 #ifndef NDEBUG
 	if (_CrtDumpMemoryLeaks()) {
-		printf("\n!!!!! >> A memory leak was detected << !!!!!\n");
+		std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";
 	}
 #endif
 	return result ? 0 : 1;

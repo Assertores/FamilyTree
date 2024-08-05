@@ -6,30 +6,32 @@
 
 #include <internal_types.h>
 
+#include <array>
+
 bool
 ProviderCompositGetPersonDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto trace = CreateNoOpTrace();
-	auto composit = CreateProviderComposit(trace);
+	auto* trace = CreateNoOpTrace();
+	auto* composit = CreateProviderComposit(trace);
 	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
 	auto person = iface->GetPerson(iface, 0, trace);
 
-	CHECK(person.id, 0);
+	CHECK(person.id, 0); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
 bool
 ProviderCompositGetRelationsDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto trace = CreateNoOpTrace();
-	auto composit = CreateProviderComposit(trace);
+	auto* trace = CreateNoOpTrace();
+	auto* composit = CreateProviderComposit(trace);
 	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
-	Relation relations[2];
-	iface->GetAllRelationsOfId(iface, 0, relations, trace);
+	std::array<Relation, 2> relations{};
+	iface->GetAllRelationsOfId(iface, 0, relations.data(), trace);
 
 	CHECK_EXCLUDE(relations[0].id1, 234, 34, 9754, 26);
 	CHECK_EXCLUDE(relations[0].id2, 234, 34, 9754, 26);
