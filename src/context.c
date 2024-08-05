@@ -791,6 +791,11 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 	FreeTraceAndReturn ComputeRelativeGeneration(aContext->myMedaData, aRefId, aTargetId, aTrace);
 }
 
+FT_API Family*
+GetFamilies(Context* aContext, PersonId aId, ITrace* aTrace){
+	return NULL;
+}
+
 FT_API int
 IsDefaultString(Context* aContext, const char* aStringToCheck) {
 	if (aContext == NULL) {

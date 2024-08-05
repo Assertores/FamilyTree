@@ -67,6 +67,19 @@ typedef struct {
 	const char* endDate;
 } Relation;
 
+//! @brief hints of common sets of people. all parents have these childrens and all childrens stem
+//! from the parents.
+typedef struct {
+	//! the size of the @a parents array.
+	size_t parentCount;
+	//! all common parents of the id's in @a childrens.
+	PersonId* parents;
+	//! the size of the @a childrens array.
+	size_t childrenCount;
+	//! all common children of the id's in @a parents.
+	PersonId* childrens;
+} Family;
+
 //! @brief this enum is used in algorythms to programaticaly understand the nation of a
 //! relationship.
 typedef enum {

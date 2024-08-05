@@ -211,6 +211,15 @@ FT_API Relation* GetPersonRelations(
 FT_API int GetRelativeGeneration(
 	Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace);
 
+//! @brief hints you at which Id's can be connecting into one line as all the childs have the same
+//! set of parents.
+//! @param aContext a pointer to the context.
+//! @param aId the id of the person interested in.
+//! @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+//! interested.
+//! @return an array of families the person is in eather as a child or as a parent.
+FT_API Family* GetFamilies(Context* aContext, PersonId aId, ITrace* aTrace);
+
 //! @brief checks if a given string points to the default value.
 //! @param aContext a pointer to the context.
 //! @param aStringToCheck the string to check.
