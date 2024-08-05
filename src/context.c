@@ -237,7 +237,10 @@ AddDataProvider(Context* aContext, IDataProvider* aData, ITrace* aTrace) {
 
 FT_API IDataProvider*
 CreateDataProvider(
-	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace) {
+	Context* aContext,
+	IRelationals* aRelations,
+	IPersonals* aPersonals,
+	ITrace* aTrace) {
 	int IsNoOpTrace = 0;
 	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
 		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
@@ -791,8 +794,33 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 	FreeTraceAndReturn ComputeRelativeGeneration(aContext->myMedaData, aRefId, aTargetId, aTrace);
 }
 
-FT_API Family*
-GetFamilies(Context* aContext, PersonId aId, ITrace* aTrace){
+FT_API PersonId*
+GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aTrace) {
+	return NULL;
+}
+
+FT_API PersonId*
+GetSiblings(Context* aContext, PersonId aId, size_t* aOutSiblingCount, ITrace* aTrace) {
+	return NULL;
+}
+
+FT_API PersonId*
+GetCommonParents(
+	Context* aContext,
+	size_t aIdCount,
+	PersonId* aIds,
+	size_t* aOutParentCount,
+	ITrace* aTrace) {
+	return NULL;
+}
+
+FT_API PersonId*
+GetCommonChildren(
+	Context* aContext,
+	size_t aIdCount,
+	PersonId* aIds,
+	size_t* aOutChildrenCount,
+	ITrace* aTrace) {
 	return NULL;
 }
 

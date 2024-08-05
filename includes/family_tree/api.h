@@ -203,7 +203,7 @@ FT_API Person* GetPersonsMatchingPattern(
 FT_API Relation*
 GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace);
 
-/// @brief retreaves the relative generation of @a aTargetId
+/// @brief retreaves the relative generation of @a aTargetId.
 /// @param aContext a pointer to the context.
 /// @param aRefId the id which is considered generation 0.
 /// @param aTargetId the id of the person interested in.
@@ -214,14 +214,59 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 FT_API int
 GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace);
 
-/// @brief hints you at which Id's can be connecting into one line as all the childs have the same
-/// set of parents.
+/// @brief retreaves all people @a aId has at least one common child with.
 /// @param aContext a pointer to the context.
 /// @param aId the id of the person interested in.
+/// @param aOutParterCount the amount of partners returned.
 /// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
 /// interested.
-/// @return an array of families the person is in eather as a child or as a parent.
-FT_API Family* GetFamilies(Context* aContext, PersonId aId, ITrace* aTrace);
+/// @return an array of Id's or NULL if no partner is found or @a aId has no children.
+FT_API PersonId*
+GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aTrace);
+
+/// @brief retreaves all people @a aId has at least one common parent with.
+/// @param aContext a pointer to the context.
+/// @param aId the id of the person interested in.
+/// @param aOutSiblingCount the amount of siblings returned.
+/// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+/// interested.
+/// @return an array of Id's or NULL if no sibling is found or @a aId has no parent.
+FT_API PersonId*
+GetSiblings(Context* aContext, PersonId aId, size_t* aOutSiblingCount, ITrace* aTrace);
+
+/// @brief retreaves the common parents between all people provided in @a aIds.
+/// @param aContext a pointer to the context.
+/// @param aIdCount the size of @a aIds.
+/// @param aIds the id's of the childrens the parents are searched for. the array must have @a
+/// aIdCount amount of elements allocated.
+/// @param aOutParentCount the amount of parents returned.
+/// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+/// interested.
+/// @return an array of Id's that are marked as parent in all @a aIds or NULL if there are no common
+/// Parents.
+FT_API PersonId* GetCommonParents(
+	Context* aContext,
+	size_t aIdCount,
+	PersonId* aIds,
+	size_t* aOutParentCount,
+	ITrace* aTrace);
+
+/// @brief retreaves the common children between all people provided in @a aIds.
+/// @param aContext a pointer to the context.
+/// @param aIdCount the size of @a aIds.
+/// @param aIds the id's of the parents the childrens are searched for. the array must have @a
+/// aIdCount amount of elements allocated.
+/// @param aOutChildrenCount the amount of children returned.
+/// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+/// interested.
+/// @return an array of Id's that are marked as children in all @a aIds or NULL if there are no
+/// common Children.
+FT_API PersonId* GetCommonChildren(
+	Context* aContext,
+	size_t aIdCount,
+	PersonId* aIds,
+	size_t* aOutChildrenCount,
+	ITrace* aTrace);
 
 /// @brief checks if a given string points to the default value.
 /// @param aContext a pointer to the context.
