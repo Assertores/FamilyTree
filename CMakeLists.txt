@@ -3,6 +3,7 @@
 project ("FamilyTree" LANGUAGES C CXX)
 
 include(CTest)
+include("CodeAnalysis.cmake")
 
 function(FT_declare libName)
 add_library(FT::${libName} ALIAS ${libName})
