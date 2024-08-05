@@ -2,9 +2,17 @@
 
 #include "auto_free.hpp"
 #include "check.hpp"
+#include "mock_data_provider.hpp"
 #include "mock_platform.hpp"
 
 #include <family_tree/api.h>
+
+#include <array>
+
+constexpr PersonId theId1 = 234;
+constexpr PersonId theId2 = 34;
+constexpr PersonId theId3 = 9754;
+constexpr PersonId theId4 = 26;
 
 bool
 CanRetreavePersonThroughAPI() {
@@ -101,6 +109,74 @@ CanRetreaveRelationsOfPerson() {
 	size_t count = 0;
 	// NOLINTNEXTLINE(clang-analyzer-deadcode.DeadStores)
 	auto* relations = GetPersonRelations(context, 0, &count, nullptr);
+
+	return true;
+}
+
+bool
+CanRetreavePartners() {
+	AutoFree context = Create(nullptr);
+	MockDataProvider data{};
+
+	AddDataProvider(context, data, nullptr);
+
+	size_t count = 0;
+	auto* partners = GetPartners(context, theId1, &count, nullptr);
+
+	CHECK(count, 1);
+	CHECK(partners[0], theId3);
+
+	return true;
+}
+
+bool
+CanRetreaveSiblings() {
+	AutoFree context = Create(nullptr);
+	MockDataProvider data{};
+
+	AddDataProvider(context, data, nullptr);
+
+	size_t count = 0;
+	auto* siblings = GetSiblings(context, theId4, &count, nullptr);
+
+	CHECK(count, 1);
+	CHECK(siblings[0], theId2);
+
+	return true;
+}
+
+bool
+CanRetreaveCommonParents() {
+	AutoFree context = Create(nullptr);
+	MockDataProvider data{};
+
+	AddDataProvider(context, data, nullptr);
+
+	std::array<PersonId, 2> parents{theId1, theId3};
+
+	size_t count = 0;
+	auto* childrens = GetCommonChildren(context, parents.size(), parents.data(), &count, nullptr);
+
+	CHECK(count, 1);
+	CHECK(childrens[0], theId4);
+
+	return true;
+}
+
+bool
+CanRetreaveCommonChildren() {
+	AutoFree context = Create(nullptr);
+	MockDataProvider data{};
+
+	AddDataProvider(context, data, nullptr);
+
+	std::array<PersonId, 2> childrens{theId4, theId2};
+
+	size_t count = 0;
+	auto* parents = GetCommonParents(context, childrens.size(), childrens.data(), &count, nullptr);
+
+	CHECK(count, 1);
+	CHECK(parents[0], theId1);
 
 	return true;
 }

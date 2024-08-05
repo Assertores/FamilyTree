@@ -35,6 +35,10 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(CanPlayMusicThroughAPI);
 	result &= RUN(CanShowImagesThroughAPI);
 	result &= RUN(CanRetreaveRelationsOfPerson);
+	result &= RUN(CanRetreavePartners);
+	result &= RUN(CanRetreaveSiblings);
+	result &= RUN(CanRetreaveCommonParents);
+	result &= RUN(CanRetreaveCommonChildren);
 	std::cout << "\n[ SUITE ] CSVRelations\n";
 	result &= RUN(CSVRelationsCanHandleEmptyFile);
 	result &= RUN(CSVRelationsCanComputeCountOfAllUniqueIds);
