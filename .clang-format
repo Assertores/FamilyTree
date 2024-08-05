@@ -20,6 +20,7 @@ SortIncludes: true
 AccessModifierOffset: -4
 AlignAfterOpenBracket: AlwaysBreak
 AllowAllArgumentsOnNextLine: false
+AllowAllParametersOfDeclarationOnNextLine: false
 AlwaysBreakAfterReturnType: TopLevelDefinitions
 BinPackArguments: false
 BinPackParameters: false

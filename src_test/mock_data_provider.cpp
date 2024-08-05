@@ -37,7 +37,10 @@ AbstractDataProvider_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId
 
 void
 AbstractDataProvider_GetAllRelationsOfId(
-	IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
+	IDataProvider* aThis,
+	PersonId aId,
+	Relation* aOutRelation,
+	ITrace* aTrace) {
 	((C_DataProvider*)aThis)->myThis->GetAllRelationsOfId(aId, aOutRelation);
 }
 

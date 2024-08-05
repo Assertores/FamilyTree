@@ -9,15 +9,15 @@ extern "C" {
 typedef struct ProviderComposit ProviderComposit;
 
 ProviderComposit* CreateProviderComposit(ITrace* aTrace);
-IDataProvider* CreateForwardingProvider(
-	IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace);
+IDataProvider*
+CreateForwardingProvider(IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace);
 IRelationals* CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 IPersonals* CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 IPlatform* CreatePlatform(ITrace* aTrace);
 ITrace* CreateNoOpTrace();
 
-void ProviderComposit_AddDataProvider(
-	ProviderComposit* aThis, IDataProvider* aProvider, ITrace* aTrace);
+void
+ProviderComposit_AddDataProvider(ProviderComposit* aThis, IDataProvider* aProvider, ITrace* aTrace);
 IDataProvider* ProviderComposit_Cast(ProviderComposit* aThis);
 
 IDataProvider* CreateSharedDataProviderDecorator(IDataProvider* aElement, ITrace* aTrace);

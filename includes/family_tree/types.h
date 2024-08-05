@@ -115,7 +115,10 @@ struct IRelationals {
 	/// stores all known relations that contain @a aId into @a aOutRelation call @a
 	/// GetAllRelationsOfIdCount upfront and make shure enough memory is allocated.
 	void (*GetAllRelationsOfId)(
-		IRelationals* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace);
+		IRelationals* aThis,
+		PersonId aId,
+		Relation* aOutRelation,
+		ITrace* aTrace);
 	/// returns the corresponding @ref RelationType for a given @a Relation
 	RelationType (*GetRelationType)(IRelationals* aThis, Relation aRelation, ITrace* aTrace);
 	/// frees the object itself and all data allocated by it.
@@ -160,7 +163,10 @@ struct IDataProvider {
 	size_t (*GetAllRelationsOfIdCount)(IDataProvider* aThis, PersonId aId, ITrace* aTrace);
 	/// @copybrief IRelationals.GetAllRelationsOfId
 	void (*GetAllRelationsOfId)(
-		IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace);
+		IDataProvider* aThis,
+		PersonId aId,
+		Relation* aOutRelation,
+		ITrace* aTrace);
 	/// @copybrief IRelationals.GetRelationType
 	RelationType (*GetRelationType)(IDataProvider* aThis, Relation aRelation, ITrace* aTrace);
 	/// frees the object itself and all data allocated by it.

@@ -76,7 +76,10 @@ FT_API void AddDataProvider(Context* aContext, IDataProvider* aDataProvider, ITr
 /// @note Copy will be called on @a aRelations and @a aPersonals.
 /// @note the object will be freed once @ref Free is called.
 FT_API IDataProvider* CreateDataProvider(
-	Context* aContext, IRelationals* aRelations, IPersonals* aPersonals, ITrace* aTrace);
+	Context* aContext,
+	IRelationals* aRelations,
+	IPersonals* aPersonals,
+	ITrace* aTrace);
 
 /// @brief creates a relations object used in @ref CreateDataProvider
 /// @param aContext a pointer to the context.
@@ -99,8 +102,8 @@ FT_API IDataProvider* CreateDataProvider(
 /// interested.
 /// @return a fully setup object that can be used to retreave relation data information.
 /// @note the object will be freed once @ref Free is called.
-FT_API IRelationals* CreateCSVRelations(
-	Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
+FT_API IRelationals*
+CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 
 /// @brief creates a personals object used in @ref CreateDataProvider
 /// @param aContext a pointer to the context.
@@ -130,8 +133,8 @@ FT_API IRelationals* CreateCSVRelations(
 /// interested.
 /// @return a fully setup object that can be used to retreave personal data.
 /// @note the object will be freed once @ref Free is called.
-FT_API IPersonals* CreateJSONPersonals(
-	Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
+FT_API IPersonals*
+CreateJSONPersonals(Context* aContext, const char* aPath, IPlatform* aPlatform, ITrace* aTrace);
 
 /// @brief Create a Platform used in @ref CreateCSVRelations and @ref CreateJSONPersonals
 /// @param aContext a pointer to the context.
@@ -197,8 +200,8 @@ FT_API Person* GetPersonsMatchingPattern(
 /// @return a pointer to an array of @ref Relation which contain @a aId.
 /// @note the values in Person will be freed once @ref Free is called.
 /// @todo this array is currently leaked.
-FT_API Relation* GetPersonRelations(
-	Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace);
+FT_API Relation*
+GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, ITrace* aTrace);
 
 /// @brief retreaves the relative generation of @a aTargetId
 /// @param aContext a pointer to the context.
@@ -208,8 +211,8 @@ FT_API Relation* GetPersonRelations(
 /// interested.
 /// @return the number of generations @a aTargetId is apart from @a aRefId. a positive number means
 /// lower in the graph. a negative number means higher in the graph. 0 means in the same generation.
-FT_API int GetRelativeGeneration(
-	Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace);
+FT_API int
+GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, ITrace* aTrace);
 
 /// @brief hints you at which Id's can be connecting into one line as all the childs have the same
 /// set of parents.

@@ -124,6 +124,8 @@ MockPlatform::OpenImage(const char* aPath) {
 
 char*
 CsvPlatform::ReadFile(const char* aPath) {
-	auto backing = "id1,id2,type\n5,32,StrictlyLower\n13,8,StrictlyLower\n5,13,StrictlyLower\n32,9,StrictlyLower";
+	auto backing =
+		"id1,id2,type\n5,32,StrictlyLower\n13,8,StrictlyLower\n5,13,StrictlyLower\n32,9,"
+		"StrictlyLower";
 	return (new std::string(backing))->data();
 }
