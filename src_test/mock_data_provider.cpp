@@ -179,6 +179,7 @@ MockDataProvider::MockDataProvider() {
 	relation.id2 = 5;
 	myRelations[relation.id1].push_back(relation);
 	myRelations[relation.id2].push_back(relation);
+	myChildRelations.push_back(relation);
 	relation.id1 = 1;
 	relation.id2 = 12;
 	myRelations[relation.id1].push_back(relation);

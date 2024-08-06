@@ -739,6 +739,10 @@ GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aT
 		aTrace->Fail(aTrace, "Context is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
+	if (aOutParterCount == NULL) {
+		aTrace->Fail(aTrace, "Parter Count is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
 
 	size_t minCount = ComputePartnersMinimalCount(aContext->myMedaData, aId, aTrace);
 	if (minCount == 0) {
@@ -768,6 +772,10 @@ GetSiblings(Context* aContext, PersonId aId, size_t* aOutSiblingCount, ITrace* a
 
 	if (aContext == NULL) {
 		aTrace->Fail(aTrace, "Context is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
+	if (aOutSiblingCount == NULL) {
+		aTrace->Fail(aTrace, "Sibling Count is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
 
@@ -806,7 +814,31 @@ GetCommonParents(
 		aTrace->Fail(aTrace, "Context is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
-	return NULL;
+	if (aOutParentCount == NULL) {
+		aTrace->Fail(aTrace, "Parent Count is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
+	if (aIdCount == 0) {
+		*aOutParentCount = 0;
+		aTrace->Succeed(aTrace);
+		FREE_TRACE_AND_RETURN NULL;
+	}
+	if (aIds == NULL) {
+		aTrace->Fail(aTrace, "Ids is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
+
+	size_t count = GetParentsCount(aContext->myMedaData, aIds[0], aTrace);
+	PersonId* result = calloc(count, sizeof(PersonId));
+	GetParents(aContext->myMedaData, aIds[0], result, aTrace);
+	for (size_t i = 1; i < aIdCount; i++) {
+		count = IntersectParents(aContext->myMedaData, aIds[i], count, result, aTrace);
+	}
+	result = realloc(result, count * sizeof(PersonId));
+	// TODO: keep track of memory
+
+	*aOutParentCount = count;
+	FREE_TRACE_AND_RETURN result;
 }
 
 FT_API PersonId*
@@ -822,7 +854,31 @@ GetCommonChildren(
 		aTrace->Fail(aTrace, "Context is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
-	return NULL;
+	if (aOutChildrenCount == NULL) {
+		aTrace->Fail(aTrace, "Children Count is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
+	if (aIdCount == 0) {
+		*aOutChildrenCount = 0;
+		aTrace->Succeed(aTrace);
+		FREE_TRACE_AND_RETURN NULL;
+	}
+	if (aIds == NULL) {
+		aTrace->Fail(aTrace, "Ids is NULL");
+		FREE_TRACE_AND_RETURN NULL;
+	}
+
+	size_t count = GetChildrenCount(aContext->myMedaData, aIds[0], aTrace);
+	PersonId* result = calloc(count, sizeof(PersonId));
+	GetChildrens(aContext->myMedaData, aIds[0], result, aTrace);
+	for (size_t i = 1; i < aIdCount; i++) {
+		count = IntersectChildrens(aContext->myMedaData, aIds[i], count, result, aTrace);
+	}
+	result = realloc(result, count * sizeof(PersonId));
+	// TODO: keep track of memory
+
+	*aOutChildrenCount = count;
+	FREE_TRACE_AND_RETURN result;
 }
 
 FT_API int

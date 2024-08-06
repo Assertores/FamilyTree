@@ -23,6 +23,24 @@ size_t ComputePartners(MetaData aMetaData, PersonId aId, PersonId* aOutPartners,
 size_t ComputeSiblingsMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace);
 size_t ComputeSiblings(MetaData aMetaData, PersonId aId, PersonId* aOutSiblings, ITrace* aTrace);
 
+size_t GetParentsCount(MetaData aMetaData, PersonId aId, ITrace* aTrace);
+void GetParents(MetaData aMetaData, PersonId aId, PersonId* aOutParents, ITrace* aTrace);
+size_t IntersectParents(
+	MetaData aMetaData,
+	PersonId aId,
+	size_t aParentCount,
+	PersonId* aInOutParents,
+	ITrace* aTrace);
+
+size_t GetChildrenCount(MetaData aMetaData, PersonId aId, ITrace* aTrace);
+void GetChildrens(MetaData aMetaData, PersonId aId, PersonId* aOutChildrens, ITrace* aTrace);
+size_t IntersectChildrens(
+	MetaData aMetaData,
+	PersonId aId,
+	size_t aChildrenCount,
+	PersonId* aInOutChildrens,
+	ITrace* aTrace);
+
 #ifdef __cplusplus
 }
 #endif

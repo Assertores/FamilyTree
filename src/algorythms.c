@@ -223,8 +223,8 @@ ComputePartnersMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
 	PersonMeta** childrens = NULL;
 	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
 		if (aMetaData.myPersons[i].myPersonId == aId) {
-			childrens = aMetaData.myPersons[i].myChilds;
 			childrenCount = aMetaData.myPersons[i].myChildCount;
+			childrens = aMetaData.myPersons[i].myChilds;
 			break;
 		}
 	}
@@ -245,8 +245,8 @@ ComputePartners(MetaData aMetaData, PersonId aId, PersonId* aOutPartners, ITrace
 	PersonMeta** childrens = NULL;
 	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
 		if (aMetaData.myPersons[i].myPersonId == aId) {
-			childrens = aMetaData.myPersons[i].myChilds;
 			childrenCount = aMetaData.myPersons[i].myChildCount;
+			childrens = aMetaData.myPersons[i].myChilds;
 			break;
 		}
 	}
@@ -266,7 +266,7 @@ ComputePartners(MetaData aMetaData, PersonId aId, PersonId* aOutPartners, ITrace
 					break;
 				}
 			}
-			if (isUnique == 1) {
+			if (isUnique != 0) {
 				aOutPartners[uniqueParents] = childrens[i]->myParents[indexParent]->myPersonId;
 				uniqueParents++;
 			}
@@ -281,8 +281,8 @@ ComputeSiblingsMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
 	PersonMeta** parents = NULL;
 	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
 		if (aMetaData.myPersons[i].myPersonId == aId) {
-			parents = aMetaData.myPersons[i].myParents;
 			parentCount = aMetaData.myPersons[i].myParentCount;
+			parents = aMetaData.myPersons[i].myParents;
 			break;
 		}
 	}
@@ -299,36 +299,172 @@ ComputeSiblingsMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
 
 size_t
 ComputeSiblings(MetaData aMetaData, PersonId aId, PersonId* aOutSiblings, ITrace* aTrace) {
+	size_t childrenCount = 0;
+	PersonMeta** childrens = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			childrenCount = aMetaData.myPersons[i].myChildCount;
+			childrens = aMetaData.myPersons[i].myChilds;
+			break;
+		}
+	}
+	if (childrens == NULL) {
+		return 0;
+	}
+	size_t uniqueSiblings = 0;
+	for (size_t i = 0; i < childrenCount; i++) {
+		for (size_t indexParent = 0; indexParent < childrens[i]->myParentCount; indexParent++) {
+			if (childrens[i]->myParents[indexParent]->myPersonId == aId) {
+				continue;
+			}
+			int isUnique = 1;
+			for (size_t j = 0; j < uniqueSiblings; j++) {
+				if (childrens[i]->myParents[indexParent]->myPersonId == aOutSiblings[j]) {
+					isUnique = 0;
+					break;
+				}
+			}
+			if (isUnique != 0) {
+				aOutSiblings[uniqueSiblings] = childrens[i]->myParents[indexParent]->myPersonId;
+				uniqueSiblings++;
+			}
+		}
+	}
+	return uniqueSiblings;
+}
+
+size_t
+GetParentsCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
 	size_t parentCount = 0;
 	PersonMeta** parents = NULL;
 	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
 		if (aMetaData.myPersons[i].myPersonId == aId) {
-			parents = aMetaData.myPersons[i].myChilds;
-			parentCount = aMetaData.myPersons[i].myChildCount;
+			return aMetaData.myPersons[i].myParentCount;
+		}
+	}
+	return 0;
+}
+
+void
+GetParents(MetaData aMetaData, PersonId aId, PersonId* aOutParents, ITrace* aTrace) {
+	size_t parentCount = 0;
+	PersonMeta** parents = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			parentCount = aMetaData.myPersons[i].myParentCount;
+			parents = aMetaData.myPersons[i].myParents;
+			break;
+		}
+	}
+	if (parents == NULL) {
+		return;
+	}
+	for (size_t i = 0; i < parentCount; i++) {
+		aOutParents[i] = parents[i]->myPersonId;
+	}
+}
+
+size_t
+IntersectParents(
+	MetaData aMetaData,
+	PersonId aId,
+	size_t aParentCount,
+	PersonId* aInOutParents,
+	ITrace* aTrace) {
+	size_t parentCount = 0;
+	PersonMeta** parents = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			parentCount = aMetaData.myPersons[i].myParentCount;
+			parents = aMetaData.myPersons[i].myParents;
 			break;
 		}
 	}
 	if (parents == NULL) {
 		return 0;
 	}
-	size_t uniqueSiblings = 0;
-	for (size_t i = 0; i < parentCount; i++) {
-		for (size_t indexParent = 0; indexParent < parents[i]->myParentCount; indexParent++) {
-			if (parents[i]->myParents[indexParent]->myPersonId == aId) {
-				continue;
-			}
-			int isUnique = 1;
-			for (size_t j = 0; j < uniqueSiblings; j++) {
-				if (parents[i]->myParents[indexParent]->myPersonId == aOutSiblings[j]) {
-					isUnique = 0;
-					break;
-				}
-			}
-			if (isUnique == 1) {
-				aOutSiblings[uniqueSiblings] = parents[i]->myParents[indexParent]->myPersonId;
-				uniqueSiblings++;
+	for (size_t i = 0; i < aParentCount; i++) {
+		int found = 0;
+		for (size_t j = 0; j < parentCount; j++) {
+			if (aInOutParents[i] == parents[j]->myPersonId) {
+				found = 1;
+				break;
 			}
 		}
+		if (found != 0) {
+			continue;
+		}
+		aParentCount--;
+		aInOutParents[i] = aInOutParents[aParentCount];
+		// NOTE: the moved item needs to be checked as well.
+		i--;
 	}
-	return uniqueSiblings;
+	return aParentCount;
+}
+
+size_t
+GetChildrenCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			return aMetaData.myPersons[i].myChildCount;
+		}
+	}
+	return 0;
+}
+
+void
+GetChildrens(MetaData aMetaData, PersonId aId, PersonId* aOutChildrens, ITrace* aTrace) {
+	size_t childrenCount = 0;
+	PersonMeta** childrens = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			childrenCount = aMetaData.myPersons[i].myChildCount;
+			childrens = aMetaData.myPersons[i].myChilds;
+			break;
+		}
+	}
+	if (childrens == NULL) {
+		return;
+	}
+	for (size_t i = 0; i < childrenCount; i++) {
+		aOutChildrens[i] = childrens[i]->myPersonId;
+	}
+}
+
+size_t
+IntersectChildrens(
+	MetaData aMetaData,
+	PersonId aId,
+	size_t aChildrenCount,
+	PersonId* aInOutChildrens,
+	ITrace* aTrace) {
+	size_t childrenCount = 0;
+	PersonMeta** childrens = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			childrenCount = aMetaData.myPersons[i].myChildCount;
+			childrens = aMetaData.myPersons[i].myChilds;
+			break;
+		}
+	}
+	if (childrens == NULL) {
+		return 0;
+	}
+	for (size_t i = 0; i < aChildrenCount; i++) {
+		int found = 0;
+		for (size_t j = 0; j < childrenCount; j++) {
+			if (aInOutChildrens[i] == childrens[j]->myPersonId) {
+				found = 1;
+				break;
+			}
+		}
+		if (found != 0) {
+			continue;
+		}
+		aChildrenCount--;
+		aInOutChildrens[i] = aInOutChildrens[aChildrenCount];
+		// NOTE: the moved item needs to be checked as well.
+		i--;
+	}
+	return aChildrenCount;
 }

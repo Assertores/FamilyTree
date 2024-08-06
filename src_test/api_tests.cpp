@@ -147,15 +147,15 @@ CanRetreaveCommonParents() {
 
 	AddDataProvider(context, data, nullptr);
 
-	std::array<PersonId, 2> parents{1, 2};
+	std::array<PersonId, 2> parents{0, 1};
 
 	size_t count = 0;
 	auto* childrens = GetCommonChildren(context, parents.size(), parents.data(), &count, nullptr);
 
 	CHECK(count, 3);
-	CHECK(3, childrens[0], childrens[1], childrens[2]);
-	CHECK(5, childrens[0], childrens[1], childrens[2]);
-	CHECK(12, childrens[0], childrens[1], childrens[2]);
+	CHECK(2, childrens[0], childrens[1], childrens[2]);
+	CHECK(4, childrens[0], childrens[1], childrens[2]);
+	CHECK(11, childrens[0], childrens[1], childrens[2]);
 
 	return true;
 }
@@ -167,14 +167,14 @@ CanRetreaveCommonChildren() {
 
 	AddDataProvider(context, data, nullptr);
 
-	std::array<PersonId, 2> childrens{12, 3}; // NOLINT
+	std::array<PersonId, 2> childrens{11, 4}; // NOLINT
 
 	size_t count = 0;
 	auto* parents = GetCommonParents(context, childrens.size(), childrens.data(), &count, nullptr);
 
 	CHECK(count, 2);
+	CHECK(0, parents[0], parents[1]);
 	CHECK(1, parents[0], parents[1]);
-	CHECK(2, parents[0], parents[1]);
 
 	return true;
 }
