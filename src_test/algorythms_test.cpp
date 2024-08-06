@@ -13,12 +13,12 @@ ChildRelationIsCorrectlyUnderstood() {
 	auto* trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
-	auto result = ComputeRelativeGeneration(metadata, 234, 34, trace); // NOLINT
+	auto result = ComputeRelativeGeneration(metadata, 1, 3, trace); // NOLINT
 	CHECK(result, 1);
-	result = ComputeRelativeGeneration(metadata, 234, 26, trace); // NOLINT
-	CHECK(result, 1);
-	result = ComputeRelativeGeneration(metadata, 34, 9754, trace); // NOLINT
-	CHECK(result, 1); // NOLINT(readability-simplify-boolean-expr)
+	result = ComputeRelativeGeneration(metadata, 5, 9, trace); // NOLINT
+	CHECK(result, 2);
+	result = ComputeRelativeGeneration(metadata, 1, 18, trace); // NOLINT
+	CHECK(result, 7); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
@@ -28,12 +28,12 @@ ParentRelationIsCorrectlyUnderstood() {
 	auto* trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
-	auto result = ComputeRelativeGeneration(metadata, 34, 234, trace); // NOLINT
+	auto result = ComputeRelativeGeneration(metadata, 9, 1, trace); // NOLINT
+	CHECK(result, -3);
+	result = ComputeRelativeGeneration(metadata, 7, 5, trace); // NOLINT
 	CHECK(result, -1);
-	result = ComputeRelativeGeneration(metadata, 26, 234, trace); // NOLINT
-	CHECK(result, -1);
-	result = ComputeRelativeGeneration(metadata, 9754, 34, trace); // NOLINT
-	CHECK(result, -1); // NOLINT(readability-simplify-boolean-expr)
+	result = ComputeRelativeGeneration(metadata, 14, 10, trace); // NOLINT
+	CHECK(result, -2); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }
 
@@ -43,9 +43,9 @@ GrandParentAndChildRelationIsCorrectlyUnderstood() {
 	auto* trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
-	auto result = ComputeRelativeGeneration(metadata, 234, 9754, trace); // NOLINT
+	auto result = ComputeRelativeGeneration(metadata, 1, 7, trace); // NOLINT
 	CHECK(result, 2);
-	result = ComputeRelativeGeneration(metadata, 9754, 234, trace); // NOLINT
+	result = ComputeRelativeGeneration(metadata, 11, 8, trace); // NOLINT
 	CHECK(result, -2); // NOLINT(readability-simplify-boolean-expr)
 	return true;
 }

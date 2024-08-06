@@ -9,11 +9,6 @@
 
 #include <array>
 
-constexpr PersonId theId1 = 234;
-constexpr PersonId theId2 = 34;
-constexpr PersonId theId3 = 9754;
-constexpr PersonId theId4 = 26;
-
 bool
 CanRetreavePersonThroughAPI() {
 	AutoFree context = Create(nullptr);
@@ -121,10 +116,10 @@ CanRetreavePartners() {
 	AddDataProvider(context, data, nullptr);
 
 	size_t count = 0;
-	auto* partners = GetPartners(context, theId1, &count, nullptr);
+	auto* partners = GetPartners(context, 2, &count, nullptr);
 
 	CHECK(count, 1);
-	CHECK(partners[0], theId3);
+	CHECK(partners[0], 3);
 
 	return true;
 }
@@ -137,10 +132,10 @@ CanRetreaveSiblings() {
 	AddDataProvider(context, data, nullptr);
 
 	size_t count = 0;
-	auto* siblings = GetSiblings(context, theId4, &count, nullptr);
+	auto* siblings = GetSiblings(context, 2, &count, nullptr);
 
 	CHECK(count, 1);
-	CHECK(siblings[0], theId2);
+	CHECK(siblings[0], 3);
 
 	return true;
 }
@@ -152,13 +147,15 @@ CanRetreaveCommonParents() {
 
 	AddDataProvider(context, data, nullptr);
 
-	std::array<PersonId, 2> parents{theId1, theId3};
+	std::array<PersonId, 2> parents{1, 2};
 
 	size_t count = 0;
 	auto* childrens = GetCommonChildren(context, parents.size(), parents.data(), &count, nullptr);
 
-	CHECK(count, 1);
-	CHECK(childrens[0], theId4);
+	CHECK(count, 3);
+	CHECK(3, childrens[0], childrens[1], childrens[2]);
+	CHECK(5, childrens[0], childrens[1], childrens[2]);
+	CHECK(12, childrens[0], childrens[1], childrens[2]);
 
 	return true;
 }
@@ -170,13 +167,14 @@ CanRetreaveCommonChildren() {
 
 	AddDataProvider(context, data, nullptr);
 
-	std::array<PersonId, 2> childrens{theId4, theId2};
+	std::array<PersonId, 2> childrens{12, 3}; // NOLINT
 
 	size_t count = 0;
 	auto* parents = GetCommonParents(context, childrens.size(), childrens.data(), &count, nullptr);
 
-	CHECK(count, 1);
-	CHECK(parents[0], theId1);
+	CHECK(count, 2);
+	CHECK(1, parents[0], parents[1]);
+	CHECK(2, parents[0], parents[1]);
 
 	return true;
 }

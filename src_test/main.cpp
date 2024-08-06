@@ -5,7 +5,6 @@
 #include "provider_composit_tests.hpp"
 
 #ifndef NDEBUG
-#define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 
@@ -14,7 +13,12 @@
 static bool
 Run(const char* aTestName, bool (*aTest)()) {
 	std::cout << "[TEST   ] ===== " << aTestName << '\n';
-	auto result = aTest();
+	auto result = false;
+	try {
+		result = aTest();
+	} catch (...) {
+		std::cout << "catched exeption.\n";
+	}
 	std::cout << "[" << aTestName << "] ///// " << (result ? "SUCCESS" : " FAILED") << '\n';
 	return result;
 }
@@ -54,9 +58,11 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(GrandParentAndChildRelationIsCorrectlyUnderstood);
 
 #ifndef NDEBUG
-	if (_CrtDumpMemoryLeaks()) {
+	if (_CrtDumpMemoryLeaks() != 0) {
 		std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";
 	}
 #endif
+
+	std::cout << "===== DONE =====\n";
 	return result ? 0 : 1;
 }

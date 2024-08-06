@@ -3,7 +3,6 @@
 #include <family_tree/api.h>
 
 #ifndef NDEBUG
-#define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
 #endif
 

@@ -30,7 +30,8 @@ ProviderCompositGetRelationsDoesNotLeakInternalId() {
 	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
 
-	std::array<Relation, 2> relations{};
+	CHECK(iface->GetAllRelationsOfIdCount(iface, 0, trace), 3);
+	std::array<Relation, 3> relations{};
 	iface->GetAllRelationsOfId(iface, 0, relations.data(), trace);
 
 	CHECK_EXCLUDE(relations[0].id1, 234, 34, 9754, 26);
