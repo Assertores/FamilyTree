@@ -796,12 +796,74 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 
 FT_API PersonId*
 GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aTrace) {
-	return NULL;
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
+	if (aContext == NULL) {
+		aTrace->Fail(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
+	}
+
+	size_t minCount = ComputePartnersMinimalCount(aContext->myMedaData, aId, aTrace);
+	if (minCount == 0) {
+		*aOutParterCount = 0;
+		aTrace->Succeed(aTrace);
+		FreeTraceAndReturn NULL;
+	}
+
+	PersonId* result = calloc(minCount, sizeof(PersonId));
+	minCount = ComputePartners(aContext->myMedaData, aId, result, aTrace);
+	if (minCount == 0) {
+		*aOutParterCount = 0;
+		aTrace->Succeed(aTrace);
+		FreeTraceAndReturn NULL;
+	}
+
+	result = realloc(result, minCount * sizeof(PersonId));
+	// TODO: keep track of memory
+
+	*aOutParterCount = minCount;
+	FreeTraceAndReturn result;
 }
 
 FT_API PersonId*
 GetSiblings(Context* aContext, PersonId aId, size_t* aOutSiblingCount, ITrace* aTrace) {
-	return NULL;
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
+	if (aContext == NULL) {
+		aTrace->Fail(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
+	}
+
+	size_t minCount = ComputeSiblingsMinimalCount(aContext->myMedaData, aId, aTrace);
+	if (minCount == 0) {
+		*aOutSiblingCount = 0;
+		aTrace->Succeed(aTrace);
+		FreeTraceAndReturn NULL;
+	}
+
+	PersonId* result = calloc(minCount, sizeof(PersonId));
+	minCount = ComputeSiblings(aContext->myMedaData, aId, result, aTrace);
+	if (minCount == 0) {
+		*aOutSiblingCount = 0;
+		aTrace->Succeed(aTrace);
+		FreeTraceAndReturn NULL;
+	}
+
+	result = realloc(result, minCount * sizeof(PersonId));
+	// TODO: keep track of memory
+
+	*aOutSiblingCount = minCount;
+	FreeTraceAndReturn result;
 }
 
 FT_API PersonId*
@@ -811,6 +873,17 @@ GetCommonParents(
 	PersonId* aIds,
 	size_t* aOutParentCount,
 	ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
+	if (aContext == NULL) {
+		aTrace->Fail(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
+	}
 	return NULL;
 }
 
@@ -821,6 +894,17 @@ GetCommonChildren(
 	PersonId* aIds,
 	size_t* aOutChildrenCount,
 	ITrace* aTrace) {
+	int IsNoOpTrace = 0;
+	if (aTrace == NULL || aTrace->CreateSubTrace == NULL || aTrace->AddEvent == NULL
+		|| aTrace->Succeed == NULL || aTrace->Fail == NULL || aTrace->Free == NULL) {
+		IsNoOpTrace = 1;
+		aTrace = CreateNoOpTrace();
+	}
+
+	if (aContext == NULL) {
+		aTrace->Fail(aTrace, "Context is NULL");
+		FreeTraceAndReturn NULL;
+	}
 	return NULL;
 }
 

@@ -17,12 +17,18 @@ typedef struct PersonMeta_t {
 } PersonMeta;
 
 void ResolveGenerationsRecursively(
-	PersonMeta* element, int minGeneration, int aFromChild, ITrace* aTrace);
+	PersonMeta* element,
+	int minGeneration,
+	int aFromChild,
+	ITrace* aTrace);
 void SquashUp(PersonMeta* element, ITrace* aTrace);
 
 void
 ResolveGenerationsRecursively(
-	PersonMeta* element, int minGeneration, int aFromChild, ITrace* aTrace) {
+	PersonMeta* element,
+	int minGeneration,
+	int aFromChild,
+	ITrace* aTrace) {
 	char string[126];
 	sprintf(string, "Resolving generations for person: %zu", element->myPersonId);
 	aTrace->AddEvent(aTrace, string);
@@ -59,7 +65,7 @@ SquashUp(PersonMeta* element, ITrace* aTrace) {
 		return;
 	}
 
-	// alle Parents auf den höhesten wert setzen
+	// alle Parents auf den hï¿½hesten wert setzen
 	int maxNumber = -1;
 	for (size_t i = 0; i < element->myParentCount; i++) {
 		maxNumber = maxNumber > element->myParents[i]->myGeneration
@@ -209,4 +215,120 @@ ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2, ITra
 	}
 	aTrace->AddEvent(aTrace, "calculate difference");
 	return generationOfId2 - generationOfId1;
+}
+
+size_t
+ComputePartnersMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
+	size_t childrenCount = 0;
+	PersonMeta** childrens = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			childrens = aMetaData.myPersons[i].myChilds;
+			childrenCount = aMetaData.myPersons[i].myChildCount;
+			break;
+		}
+	}
+	if (childrens == NULL) {
+		return 0;
+	}
+	size_t sum = 0;
+	for (size_t i = 0; i < childrenCount; i++) {
+		// not counting aId as parrent
+		sum += childrens[i]->myParentCount - 1;
+	}
+	return sum;
+}
+
+size_t
+ComputePartners(MetaData aMetaData, PersonId aId, PersonId* aOutPartners, ITrace* aTrace) {
+	size_t childrenCount = 0;
+	PersonMeta** childrens = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			childrens = aMetaData.myPersons[i].myChilds;
+			childrenCount = aMetaData.myPersons[i].myChildCount;
+			break;
+		}
+	}
+	if (childrens == NULL) {
+		return 0;
+	}
+	size_t uniqueParents = 0;
+	for (size_t i = 0; i < childrenCount; i++) {
+		for (size_t indexParent = 0; indexParent < childrens[i]->myParentCount; indexParent++) {
+			if (childrens[i]->myParents[indexParent]->myPersonId == aId) {
+				continue;
+			}
+			int isUnique = 1;
+			for (size_t j = 0; j < uniqueParents; j++) {
+				if (childrens[i]->myParents[indexParent]->myPersonId == aOutPartners[j]) {
+					isUnique = 0;
+					break;
+				}
+			}
+			if (isUnique == 1) {
+				aOutPartners[uniqueParents] = childrens[i]->myParents[indexParent]->myPersonId;
+				uniqueParents++;
+			}
+		}
+	}
+	return uniqueParents;
+}
+
+size_t
+ComputeSiblingsMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace) {
+	size_t parentCount = 0;
+	PersonMeta** parents = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			parents = aMetaData.myPersons[i].myParents;
+			parentCount = aMetaData.myPersons[i].myParentCount;
+			break;
+		}
+	}
+	if (parents == NULL) {
+		return 0;
+	}
+	size_t sum = 0;
+	for (size_t i = 0; i < parentCount; i++) {
+		// not counting aId as parrent
+		sum += parents[i]->myChildCount - 1;
+	}
+	return sum;
+}
+
+size_t
+ComputeSiblings(MetaData aMetaData, PersonId aId, PersonId* aOutSiblings, ITrace* aTrace) {
+	size_t parentCount = 0;
+	PersonMeta** parents = NULL;
+	for (size_t i = 0; i < aMetaData.myPersonCount; i++) {
+		if (aMetaData.myPersons[i].myPersonId == aId) {
+			parents = aMetaData.myPersons[i].myChilds;
+			parentCount = aMetaData.myPersons[i].myChildCount;
+			break;
+		}
+	}
+	if (parents == NULL) {
+		return 0;
+	}
+	size_t uniqueSiblings = 0;
+	for (size_t i = 0; i < parentCount; i++) {
+		for (size_t indexParent = 0; indexParent < parents[i]->myParentCount; indexParent++) {
+			if (parents[i]->myParents[indexParent]->myPersonId == aId) {
+				continue;
+			}
+			int isUnique = 1;
+			for (size_t j = 0; j < uniqueSiblings; j++) {
+				if (parents[i]->myParents[indexParent]->myPersonId == aOutSiblings[j]) {
+					isUnique = 0;
+					break;
+				}
+			}
+			if (isUnique == 1) {
+				aOutSiblings[uniqueSiblings] = parents[i]->myParents[indexParent]->myPersonId;
+				uniqueSiblings++;
+			}
+		}
+	}
+	return uniqueSiblings;
 }

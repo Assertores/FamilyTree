@@ -17,6 +17,12 @@ MetaData CreateMetaData(IDataProvider* aDataProvider, ITrace* aTrace);
 void FreeMetaData(MetaData* aMetaData);
 int ComputeRelativeGeneration(MetaData aMetaData, PersonId aId1, PersonId aId2, ITrace* aTrace);
 
+size_t ComputePartnersMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace);
+size_t ComputePartners(MetaData aMetaData, PersonId aId, PersonId* aOutPartners, ITrace* aTrace);
+
+size_t ComputeSiblingsMinimalCount(MetaData aMetaData, PersonId aId, ITrace* aTrace);
+size_t ComputeSiblings(MetaData aMetaData, PersonId aId, PersonId* aOutSiblings, ITrace* aTrace);
+
 #ifdef __cplusplus
 }
 #endif
