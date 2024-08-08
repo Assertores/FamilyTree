@@ -3,6 +3,7 @@
 #include <algorithm>
 #include <iostream>
 #include <set>
+#include <string>
 
 namespace graph {
 namespace {
@@ -18,6 +19,8 @@ private:
 
 class Person : public IPerson {
 public:
+	Person(::Person aPerson, std::function<bool(const char*)> aIsDefaultString);
+
 	[[nodiscard]] bool PrintNextLine(std::vector<char>& aCanvas) override;
 	[[nodiscard]] IPort* CreatePort(bool aOnTop) override;
 	[[nodiscard]] size_t GetEndOfElement() override;
@@ -25,8 +28,9 @@ public:
 
 private:
 	// TODO: change this with real data eventualy
-	size_t myWidth = 10; // NOLINT
-	size_t myHight = 7;	 // NOLINT
+	size_t myWidth = 0;
+	size_t myHight = 0;
+	std::vector<std::string> myContent;
 
 	size_t myCurrentLine = 0;
 
@@ -72,9 +76,66 @@ private:
 	std::shared_ptr<IFamilie> myRealFamilie = nullptr;
 };
 
+Person::Person(::Person aPerson, std::function<bool(const char*)> aIsDefaultString) {
+	myContent.emplace_back(std::to_string(aPerson.id));
+
+	std::string line;
+	if (!aIsDefaultString(aPerson.title)) {
+		line += aPerson.title;
+		line += ' ';
+	}
+	line += aPerson.firstNames[0];
+	if (!aIsDefaultString(aPerson.titleOfNobility)) {
+		line += ' ';
+		line += aPerson.titleOfNobility;
+	}
+	line += ' ';
+	line += aPerson.lastNames[0];
+	if (!line.empty()) {
+		myContent.emplace_back(line);
+		line.clear();
+	}
+
+	if (!aIsDefaultString(aPerson.dateOfBirth)) {
+		line += "* ";
+		line += aPerson.dateOfBirth;
+		if (!aIsDefaultString(aPerson.placeOfBirth)) {
+			line += " (";
+			line += aPerson.placeOfBirth;
+			line += ')';
+		}
+	}
+	if (!line.empty()) {
+		myContent.emplace_back(line);
+		line.clear();
+	}
+
+	if (!aIsDefaultString(aPerson.dateOfDeath)) {
+		line += "* ";
+		line += aPerson.dateOfDeath;
+		if (!aIsDefaultString(aPerson.placeOfDeath)) {
+			line += " (";
+			line += aPerson.placeOfDeath;
+			line += ')';
+		}
+	}
+	if (!line.empty()) {
+		myContent.emplace_back(line);
+		line.clear();
+	}
+
+	myHight = myContent.size() + 4;
+	for (const auto& line : myContent) {
+		if (line.size() > myWidth) {
+			myWidth = line.size();
+		}
+	}
+	myWidth += 2;
+}
+
 bool
 Person::PrintNextLine(std::vector<char>& aCanvas) {
-	if (myCurrentLine == 0 || myCurrentLine == myHight - 1) {
+	if (myCurrentLine == 0 || myCurrentLine >= myHight - 1) {
 		auto start = aCanvas.size();
 		Ports& ports = myCurrentLine == 0 ? myTopPorts : myBottomPorts;
 		for (size_t i = 0; i < myWidth; i++) {
@@ -96,11 +157,13 @@ Person::PrintNextLine(std::vector<char>& aCanvas) {
 		}
 
 		aCanvas.push_back('+');
-	} else if (myCurrentLine > myHight) {
-		aCanvas.insert(aCanvas.end(), myWidth, ' ');
 	} else {
 		aCanvas.push_back('|');
-		aCanvas.insert(aCanvas.end(), myWidth - 2, ' ');
+		aCanvas.insert(
+			aCanvas.end(),
+			myContent[myCurrentLine - 2].begin(),
+			myContent[myCurrentLine - 2].end());
+		aCanvas.insert(aCanvas.end(), myWidth - 2 - myContent[myCurrentLine - 2].length(), ' ');
 		aCanvas.push_back('|');
 	}
 	myCurrentLine++;
@@ -312,8 +375,8 @@ ProxyFamilie::InsertPorts(std::vector<char>& aCanvas) {
 } // namespace
 
 std::shared_ptr<IPerson>
-IPerson::CreatePerson(::Person aPerson) {
-	return std::make_shared<graph::Person>();
+IPerson::CreatePerson(::Person aPerson, std::function<bool(const char*)> aIsDefaultString) {
+	return std::make_shared<graph::Person>(aPerson, std::move(aIsDefaultString));
 }
 
 void

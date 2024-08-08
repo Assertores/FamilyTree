@@ -5,6 +5,7 @@
 #include <map>
 #include <memory>
 #include <vector>
+#include <functional>
 
 namespace graph {
 class IPort {
@@ -23,7 +24,7 @@ public:
 
 class IPerson : public IGraphElement {
 public:
-	static std::shared_ptr<IPerson> CreatePerson(Person aPerson);
+	static std::shared_ptr<IPerson> CreatePerson(Person aPerson, std::function<bool(const char*)> aIsDefaultString);
 
 	[[nodiscard]] virtual IPort* CreatePort(bool aOnTop) = 0;
 	[[nodiscard]] virtual size_t GetEndOfElement() = 0;

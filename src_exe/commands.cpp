@@ -387,7 +387,9 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 		for (size_t i = 0; i < (othersGeneration - firstGeneration); i++) {
 			iterator++;
 		}
-		auto person = graph::IPerson::CreatePerson(GetPerson(myContext, personId, nullptr));
+		auto person = graph::IPerson::CreatePerson(
+			GetPerson(myContext, personId, nullptr),
+			[&](const char* a) { return IsDefaultString(myContext, a) != 0; });
 		iterator->push_back(person);
 		persons[personId] = std::make_pair(othersGeneration, person);
 	}
