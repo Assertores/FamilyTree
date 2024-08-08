@@ -1,12 +1,12 @@
 {
-	"person": 4,
-	"firstNames": [
+	"Id": 4,
+	"FirstNames": [
 		"Constance",
 		"Flora"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Houghton",
 		"Mcgee"
 	],
-	"gender": "female"
+	"Gender": "female"
 }

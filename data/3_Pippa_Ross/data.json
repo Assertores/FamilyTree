@@ -1,11 +1,11 @@
 {
-	"person": 3,
-	"firstNames": [
+	"Id": 3,
+	"FirstNames": [
 		"Pippa"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Ross"
 	],
-	"gender": "non-binary",
-	"dateOfBirth": "04.05.1996"
+	"Gender": "non-binary",
+	"DateOfBirth": "04.05.1996"
 }

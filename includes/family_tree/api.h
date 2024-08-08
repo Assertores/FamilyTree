@@ -111,22 +111,22 @@ CreateCSVRelations(Context* aContext, const char* aPath, IPlatform* aPlatform, I
 /// following format:
 /// @code{.json}
 /// {
-/// "person": 1,
-/// "title": "Some Title",
-/// "firstNames": [ "Name1", "Name2" ],
-/// "titleOfNobility": "Another Title",
+/// "Id": 1,
+/// "Title": "Some Title",
+/// "FirstNames": [ "Name1", "Name2" ],
+/// "TitleOfNobility": "Another Title",
 /// "lastName": [ "Name1", "Name2" ],
-/// "gender": "my Genre",
-/// "dateOfBirth": "a fitting date",
-/// "placeOfBirth": "a fitting place",
+/// "Gender": "my Genre",
+/// "DateOfBirth": "a fitting date",
+/// "PlaceOfBirth": "a fitting place",
 /// "death": "hopefully a different date",
-/// "placeOfDeath": "some place somewhere",
+/// "PlaceOfDeath": "some place somewhere",
 /// "Audio": "a path to a audiofile relative to this file",
 /// "Images": [ "a path to a image relative to this file", "another image" ],
 /// "Remarks": "some extra information about the person"
 /// }
 /// @endcode
-/// @note the files content needs to be a valid json format. it must contain the "person" key which
+/// @note the files content needs to be a valid json format. it must contain the "Id" key which
 /// must be a integer value. all other fields are optional and can be omitted.
 /// @param aPlatform this is used to retreave the subfolders and read in the json files.
 /// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not

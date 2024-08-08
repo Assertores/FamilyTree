@@ -110,9 +110,9 @@ _GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 				continue;
 			}
 
-			if (strcmp(currentKey, "dateOfBirth") == 0) {
+			if (strcmp(currentKey, "DateOfBirth") == 0) {
 				person->person.dateOfBirth = json + begin;
-			} else if (strcmp(currentKey, "firstNames") == 0) {
+			} else if (strcmp(currentKey, "FirstNames") == 0) {
 				firstNameBuffer =
 					realloc(firstNameBuffer, sizeof(char*) * (person->person.firstNameCount + 1));
 				if (firstNameBuffer == NULL) {
@@ -122,7 +122,7 @@ _GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 				}
 				firstNameBuffer[person->person.firstNameCount] = json + begin;
 				person->person.firstNameCount++;
-			} else if (strcmp(currentKey, "lastNames") == 0) {
+			} else if (strcmp(currentKey, "LastNames") == 0) {
 				lastNameBuffer =
 					realloc(lastNameBuffer, sizeof(char*) * (person->person.lastNameCount + 1));
 				if (lastNameBuffer == NULL) {
@@ -132,17 +132,17 @@ _GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 				}
 				lastNameBuffer[person->person.lastNameCount] = json + begin;
 				person->person.lastNameCount++;
-			} else if (strcmp(currentKey, "title") == 0) {
+			} else if (strcmp(currentKey, "Title") == 0) {
 				person->person.title = json + begin;
-			} else if (strcmp(currentKey, "titleOfNobility") == 0) {
+			} else if (strcmp(currentKey, "TitleOfNobility") == 0) {
 				person->person.titleOfNobility = json + begin;
-			} else if (strcmp(currentKey, "gender") == 0) {
+			} else if (strcmp(currentKey, "Gender") == 0) {
 				person->person.gender = json + begin;
-			} else if (strcmp(currentKey, "placeOfBirth") == 0) {
+			} else if (strcmp(currentKey, "PlaceOfBirth") == 0) {
 				person->person.placeOfBirth = json + begin;
 			} else if (strcmp(currentKey, "death") == 0) {
 				person->person.dateOfDeath = json + begin;
-			} else if (strcmp(currentKey, "placeOfDeath") == 0) {
+			} else if (strcmp(currentKey, "PlaceOfDeath") == 0) {
 				person->person.placeOfDeath = json + begin;
 			} else if (strcmp(currentKey, "Remarks") == 0) {
 				person->person.remark = json + begin;
@@ -177,7 +177,7 @@ _GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 		if (json[i] == ',' || json[i] == '}' || json[i] == ']') {
 			json[i] = '\0';
 
-			if (strcmp(currentKey, "person") == 0) {
+			if (strcmp(currentKey, "Id") == 0) {
 				person->person.id = atoi(json + begin);
 			}
 			continue;
@@ -217,14 +217,24 @@ JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId, ITrace* aTrace) {
 Person
 JsonPerson_GetPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-
-	return _GetPerson(self, aId, aTrace)->person;
+	
+	FullPerson* result = _GetPerson(self, aId, aTrace);
+	if(result == NULL){
+		aTrace->Fail(aTrace, "Returning default constructed Person");
+		return (const Person){0};
+	}
+	return result->person;
 }
 
 void
 JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 	FullPerson* person = _GetPerson(self, aId, aTrace);
+
+	if(person == NULL){
+		aTrace->Fail(aTrace, "unable to find person");
+		return;
+	}
 
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
@@ -245,6 +255,11 @@ void
 JsonPerson_ShowImages(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
 	FullPerson* person = _GetPerson(self, aId, aTrace);
+
+	if(person == NULL){
+		aTrace->Fail(aTrace, "unable to find person");
+		return;
+	}
 
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
@@ -374,7 +389,7 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 			if (file[j] == '\0') {
 				break;
 			}
-			if (strncmp(file + j, "person", 6) == 0) {
+			if (strncmp(file + j, "Id", 6) == 0) {
 				j += 6;
 				numberbegin = j;
 				continue;

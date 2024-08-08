@@ -65,24 +65,24 @@ MockPlatform::ReadFile(const char* aPath) {
 	if (aPath == std::string_view("/abc/data.json")) {
 		const auto* backing =
 			R"json({
-	"person": 5,
-	"title" : "Prof. Dr.",
-	"firstNames" : [
+	"Id": 5,
+	"Title" : "Prof. Dr.",
+	"FirstNames" : [
 		"Philippa",
 		"Rosa",
 		"Polly"
 	],
-	"titleOfNobility" : "von und zu",
-	"lastNames" : [
+	"TitleOfNobility" : "von und zu",
+	"LastNames" : [
 		"Perry",
 		"Figueroa",
 		"Russell"
 	],
-	"gender" : "male",
-	"dateOfBirth" : "04.05.1996",
-	"placeOfBirth" : "PlaceA",
+	"Gender" : "male",
+	"DateOfBirth" : "04.05.1996",
+	"PlaceOfBirth" : "PlaceA",
 	"death" : "11.11.2021",
-	"placeOfDeath" : "PlaceB",
+	"PlaceOfDeath" : "PlaceB",
 	"Audio" : "Sunday_plans.mp3",
 	"Images" : [
 		"Trohnsaal.png"

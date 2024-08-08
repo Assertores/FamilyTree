@@ -1,12 +1,12 @@
 {
-	"person": 13,
-	"firstNames": [
+	"Id": 13,
+	"FirstNames": [
 		"Kaitlyn",
 		"April"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Ball"
 	],
-	"gender": "female",
-	"dateOfBirth": "01.01.1986"
+	"Gender": "female",
+	"DateOfBirth": "01.01.1986"
 }

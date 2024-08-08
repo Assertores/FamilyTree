@@ -1,13 +1,13 @@
 {
-	"person": 11,
-	"title": "Prof. Dr.",
-	"firstNames": [
+	"Id": 11,
+	"Title": "Prof. Dr.",
+	"FirstNames": [
 		"Maia",
 		"Ruth"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Salinas"
 	],
-	"gender": "female",
-	"dateOfBirth": "01.01.1986"
+	"Gender": "female",
+	"DateOfBirth": "01.01.1986"
 }

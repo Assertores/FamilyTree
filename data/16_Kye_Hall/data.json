@@ -1,13 +1,13 @@
 {
-	"person": 16,
-	"firstNames": [
+	"Id": 16,
+	"FirstNames": [
 		"Kye",
 		"Faye"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Hall",
 		"Greene"
 	],
-	"gender": "female",
-	"dateOfBirth": "01.01.1986"
+	"Gender": "female",
+	"DateOfBirth": "01.01.1986"
 }

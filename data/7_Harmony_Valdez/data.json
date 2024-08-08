@@ -1,14 +1,14 @@
 {
-	"person": 7,
-	"firstNames": [
+	"Id": 7,
+	"FirstNames": [
 		"Harmony",
 		"Tamara",
 		"Verity",
 		"Jodie"
 	],
-	"lastNames": [
+	"LastNames": [
 		"Valdez"
 	],
-	"gender": "female",
-	"dateOfBirth": "01.01.1986"
+	"Gender": "female",
+	"DateOfBirth": "01.01.1986"
 }
