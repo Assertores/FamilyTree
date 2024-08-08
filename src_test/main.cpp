@@ -1,6 +1,7 @@
 #include "algorythms_test.hpp"
 #include "api_tests.hpp"
 #include "csv_relation_tests.hpp"
+#include "json_parser_tests.hpp"
 #include "json_person_tests.hpp"
 #include "provider_composit_tests.hpp"
 
@@ -78,6 +79,22 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(ChildRelationIsCorrectlyUnderstood);
 	result &= RUN(ParentRelationIsCorrectlyUnderstood);
 	result &= RUN(GrandParentAndChildRelationIsCorrectlyUnderstood);
+	std::cout << "\n[ SUITE ] JsonParser\n";
+	result &= RUN(NullptrWillNotDoAnything);
+	result &= RUN(EmptyStringWillNotDoAnything);
+	result &= RUN(EmptyJsonWillNotCallParsingOnTheHandler);
+	result &= RUN(AKeyIsSuccessfulyParsed);
+	result &= RUN(StringValueIsNotConsideredAKey);
+	result &= RUN(MultipleKeysAreDetected);
+	result &= RUN(StringValueParserIsCalled);
+	result &= RUN(IntParserIsNotCalledForStringValue);
+	result &= RUN(IntValueParserIsCalled);
+	result &= RUN(IgnoresWhitespaceCharacters);
+	result &= RUN(CanDealWithArrayOfInts);
+	result &= RUN(CallsKeyHandlerOnlyOnceForArray);
+	result &= RUN(ArrayCanCountainStrings);
+	result &= RUN(CanDealWithObjectInObject);
+	result &= RUN(InnerKeysAreCalledOnInnerDispatchTable);
 
 #ifndef NDEBUG
 	if (_CrtDumpMemoryLeaks() != 0) {
