@@ -18,7 +18,7 @@ ChildRelationIsCorrectlyUnderstood() {
 	result = ComputeRelativeGeneration(metadata, 5, 9, trace); // NOLINT
 	CHECK(result, 2);
 	result = ComputeRelativeGeneration(metadata, 1, 18, trace); // NOLINT
-	CHECK(result, 7); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(result, 7);
 	return true;
 }
 
@@ -33,7 +33,7 @@ ParentRelationIsCorrectlyUnderstood() {
 	result = ComputeRelativeGeneration(metadata, 7, 5, trace); // NOLINT
 	CHECK(result, -1);
 	result = ComputeRelativeGeneration(metadata, 14, 10, trace); // NOLINT
-	CHECK(result, -2); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(result, -2);
 	return true;
 }
 
@@ -46,6 +46,6 @@ GrandParentAndChildRelationIsCorrectlyUnderstood() {
 	auto result = ComputeRelativeGeneration(metadata, 1, 7, trace); // NOLINT
 	CHECK(result, 2);
 	result = ComputeRelativeGeneration(metadata, 11, 8, trace); // NOLINT
-	CHECK(result, -2); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(result, -2);
 	return true;
 }

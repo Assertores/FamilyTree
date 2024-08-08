@@ -8,7 +8,25 @@
 #include <crtdbg.h>
 #endif
 
+#include <csignal>
 #include <iostream>
+#include <string>
+
+class Exept : public std::exception {
+public:
+	explicit Exept(std::string aReason)
+		: myReason(std::move(aReason)) {}
+
+	[[nodiscard]] char const* what() const override { return myReason.c_str(); }
+
+private:
+	std::string myReason;
+};
+
+void
+SignalHandler(int aSignal) {
+	throw Exept("Signal: " + std::to_string(aSignal));
+}
 
 static bool
 Run(const char* aTestName, bool (*aTest)()) {
@@ -16,6 +34,8 @@ Run(const char* aTestName, bool (*aTest)()) {
 	auto result = false;
 	try {
 		result = aTest();
+	} catch (const std::exception& e) {
+		std::cout << "catched exeption: " << e.what() << '\n';
 	} catch (...) {
 		std::cout << "catched exeption.\n";
 	}
@@ -26,6 +46,8 @@ Run(const char* aTestName, bool (*aTest)()) {
 
 int
 main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
+	(void)signal(SIGSEGV, SignalHandler);
+
 	bool result = true;
 	std::cout << "[ SUITE ] JSONPerson\n";
 	result &= RUN(JSONPersonIsZeroIfNoFoldersExist);

@@ -75,7 +75,7 @@ CSVRelationsCanComputeRelationsCount() {
 
 	auto size = rel->GetAllRelationsOfIdCount(rel, 13, trace); // NOLINT
 
-	CHECK(size, 2); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(size, 2);
 	return true;
 }
 

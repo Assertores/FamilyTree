@@ -17,7 +17,7 @@ JSONPersonIsZeroIfNoFoldersExist() {
 
 	auto size = person->GetAllIdsCount(person, trace);
 
-	CHECK(size, 0); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(size, 0);
 	return true;
 }
 
@@ -29,7 +29,7 @@ JSONPersonIsAmountOfFolders() {
 
 	auto size = person->GetAllIdsCount(person, trace);
 
-	CHECK(size, 2); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(size, 2);
 	return true;
 }
 

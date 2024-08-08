@@ -18,7 +18,7 @@ ProviderCompositGetPersonDoesNotLeakInternalId() {
 
 	auto person = iface->GetPerson(iface, 0, trace);
 
-	CHECK(person.id, 0); // NOLINT(readability-simplify-boolean-expr)
+	CHECK(person.id, 0);
 	return true;
 }
 
