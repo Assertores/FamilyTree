@@ -1,11 +1,13 @@
 #include "commands.hpp"
 
+#include "graph.hpp"
 #include "trace.hpp"
 
 #include <family_tree/api.h>
 
 #include <iostream>
 #include <list>
+#include <map>
 #include <set>
 #include <sstream>
 #include <vector>
@@ -344,6 +346,7 @@ PrintTree::IsCommand(std::string_view aCommand) {
 	return aCommand == "print-tree" || aCommand == "t";
 }
 
+// NOLINTBEGIN
 void
 PrintTree::ExecuteCommand(const std::string& aLine) {
 	PersonId requestedIds = 0;
@@ -367,7 +370,9 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 	}
 
 	int firstGeneration = 0;
-	std::list<std::vector<PersonId>> generations;
+	std::list<std::vector<std::shared_ptr<graph::IPerson>>> generations;
+	std::map<PersonId, std::pair<int, std::shared_ptr<graph::IPerson>>> persons;
+	std::set<graph::FamilieBuilder> familieBuilders;
 
 	for (const auto& personId : peopleToShow) {
 		auto othersGeneration = GetRelativeGeneration(myContext, requestedIds, personId, nullptr);
@@ -382,21 +387,88 @@ PrintTree::ExecuteCommand(const std::string& aLine) {
 		for (size_t i = 0; i < (othersGeneration - firstGeneration); i++) {
 			iterator++;
 		}
-		iterator->push_back(personId);
+		auto person = graph::IPerson::CreatePerson(GetPerson(myContext, personId, nullptr));
+		iterator->push_back(person);
+		persons[personId] = std::make_pair(othersGeneration, person);
 	}
 
-	for (const auto& generation : generations) {
-		bool first = true;
-		for (const auto& personId : generation) {
-			if (!first) {
-				std::cout << ", ";
+	for (const auto& [personId, graphPerson] : persons) {
+		size_t count = 0;
+		auto* partners = GetPartners(myContext, personId, &count, nullptr);
+		for (size_t i = 0; i < count; i++) {
+			PersonId parents[] = {personId, partners[i]};
+			size_t childCount = 0;
+			auto* children = GetCommonChildren(myContext, 2, parents, &childCount, nullptr);
+
+			size_t parentCount = 0;
+			auto fullParents =
+				GetCommonParents(myContext, childCount, children, &parentCount, nullptr);
+
+			graph::FamilieBuilder familie;
+			for (size_t index = 0; index < childCount; index++) {
+				auto child = persons.find(children[index]);
+				if (child == persons.end()) {
+					continue;
+				}
+				familie.AddChild(child->second.second.get(), child->second.first);
 			}
-			first = false;
-			std::cout << personId;
+			for (size_t index = 0; index < parentCount; index++) {
+				auto parent = persons.find(fullParents[index]);
+				if (parent == persons.end()) {
+					continue;
+				}
+				familie.AddParent(parent->second.second.get(), parent->second.first);
+			}
+
+			familieBuilders.insert(familie);
 		}
-		std::cout << '\n';
+	}
+
+	std::vector<std::shared_ptr<graph::IFamilie>> families;
+	for (size_t i = 0; i < generations.size(); i++) {
+		auto familie = graph::IFamilie::CreateProxy();
+		families.push_back(familie);
+
+		auto iterator = generations.begin();
+		for (size_t j = 0; j < i; j++) {
+			iterator++;
+		}
+
+		for (const auto& builder : familieBuilders) {
+			auto proxy = builder.BuildGeneration(firstGeneration + i, *familie.get());
+			if (proxy == nullptr) {
+				continue;
+			}
+			iterator->emplace_back(proxy);
+		}
+		if (iterator->empty()) {
+			continue;
+		}
+
+		for (size_t j = 1; j < iterator->size(); j++) {
+			(*iterator)[j]->SetPreviousPort((*iterator)[j - 1].get());
+			(*iterator)[j - 1]->SetNextElement((*iterator)[j].get());
+		}
+	}
+
+	size_t i = 0;
+	for (const auto& generation : generations) {
+		std::vector<char> canvas{};
+		bool notDone = false;
+		do { // NOLINT
+			notDone = generation[0]->PrintNextLine(canvas);
+			std::cout << std::string{canvas.begin(), canvas.end()} << '\n';
+			canvas.clear();
+		} while (notDone);
+		do { // NOLINT
+			notDone = families[i]->PrintNextLine(canvas);
+			std::cout << std::string{canvas.begin(), canvas.end()} << '\n';
+			canvas.clear();
+		} while (notDone);
+		i++;
 	}
 }
+// NOLINTEND
 
 void
 PrintTree::PrintHelp() {

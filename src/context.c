@@ -724,11 +724,13 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 		FREE_TRACE_AND_RETURN INT_MIN;
 	}
 
-	FREE_TRACE_AND_RETURN ComputeRelativeGeneration(
+	int result = ComputeRelativeGeneration(
 		aContext->myMedaData,
 		aRefId,
 		aTargetId,
 		aTrace);
+
+	FREE_TRACE_AND_RETURN result;
 }
 
 FT_API PersonId*

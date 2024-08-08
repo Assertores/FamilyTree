@@ -61,6 +61,8 @@ target_sources(FamilyTree
 	PRIVATE
 		"src_exe/commands.cpp"
 		"src_exe/commands.hpp"
+		"src_exe/graph.cpp"
+		"src_exe/graph.hpp"
 		"src_exe/trace.cpp"
 		"src_exe/trace.hpp"
 )
