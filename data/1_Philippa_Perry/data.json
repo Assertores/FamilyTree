@@ -17,6 +17,18 @@
 	"PlaceOfBirth": "PlaceA",
 	"death": "11.11.2021",
 	"PlaceOfDeath": "PlaceB",
+	"Profession": ["AWork", "BWork"],
+	"PlaceOfResidence": [
+		{
+			"Name": "Place A",
+			"StartDate": "04.05.1996",
+			"EndData": "05.05.1996"
+		},
+		{
+			"Name": "Place B",
+			"StartDate": "06.05.1996"
+		}
+	],
 	"Audio": "Sunday_plans.mp3",
 	"Images":[
 		"Trohnsaal.png"

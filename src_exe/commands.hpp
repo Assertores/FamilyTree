@@ -5,6 +5,7 @@
 #include <set>
 #include <string>
 #include <string_view>
+#include <vector>
 
 class ICommand {
 public:
@@ -103,7 +104,11 @@ public:
 private:
 	Context* myContext;
 
-	static Person PrivCreatePrototype(std::string aLine, size_t aBegin);
+	static Person PrivCreatePrototype(
+		std::string aLine,
+		size_t aBegin,
+		std::vector<const char*>& aOutFirstNames,
+		std::vector<const char*>& aOutLastNames);
 };
 
 class PeopleRelation : public ICommand {

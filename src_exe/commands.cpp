@@ -208,7 +208,9 @@ SearchPeople::ExecuteCommand(const std::string& aLine) {
 	}
 	minMatches = std::stoi(copy);
 
-	Person prototype = PrivCreatePrototype(aLine, begin);
+	std::vector<const char*> firstNames;
+	std::vector<const char*> lastNames;
+	Person prototype = PrivCreatePrototype(aLine, begin, firstNames, lastNames);
 
 	size_t count = 0;
 	auto* array = GetPersonsMatchingPattern(myContext, prototype, minMatches, &count, nullptr);
@@ -245,10 +247,12 @@ SearchPeople::PrintHelp() {
 }
 
 Person
-SearchPeople::PrivCreatePrototype(std::string aLine, size_t aBegin) {
+SearchPeople::PrivCreatePrototype(
+	std::string aLine,
+	size_t aBegin,
+	std::vector<const char*>& aOutFirstNames,
+	std::vector<const char*>& aOutLastNames) {
 	Person prototype{};
-	std::vector<const char*> firstNames;
-	std::vector<const char*> lastNames;
 	for (size_t i = aBegin; i < aLine.size(); i++) {
 		if (aLine.substr(i).rfind("-t=", 0) == 0) {
 			aLine[i - 1] = '\0';
@@ -257,7 +261,7 @@ SearchPeople::PrivCreatePrototype(std::string aLine, size_t aBegin) {
 		}
 		if (aLine.substr(i).rfind("-n=", 0) == 0) {
 			aLine[i - 1] = '\0';
-			firstNames.push_back(aLine.c_str() + i + 3);
+			aOutFirstNames.push_back(aLine.c_str() + i + 3);
 			continue;
 		}
 		if (aLine.substr(i).rfind("-a=", 0) == 0) {
@@ -267,7 +271,7 @@ SearchPeople::PrivCreatePrototype(std::string aLine, size_t aBegin) {
 		}
 		if (aLine.substr(i).rfind("-l=", 0) == 0) {
 			aLine[i - 1] = '\0';
-			lastNames.push_back(aLine.c_str() + i + 3);
+			aOutLastNames.push_back(aLine.c_str() + i + 3);
 			continue;
 		}
 		if (aLine.substr(i).rfind("-g=", 0) == 0) {
@@ -301,10 +305,10 @@ SearchPeople::PrivCreatePrototype(std::string aLine, size_t aBegin) {
 			continue;
 		}
 	}
-	prototype.firstNameCount = firstNames.size();
-	prototype.firstNames = firstNames.data();
-	prototype.lastNameCount = lastNames.size();
-	prototype.lastNames = lastNames.data();
+	prototype.firstNameCount = aOutFirstNames.size();
+	prototype.firstNames = aOutFirstNames.data();
+	prototype.lastNameCount = aOutLastNames.size();
+	prototype.lastNames = aOutLastNames.data();
 	return prototype;
 }
 
