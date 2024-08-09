@@ -99,5 +99,8 @@ OpenImageTriggersCorrectPathOnPlatform() {
 	AutoFree person = CreateJSONPerson("", platform, trace);
 	person->ShowImages(person, 5, trace); // NOLINT
 
-	return !platform.myUnexpectedImage && firstImageLoadedCount == 1 && secondImageLoadedCount == 1;
+	CHECK(platform.myUnexpectedImage, false);
+	CHECK(firstImageLoadedCount, 1);
+	CHECK(secondImageLoadedCount, 1);
+	return true;
 }

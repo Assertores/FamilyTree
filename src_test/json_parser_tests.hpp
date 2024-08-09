@@ -13,5 +13,6 @@ bool IgnoresWhitespaceCharacters();
 bool CanDealWithArrayOfInts();
 bool CallsKeyHandlerOnlyOnceForArray();
 bool ArrayCanCountainStrings();
+bool ArrayCanCountainMultipleStrings();
 bool CanDealWithObjectInObject();
 bool InnerKeysAreCalledOnInnerDispatchTable();

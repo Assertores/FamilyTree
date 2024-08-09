@@ -81,11 +81,11 @@ MockPlatform::ReadFile(const char* aPath) {
 	"Gender" : "male",
 	"DateOfBirth" : "04.05.1996",
 	"PlaceOfBirth" : "PlaceA",
-	"death" : "11.11.2021",
+	"DateOfDeath" : "11.11.2021",
 	"PlaceOfDeath" : "PlaceB",
 	"Audio" : "Sunday_plans.mp3",
 	"Images" : [
-		"Trohnsaal.png"
+		"Trohnsaal.png",
 		"Bauhaus.png"
 	] ,
 	"Remarks": "RemarkA"
@@ -93,7 +93,7 @@ MockPlatform::ReadFile(const char* aPath) {
 		return (new std::string(backing))->data();
 	}
 	if (aPath == std::string_view("/def/data.json")) {
-		const auto* backing = R"json({\"person\": 32})json";
+		const auto* backing = R"json({"Id": 32})json";
 		return (new std::string(backing))->data();
 	}
 	const auto* backing = "id1,id2,type\n5,32,StrictlyLower";

@@ -93,6 +93,7 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(CanDealWithArrayOfInts);
 	result &= RUN(CallsKeyHandlerOnlyOnceForArray);
 	result &= RUN(ArrayCanCountainStrings);
+	result &= RUN(ArrayCanCountainMultipleStrings);
 	result &= RUN(CanDealWithObjectInObject);
 	result &= RUN(InnerKeysAreCalledOnInnerDispatchTable);
 

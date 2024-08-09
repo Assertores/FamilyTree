@@ -288,6 +288,28 @@ ArrayCanCountainStrings() {
 }
 
 bool
+ArrayCanCountainMultipleStrings() {
+	theWasCalled = false;
+	theDispatch = {};
+	theIntValues = {};
+	theStringValues = {};
+
+	theDispatch.parseInt = [](int aValue) { theIntValues.emplace_back(aValue); };
+	theDispatch.parseString = [](const auto* aValue) { theStringValues.emplace_back(aValue); };
+	theDispatch.getKeyHandler = [](const auto* aKey) { return theDispatch; };
+
+	std::string json = R"json({"key":["hello","abcd",333]})json";
+	ParseJson(json.data(), theDispatch);
+
+	CHECK(theIntValues.size(), 1);
+	CHECK(theIntValues[0], 333);
+	CHECK(theStringValues.size(), 2);
+	CHECK(theStringValues[0], "hello");
+	CHECK(theStringValues[1], "abcd");
+	return true;
+}
+
+bool
 CanDealWithObjectInObject() {
 	theWasCalled = false;
 	theDispatch = {};
