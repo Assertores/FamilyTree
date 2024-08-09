@@ -1,4 +1,5 @@
 #include "internal_types.h"
+#include "json_parser.h"
 #include "patch.h"
 
 #include <ctype.h>
@@ -29,8 +30,205 @@ typedef struct {
 	FullPerson* myPersons;
 } JsonPerson;
 
+FullPerson* thePerson = NULL;
+const char** theFirstNameBuffer = NULL;
+const char** theLastNameBuffer = NULL;
+PersonId theId = 0;
+
+void
+PrivOnId(int aValue) {
+	theId = aValue;
+	if (thePerson == NULL) {
+		return;
+	}
+	thePerson->person.id = aValue;
+}
+
+void
+PrivOnTitle(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.title = aValue;
+}
+
+void
+PrivOnFirstName(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theFirstNameBuffer =
+		realloc(theFirstNameBuffer, sizeof(char*) * (thePerson->person.firstNameCount + 1));
+	if (theFirstNameBuffer == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theFirstNameBuffer[thePerson->person.firstNameCount] = aValue;
+	thePerson->person.firstNameCount++;
+}
+
+void
+PrivOnTitleOfNobility(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.titleOfNobility = aValue;
+}
+
+void
+PrivOnLastName(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theLastNameBuffer =
+		realloc(theLastNameBuffer, sizeof(char*) * (thePerson->person.lastNameCount + 1));
+	if (theLastNameBuffer == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theLastNameBuffer[thePerson->person.lastNameCount] = aValue;
+	thePerson->person.lastNameCount++;
+}
+
+void
+PrivOnGender(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.gender = aValue;
+}
+
+void
+PrivOnDateOfBirth(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.dateOfBirth = aValue;
+}
+
+void
+PrivOnPlaceOfBirth(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.placeOfBirth = aValue;
+}
+
+void
+PrivOnDateOfDeath(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.dateOfDeath = aValue;
+}
+
+void
+PrivOnPlaceOfDeath(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.placeOfDeath = aValue;
+}
+
+void
+PrivOnAudio(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->audioPath = aValue;
+}
+
+void
+PrivOnImage(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->imagePaths =
+		realloc(thePerson->imagePaths, sizeof(char*) * (thePerson->imagePathCount + 1));
+	if (thePerson->imagePaths == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->imagePaths[thePerson->imagePathCount] = aValue;
+	thePerson->imagePathCount++;
+}
+
+void
+PrivOnRemarks(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	thePerson->person.remark = aValue;
+}
+
+void
+PrivNoOpInt(int aValue) {}
+void
+PrivNoOpString(const char* aValue) {}
+
+JsonParsingDispatchTable
+PrivOnKey(const char* aKey) {
+	JsonParsingDispatchTable table;
+	table.getKeyHandler = PrivOnKey;
+	table.parseInt = PrivNoOpInt;
+	table.parseString = PrivNoOpString;
+
+	if (strcmp(aKey, "Id") == 0) {
+		table.parseInt = PrivOnId;
+	} else if (strcmp(aKey, "FirstNames") == 0) {
+		table.parseString = PrivOnFirstName;
+	} else if (strcmp(aKey, "LastNames") == 0) {
+		table.parseString = PrivOnLastName;
+	} else if (strcmp(aKey, "Title") == 0) {
+		table.parseString = PrivOnTitle;
+	} else if (strcmp(aKey, "TitleOfNobility") == 0) {
+		table.parseString = PrivOnTitleOfNobility;
+	} else if (strcmp(aKey, "Gender") == 0) {
+		table.parseString = PrivOnGender;
+	} else if (strcmp(aKey, "DateOfBirth") == 0) {
+		table.parseString = PrivOnDateOfBirth;
+	} else if (strcmp(aKey, "PlaceOfBirth") == 0) {
+		table.parseString = PrivOnPlaceOfBirth;
+	} else if (strcmp(aKey, "DateOfDeath") == 0) {
+		table.parseString = PrivOnDateOfDeath;
+	} else if (strcmp(aKey, "PlaceOfDeath") == 0) {
+		table.parseString = PrivOnPlaceOfDeath;
+	} else if (strcmp(aKey, "Remarks") == 0) {
+		table.parseString = PrivOnRemarks;
+	} else if (strcmp(aKey, "Audio") == 0) {
+		table.parseString = PrivOnAudio;
+	} else if (strcmp(aKey, "Images") == 0) {
+		table.parseString = PrivOnImage;
+	}
+	return table;
+}
+
+JsonParsingDispatchTable
+PrivOnlyId(const char* aKey) {
+	JsonParsingDispatchTable table;
+	table.getKeyHandler = PrivOnlyId;
+	table.parseInt = PrivNoOpInt;
+	table.parseString = PrivNoOpString;
+	if (strcmp(aKey, "Id") == 0) {
+		table.parseInt = PrivOnId;
+	}
+	return table;
+}
+
 FullPerson*
-_GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
+PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		if (self->myPersons[i].person.id == aId) {
 			return self->myPersons + i;
@@ -59,137 +257,29 @@ _GetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 		free(filePath);
 		return NULL;
 	}
-	FullPerson* person = newArray + self->myPersonCount;
+	thePerson = newArray + self->myPersonCount;
 	self->myPersons = newArray;
-	memset(person, 0, sizeof(FullPerson));
+	memset(thePerson, 0, sizeof(FullPerson));
 
 	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath, aTrace);
-	person->data = json;
-	person->folder = self->myFolders[folderIndex];
+	thePerson->data = json;
+	thePerson->folder = self->myFolders[folderIndex];
 
-	size_t length = strlen(json);
-	int isInString = 0;
-	int isInKey = 1;
-	char* currentKey = {0};
-	size_t begin = 0;
-	int isInArray = 0;
-	const char** firstNameBuffer = calloc(1, sizeof(char*));
-	const char** lastNameBuffer = NULL; // calloc(1, sizeof(char*));
-	for (size_t i = 0; i < length; i++) {
-		if (json[i] == ' ' || json[i] == '\n' || json[i] == '\r' || json[i] == '\t') {
-			continue;
-		}
-		if (json[i] == ':') {
-			if (!isInKey) {
-				free(filePath);
-				self->myPlatform->FreeString(self->myPlatform, json, aTrace);
-				return NULL;
-			}
-			isInKey = 0;
-			begin = i + 1;
-			continue;
-		}
-		if (json[i] == '[') {
-			isInArray = 1;
-			continue;
-		}
-		if (json[i] == '{') {
-			continue;
-		}
-		if (json[i] == '"') {
-			if (!isInString) {
-				begin = i + 1;
-				isInString = 1;
-				continue;
-			}
-			isInString = 0;
+	JsonParsingDispatchTable table;
+	table.getKeyHandler = PrivOnKey;
+	table.parseInt = PrivNoOpInt;
+	table.parseString = PrivNoOpString;
+	ParseJson(json, table);
+	FullPerson* person = thePerson;
 
-			json[i] = '\0';
-			if (isInKey) {
-				currentKey = json + begin;
-				continue;
-			}
-
-			if (strcmp(currentKey, "DateOfBirth") == 0) {
-				person->person.dateOfBirth = json + begin;
-			} else if (strcmp(currentKey, "FirstNames") == 0) {
-				firstNameBuffer =
-					realloc(firstNameBuffer, sizeof(char*) * (person->person.firstNameCount + 1));
-				if (firstNameBuffer == NULL) {
-					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
-					return NULL;
-				}
-				firstNameBuffer[person->person.firstNameCount] = json + begin;
-				person->person.firstNameCount++;
-			} else if (strcmp(currentKey, "LastNames") == 0) {
-				lastNameBuffer =
-					realloc(lastNameBuffer, sizeof(char*) * (person->person.lastNameCount + 1));
-				if (lastNameBuffer == NULL) {
-					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
-					return NULL;
-				}
-				lastNameBuffer[person->person.lastNameCount] = json + begin;
-				person->person.lastNameCount++;
-			} else if (strcmp(currentKey, "Title") == 0) {
-				person->person.title = json + begin;
-			} else if (strcmp(currentKey, "TitleOfNobility") == 0) {
-				person->person.titleOfNobility = json + begin;
-			} else if (strcmp(currentKey, "Gender") == 0) {
-				person->person.gender = json + begin;
-			} else if (strcmp(currentKey, "PlaceOfBirth") == 0) {
-				person->person.placeOfBirth = json + begin;
-			} else if (strcmp(currentKey, "death") == 0) {
-				person->person.dateOfDeath = json + begin;
-			} else if (strcmp(currentKey, "PlaceOfDeath") == 0) {
-				person->person.placeOfDeath = json + begin;
-			} else if (strcmp(currentKey, "Remarks") == 0) {
-				person->person.remark = json + begin;
-			} else if (strcmp(currentKey, "Audio") == 0) {
-				person->audioPath = json + begin;
-			} else if (strcmp(currentKey, "Images") == 0) {
-				person->imagePaths =
-					realloc(person->imagePaths, sizeof(char*) * (person->imagePathCount + 1));
-				if (person->imagePaths == NULL) {
-					free(filePath);
-					self->myPlatform->FreeString(self->myPlatform, json, aTrace);
-					return NULL;
-				}
-				person->imagePaths[person->imagePathCount] = json + begin;
-				person->imagePathCount++;
-			}
-			continue;
-		}
-		if (isInString) {
-			continue;
-		}
-		if (isInKey) {
-			free(filePath);
-			self->myPlatform->FreeString(self->myPlatform, json, aTrace);
-			return NULL;
-		}
-		if (json[i] == ',' && !isInArray) {
-			isInKey = 1;
-		} else if (json[i] == ']') {
-			isInArray = 0;
-		}
-		if (json[i] == ',' || json[i] == '}' || json[i] == ']') {
-			json[i] = '\0';
-
-			if (strcmp(currentKey, "Id") == 0) {
-				person->person.id = atoi(json + begin);
-			}
-			continue;
-		}
-	}
-
-	person->person.firstNames = firstNameBuffer;
-	person->person.lastNames = lastNameBuffer;
-
+	person->person.firstNames = theFirstNameBuffer;
+	person->person.lastNames = theLastNameBuffer;
 	self->myPersonCount++;
 
 	free(filePath);
+	thePerson = NULL;
+	theFirstNameBuffer = NULL;
+	theLastNameBuffer = NULL;
 	return person;
 }
 
@@ -217,9 +307,9 @@ JsonPerson_GetAllIds(IPersonals* aThis, PersonId* aOutId, ITrace* aTrace) {
 Person
 JsonPerson_GetPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-	
-	FullPerson* result = _GetPerson(self, aId, aTrace);
-	if(result == NULL){
+
+	FullPerson* result = PrivGetPerson(self, aId, aTrace);
+	if (result == NULL) {
 		aTrace->Fail(aTrace, "Returning default constructed Person");
 		return (const Person){0};
 	}
@@ -229,9 +319,9 @@ JsonPerson_GetPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 void
 JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-	FullPerson* person = _GetPerson(self, aId, aTrace);
+	FullPerson* person = PrivGetPerson(self, aId, aTrace);
 
-	if(person == NULL){
+	if (person == NULL) {
 		aTrace->Fail(aTrace, "unable to find person");
 		return;
 	}
@@ -254,9 +344,9 @@ JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 void
 JsonPerson_ShowImages(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	JsonPerson* self = (JsonPerson*)aThis;
-	FullPerson* person = _GetPerson(self, aId, aTrace);
+	FullPerson* person = PrivGetPerson(self, aId, aTrace);
 
-	if(person == NULL){
+	if (person == NULL) {
 		aTrace->Fail(aTrace, "unable to find person");
 		return;
 	}
@@ -383,34 +473,13 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 		strcpy_s(path + rootLength + 1 + strlen(self->myFolders[i]), 11, "/data.json");
 		char* file = self->myPlatform->ReadFile(self->myPlatform, path, aTrace);
 
-		size_t numberbegin = 0;
-		size_t numberlength = 0;
-		for (size_t j = 0;; j++) {
-			if (file[j] == '\0') {
-				break;
-			}
-			if (strncmp(file + j, "Id", 6) == 0) {
-				j += 6;
-				numberbegin = j;
-				continue;
-			}
-			if (numberbegin == 0) {
-				continue;
-			}
-			if (!isdigit(file[j])) {
-				if (numberlength == 0) {
-					numberbegin++;
-					continue;
-				}
-				break;
-			}
-			numberlength++;
-		}
-		if (numberlength == 0) {
-			continue;
-		}
-		file[numberbegin + numberlength + 1] = '\0';
-		self->myIds[i] = atoi(file + numberbegin);
+		JsonParsingDispatchTable table;
+		table.getKeyHandler = PrivOnlyId;
+		table.parseInt = PrivNoOpInt;
+		table.parseString = PrivNoOpString;
+		theId = 0;
+		ParseJson(file, table);
+		self->myIds[i] = theId;
 
 		self->myPlatform->FreeString(self->myPlatform, file, aTrace);
 	}
