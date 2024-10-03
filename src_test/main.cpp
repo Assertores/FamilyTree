@@ -40,7 +40,7 @@ Run(const char* aTestName, bool (*aTest)()) {
 	} catch (...) {
 		std::cout << "catched exeption.\n";
 	}
-	std::cout << "[" << aTestName << "] ///// " << (result ? "SUCCESS" : " FAILED") << '\n';
+	std::cout << "[" << (result ? "SUCCESS" : " FAILED") << "]\n";
 	return result;
 }
 #define RUN(aTest) Run(#aTest, &(aTest))
@@ -91,11 +91,12 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(IntValueParserIsCalled);
 	result &= RUN(IgnoresWhitespaceCharacters);
 	result &= RUN(CanDealWithArrayOfInts);
-	result &= RUN(CallsKeyHandlerOnlyOnceForArray);
+	result &= RUN(CallsKeyHandlerOnceForEveryElementInArray);
 	result &= RUN(ArrayCanCountainStrings);
 	result &= RUN(ArrayCanCountainMultipleStrings);
 	result &= RUN(CanDealWithObjectInObject);
 	result &= RUN(InnerKeysAreCalledOnInnerDispatchTable);
+	result &= RUN(CanHandlerArrayOfObjects);
 
 #ifndef NDEBUG
 	if (_CrtDumpMemoryLeaks() != 0) {

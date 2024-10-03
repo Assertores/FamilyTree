@@ -4,13 +4,21 @@
 #include <stdlib.h>
 #include <string.h>
 
+typedef struct {
+	const char* myCurrentKey;
+	JsonParsingDispatchTable myParser;
+} ParserElement;
+
 void
 ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 	if (aJson == NULL) {
 		return;
 	}
-	JsonParsingDispatchTable* parserStack = malloc(sizeof(JsonParsingDispatchTable));
-	parserStack[0] = aHandler;
+	ParserElement* parserStack = malloc(sizeof(ParserElement));
+	ParserElement root;
+	root.myCurrentKey = "";
+	root.myParser = aHandler;
+	parserStack[0] = root;
 	size_t parserStackDepth = 0;
 
 	size_t isArrayBitfieldStack = 0;
@@ -19,6 +27,7 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 	size_t length = strlen(aJson);
 
 	size_t begin = 0;
+
 	int isInString = 0;
 	int wasString = 0;
 	int isInKey = 1;
@@ -33,11 +42,13 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 			} else {
 				aJson[i] = '\0';
 				if (isInKey == 1) {
-					parserStack = realloc(
-						parserStack,
-						sizeof(JsonParsingDispatchTable) * (parserStackDepth + 2));
-					parserStack[parserStackDepth + 1] =
-						parserStack[parserStackDepth].getKeyHandler(aJson + begin);
+					parserStack =
+						realloc(parserStack, sizeof(ParserElement) * (parserStackDepth + 2));
+					ParserElement element;
+					element.myCurrentKey = aJson + begin;
+					element.myParser =
+						parserStack[parserStackDepth].myParser.getKeyHandler(element.myCurrentKey);
+					parserStack[parserStackDepth + 1] = element;
 					parserStackDepth++;
 				}
 				isInString = 0;
@@ -60,9 +71,9 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 		if (isInKey == 0 && (element == ',' || element == '}' || element == ']')) {
 			aJson[i] = '\0';
 			if (wasString) {
-				parserStack[parserStackDepth].parseString(aJson + begin);
+				parserStack[parserStackDepth].myParser.parseString(aJson + begin);
 			} else {
-				parserStack[parserStackDepth].parseInt(atoi(aJson + begin)); // NOLINT
+				parserStack[parserStackDepth].myParser.parseInt(atoi(aJson + begin)); // NOLINT
 			}
 			if ((isArrayBitfieldStack & ((size_t)1 << bitfieldStackDepth)) == 0) {
 				isInKey = 1;
@@ -89,10 +100,20 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 			begin = i + 1;
 		}
 
+		// get a new parser for the next value in the array.
+		if ((isArrayBitfieldStack & ((size_t)1 << bitfieldStackDepth)) != 0 && element == ',') {
+			parserStack[parserStackDepth].myParser =
+				parserStack[parserStackDepth - 1].myParser.getKeyHandler(
+					parserStack[parserStackDepth - 1].myCurrentKey);
+		}
+
 		// Pop Parsing Strategy
 		if (element == ']' || element == '}') {
 			bitfieldStackDepth--;
 			isInKey = 1;
+			if (element == '}') {
+				parserStackDepth--;
+			}
 			continue;
 		}
 	}
