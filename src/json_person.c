@@ -33,6 +33,7 @@ typedef struct {
 FullPerson* thePerson = NULL;
 const char** theFirstNameBuffer = NULL;
 const char** theLastNameBuffer = NULL;
+const char** theProfessions = NULL;
 PersonId theId = 0;
 
 void
@@ -174,9 +175,60 @@ PrivOnRemarks(const char* aValue) {
 }
 
 void
+PrivOnProfession(const char* aValue) {
+	if (thePerson == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theProfessions =
+		realloc(theProfessions, sizeof(char*) * (thePerson->person.professionCount + 1));
+	if (theProfessions == NULL) {
+		// TODO: error handling
+		return;
+	}
+	theProfessions[thePerson->person.professionCount] = aValue;
+	thePerson->person.professionCount++;
+}
+
+void
 PrivNoOpInt(int aValue) {}
 void
 PrivNoOpString(const char* aValue) {}
+
+void
+PrivOnName(const char* aValue) {
+	thePerson->person.placeOfResidences[thePerson->person.placeOfResidenceCount - 1].name = aValue;
+}
+
+void
+PrivOnStartDate(const char* aValue) {
+	thePerson->person.placeOfResidences[thePerson->person.placeOfResidenceCount - 1].startDate =
+		aValue;
+}
+
+void
+PrivOnEndData(const char* aValue) {
+	thePerson->person.placeOfResidences[thePerson->person.placeOfResidenceCount - 1].endDate =
+		aValue;
+}
+
+JsonParsingDispatchTable
+PrivOnResidence(const char* aKey) {
+	JsonParsingDispatchTable table;
+	table.getKeyHandler = PrivOnResidence;
+	table.parseInt = PrivNoOpInt;
+	table.parseString = PrivNoOpString;
+
+	if (strcmp(aKey, "Name") == 0) {
+		table.parseString = PrivOnName;
+	} else if (strcmp(aKey, "StartDate") == 0) {
+		table.parseString = PrivOnStartDate;
+	} else if (strcmp(aKey, "EndData") == 0) {
+		table.parseString = PrivOnEndData;
+	}
+
+	return table;
+}
 
 JsonParsingDispatchTable
 PrivOnKey(const char* aKey) {
@@ -211,6 +263,15 @@ PrivOnKey(const char* aKey) {
 		table.parseString = PrivOnAudio;
 	} else if (strcmp(aKey, "Images") == 0) {
 		table.parseString = PrivOnImage;
+	} else if (strcmp(aKey, "Profession") == 0) {
+		table.parseString = PrivOnProfession;
+	} else if (strcmp(aKey, "PlaceOfResidence") == 0) {
+		thePerson->person.placeOfResidenceCount++;
+		thePerson->person.placeOfResidences = realloc(
+			thePerson->person.placeOfResidences,
+			sizeof(Residence) * thePerson->person.placeOfResidenceCount);
+
+		table.getKeyHandler = PrivOnResidence;
 	}
 	return table;
 }

@@ -14,6 +14,16 @@ typedef struct Context Context;
 /// @brief an identifyer for a person. this may not match the id in the data.
 typedef size_t PersonId;
 
+/// @brief places of residence can also have a start- and enddate.
+typedef struct {
+	/// the name of the residence.
+	const char* name;
+	/// the date, when the person moved here.
+	const char* startDate;
+	/// the date the person moved away from here.
+	const char* endDate;
+} Residence;
+
 /// @brief all detailed informations about a person.
 /// @note all const char* fields will be valid and may be filled with a default string. same goes
 /// for the first element in any const char* const* array even if its Count variable is 0. it is
@@ -47,6 +57,14 @@ typedef struct {
 	const char* dateOfDeath;
 	/// the place of deat in an unspecifyed format.
 	const char* placeOfDeath;
+	/// the size of the @a professions array.
+	size_t professionCount;
+	/// all known professions of the person.
+	const char* const* professions;
+	/// the size of the @a placeOfResidences array.
+	size_t placeOfResidenceCount;
+	/// all known places of residence of the person.
+	Residence* placeOfResidences;
 	/// any additional information may be added here.
 	const char* remark;
 } Person;

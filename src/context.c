@@ -493,6 +493,9 @@ PopulateNullValues(Person* aPerson, Context* aContext) {
 	if (aPerson->remark == NULL) {
 		aPerson->remark = aContext->myDefaultString;
 	}
+	if (aPerson->professions == NULL) {
+		aPerson->professions = aContext->myDefaultString;
+	}
 }
 
 FT_API Person
@@ -725,11 +728,7 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 		FREE_TRACE_AND_RETURN INT_MIN;
 	}
 
-	int result = ComputeRelativeGeneration(
-		aContext->myMedaData,
-		aRefId,
-		aTargetId,
-		aTrace);
+	int result = ComputeRelativeGeneration(aContext->myMedaData, aRefId, aTargetId, aTrace);
 
 	FREE_TRACE_AND_RETURN result;
 }
