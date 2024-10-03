@@ -18,7 +18,7 @@ public:
 	explicit Exept(std::string aReason)
 		: myReason(std::move(aReason)) {}
 
-	[[nodiscard]] char const* what() const override { return myReason.c_str(); }
+	[[nodiscard]] char const* what() const noexcept override { return myReason.c_str(); }
 
 private:
 	std::string myReason;
