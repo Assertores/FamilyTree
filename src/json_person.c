@@ -270,6 +270,10 @@ PrivOnKey(const char* aKey) {
 		thePerson->person.placeOfResidences = realloc(
 			thePerson->person.placeOfResidences,
 			sizeof(Residence) * thePerson->person.placeOfResidenceCount);
+		memset(
+			&thePerson->person.placeOfResidences[thePerson->person.placeOfResidenceCount - 1],
+			0,
+			sizeof(Residence));
 
 		table.getKeyHandler = PrivOnResidence;
 	}
@@ -335,6 +339,7 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 
 	person->person.firstNames = theFirstNameBuffer;
 	person->person.lastNames = theLastNameBuffer;
+	person->person.professions = theProfessions;
 	self->myPersonCount++;
 
 	free(filePath);

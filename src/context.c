@@ -494,7 +494,18 @@ PopulateNullValues(Person* aPerson, Context* aContext) {
 		aPerson->remark = aContext->myDefaultString;
 	}
 	if (aPerson->professions == NULL) {
-		aPerson->professions = aContext->myDefaultString;
+		aPerson->professions = &aContext->myDefaultString;
+	}
+	for (int i = 0; i < aPerson->placeOfResidenceCount; i++) {
+		if (aPerson->placeOfResidences[i].name == NULL) {
+			aPerson->placeOfResidences[i].name = aContext->myDefaultString;
+		}
+		if (aPerson->placeOfResidences[i].startDate == NULL) {
+			aPerson->placeOfResidences[i].startDate = aContext->myDefaultString;
+		}
+		if (aPerson->placeOfResidences[i].endDate == NULL) {
+			aPerson->placeOfResidences[i].endDate = aContext->myDefaultString;
+		}
 	}
 }
 

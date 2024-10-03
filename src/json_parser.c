@@ -42,12 +42,13 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 			} else {
 				aJson[i] = '\0';
 				if (isInKey == 1) {
+					parserStack[parserStackDepth].myCurrentKey = aJson + begin;
 					parserStack =
 						realloc(parserStack, sizeof(ParserElement) * (parserStackDepth + 2));
 					ParserElement element;
-					element.myCurrentKey = aJson + begin;
+					element.myCurrentKey = "";
 					element.myParser =
-						parserStack[parserStackDepth].myParser.getKeyHandler(element.myCurrentKey);
+						parserStack[parserStackDepth].myParser.getKeyHandler(aJson + begin);
 					parserStack[parserStackDepth + 1] = element;
 					parserStackDepth++;
 				}
@@ -77,6 +78,7 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 			}
 			if ((isArrayBitfieldStack & ((size_t)1 << bitfieldStackDepth)) == 0) {
 				isInKey = 1;
+				parserStackDepth--;
 			}
 			wasString = 0;
 			begin = i + 1;
@@ -111,9 +113,6 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 		if (element == ']' || element == '}') {
 			bitfieldStackDepth--;
 			isInKey = 1;
-			if (element == '}') {
-				parserStackDepth--;
-			}
 			continue;
 		}
 	}
