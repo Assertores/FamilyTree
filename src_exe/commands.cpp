@@ -115,6 +115,19 @@ PrintPerson::ExecuteCommand(const std::string& aLine) {
 	std::cout << "Gender: " << person.gender << '\n';
 	std::cout << "Date of birth: " << person.dateOfBirth << " at: " << person.placeOfBirth << '\n';
 	std::cout << "Date of death: " << person.dateOfDeath << " at: " << person.placeOfDeath << '\n';
+	std::cout << "Professions: " << person.professions[0];
+	for (int i = 1; i < person.professionCount; i++) {
+		std::cout << ", " << person.professions[i];
+	}
+	std::cout << '\n';
+	if (person.placeOfResidenceCount > 0) {
+		std::cout << "Residence:\n";
+		for (int i = 0; i < person.placeOfResidenceCount; i++) {
+			std::cout << "    " << person.placeOfResidences[i].name
+					  << " from: " << person.placeOfResidences[i].startDate
+					  << " to: " << person.placeOfResidences[i].endDate << '\n';
+		}
+	}
 	std::cout << "Remarks:\n" << person.remark << '\n';
 }
 
