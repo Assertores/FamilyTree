@@ -7,6 +7,7 @@
 #endif
 
 #include <iostream>
+#include <string>
 
 int
 main() { // NOLINT(bugprone-exception-escape)
@@ -39,7 +40,7 @@ main() { // NOLINT(bugprone-exception-escape)
 		}
 		line = line.substr(nonWhitespaceCharacter);
 
-		quit = ICommand::Execute(command, line);
+		quit = ICommand::Execute(std::move(command), line);
 	}
 
 	Free(context, nullptr);
