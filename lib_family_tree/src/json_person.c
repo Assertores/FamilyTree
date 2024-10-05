@@ -346,6 +346,7 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	thePerson = NULL;
 	theFirstNameBuffer = NULL;
 	theLastNameBuffer = NULL;
+	theProfessions = NULL;
 	return person;
 }
 
