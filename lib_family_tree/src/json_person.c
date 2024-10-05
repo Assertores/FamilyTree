@@ -392,6 +392,10 @@ JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 		aTrace->Fail(aTrace, "unable to find person");
 		return;
 	}
+	if(person->audioPath == NULL){
+		aTrace->Fail(aTrace, "no audio to play");
+		return;
+	}
 
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
