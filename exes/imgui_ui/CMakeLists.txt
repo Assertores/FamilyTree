@@ -5,6 +5,8 @@ add_executable(FamilyTreeGui EXCLUDE_FROM_ALL "main.cpp")
 target_sources(FamilyTreeGui
 	PRIVATE
 	"src/imgui_adapter.hpp"
+	"src/view.cpp"
+	"src/view.hpp"
 	"src/windows_adapter.cpp"
 	"src/windows_adapter.hpp"
 )

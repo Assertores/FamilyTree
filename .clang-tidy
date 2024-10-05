@@ -27,7 +27,8 @@ Checks: >-
     -performance-unnecessary-value-param,
     portability-*,
     readability-*,
-    -readability-simplify-boolean-expr
+    -readability-simplify-boolean-expr,
+    -readability-convert-member-functions-to-static
 
 CheckOptions:
     - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
