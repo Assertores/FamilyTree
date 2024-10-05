@@ -113,6 +113,9 @@ ParseJson(char* aJson, JsonParsingDispatchTable aHandler) {
 		if (element == ']' || element == '}') {
 			bitfieldStackDepth--;
 			isInKey = 1;
+			if (element == ']') {
+				parserStackDepth--;
+			}
 			continue;
 		}
 	}
