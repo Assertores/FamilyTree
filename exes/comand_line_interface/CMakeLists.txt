@@ -1,8 +1,8 @@
 cmake_minimum_required (VERSION 3.20)
 
-add_executable(FamilyTree EXCLUDE_FROM_ALL "main.cpp")
+add_executable(FamilyTreeCli EXCLUDE_FROM_ALL "main.cpp")
 
-target_sources(FamilyTree
+target_sources(FamilyTreeCli
 	PRIVATE
 		"src/commands.cpp"
 		"src/commands.hpp"
@@ -12,11 +12,11 @@ target_sources(FamilyTree
 		"src/trace.hpp"
 )
 
-target_include_directories(FamilyTree PRIVATE "src")
+target_include_directories(FamilyTreeCli PRIVATE "src")
 
-target_compile_features(FamilyTree PRIVATE cxx_std_17)
+target_compile_features(FamilyTreeCli PRIVATE cxx_std_17)
 
-target_link_libraries(FamilyTree
+target_link_libraries(FamilyTreeCli
 	PRIVATE
 		FT::LibFamilyTreeStatic
 )
