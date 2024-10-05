@@ -160,85 +160,113 @@ View::PrivDoSearch() {
 void
 View::PrivShowPerson(const Person& aPerson) {
 	ImGui::PushID(&aPerson);
-	const auto personId = std::to_string(aPerson.id);
 
 	if (ImGui::CollapsingHeader(
-			(personId + ' ' + aPerson.firstNames[0] + ' ' + aPerson.lastNames[0]).c_str())) {
-		ImGui::TextUnformatted(personId.c_str());
+			(std::to_string(aPerson.id) + ' ' + aPerson.firstNames[0] + ' ' + aPerson.lastNames[0])
+				.c_str())) {
+		if (ImGui::Button("Show Images")) {
+			ShowImagesOfPerson(myContext, aPerson.id, nullptr);
+		}
 		ImGui::SameLine();
-		if (IsDefaultString(myContext, aPerson.title) == 0) {
-			ImGui::TextUnformatted(aPerson.title);
-			ImGui::SameLine();
+		if (ImGui::Button("Play Audio")) {
+			PlayPerson(myContext, aPerson.id, nullptr);
 		}
-		for (int i = 0; i < aPerson.firstNameCount; i++) {
-			ImGui::TextUnformatted(aPerson.firstNames[i]);
-			ImGui::SameLine();
-		}
-		if (IsDefaultString(myContext, aPerson.titleOfNobility) == 0) {
-			ImGui::TextUnformatted(aPerson.titleOfNobility);
-			ImGui::SameLine();
-		}
-		for (int i = 0; i < aPerson.lastNameCount; i++) {
-			ImGui::TextUnformatted(aPerson.lastNames[i]);
-			ImGui::SameLine();
-		}
-		ImGui::NewLine();
+
+		PrivShowName(aPerson);
 
 		ImGui::TextUnformatted("Gender");
 		ImGui::SameLine();
 		ImGui::TextUnformatted(aPerson.gender);
 
-		if (IsDefaultString(myContext, aPerson.dateOfBirth) == 0) {
-			ImGui::TextUnformatted("Birth");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.dateOfBirth);
-			ImGui::SameLine();
-			ImGui::TextUnformatted("at");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.placeOfBirth);
-		}
-
-		if (IsDefaultString(myContext, aPerson.dateOfDeath) == 0) {
-			ImGui::TextUnformatted("Death");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.dateOfDeath);
-			ImGui::SameLine();
-			ImGui::TextUnformatted("at");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.placeOfDeath);
-		}
-
-		if (aPerson.professionCount > 0) {
-			ImGui::TextUnformatted("Professions:");
-			for (int i = 0; i < aPerson.professionCount; i++) {
-				ImGui::TextUnformatted(" -");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(aPerson.professions[i]);
-			}
-		}
-
-		if (aPerson.placeOfResidenceCount > 0) {
-			ImGui::TextUnformatted("Residence of:");
-			for (int i = 0; i < aPerson.placeOfResidenceCount; i++) {
-				ImGui::TextUnformatted(" -");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(aPerson.placeOfResidences[i].name);
-				ImGui::SameLine();
-				ImGui::TextUnformatted("from");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(aPerson.placeOfResidences[i].startDate);
-				ImGui::SameLine();
-				ImGui::TextUnformatted("to");
-				ImGui::SameLine();
-				ImGui::TextUnformatted(aPerson.placeOfResidences[i].endDate);
-			}
-		}
-
-		if (IsDefaultString(myContext, aPerson.remark) == 0) {
-			ImGui::NewLine();
-			ImGui::TextUnformatted("Remarks:");
-			ImGui::TextUnformatted(aPerson.remark);
-		}
+		PrivShowDates(aPerson);
+		PrivShowProfessions(aPerson);
+		PrivShowResidence(aPerson);
+		PrivShowRemarks(aPerson);
 	}
 	ImGui::PopID();
+}
+
+void
+View::PrivShowName(const Person& aPerson) {
+	if (IsDefaultString(myContext, aPerson.title) == 0) {
+		ImGui::TextUnformatted(aPerson.title);
+		ImGui::SameLine();
+	}
+	for (int i = 0; i < aPerson.firstNameCount; i++) {
+		ImGui::TextUnformatted(aPerson.firstNames[i]);
+		ImGui::SameLine();
+	}
+	if (IsDefaultString(myContext, aPerson.titleOfNobility) == 0) {
+		ImGui::TextUnformatted(aPerson.titleOfNobility);
+		ImGui::SameLine();
+	}
+	for (int i = 0; i < aPerson.lastNameCount; i++) {
+		ImGui::TextUnformatted(aPerson.lastNames[i]);
+		ImGui::SameLine();
+	}
+	ImGui::NewLine();
+}
+
+void
+View::PrivShowDates(const Person& aPerson) {
+	if (IsDefaultString(myContext, aPerson.dateOfBirth) == 0) {
+		ImGui::TextUnformatted("Birth");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(aPerson.dateOfBirth);
+		ImGui::SameLine();
+		ImGui::TextUnformatted("at");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(aPerson.placeOfBirth);
+	}
+
+	if (IsDefaultString(myContext, aPerson.dateOfDeath) == 0) {
+		ImGui::TextUnformatted("Death");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(aPerson.dateOfDeath);
+		ImGui::SameLine();
+		ImGui::TextUnformatted("at");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(aPerson.placeOfDeath);
+	}
+}
+
+void
+View::PrivShowProfessions(const Person& aPerson) {
+	if (aPerson.professionCount > 0) {
+		ImGui::TextUnformatted("Professions:");
+		for (int i = 0; i < aPerson.professionCount; i++) {
+			ImGui::TextUnformatted(" -");
+			ImGui::SameLine();
+			ImGui::TextUnformatted(aPerson.professions[i]);
+		}
+	}
+}
+
+void
+View::PrivShowResidence(const Person& aPerson) {
+	if (aPerson.placeOfResidenceCount > 0) {
+		ImGui::TextUnformatted("Residence of:");
+		for (int i = 0; i < aPerson.placeOfResidenceCount; i++) {
+			ImGui::TextUnformatted(" -");
+			ImGui::SameLine();
+			ImGui::TextUnformatted(aPerson.placeOfResidences[i].name);
+			ImGui::SameLine();
+			ImGui::TextUnformatted("from");
+			ImGui::SameLine();
+			ImGui::TextUnformatted(aPerson.placeOfResidences[i].startDate);
+			ImGui::SameLine();
+			ImGui::TextUnformatted("to");
+			ImGui::SameLine();
+			ImGui::TextUnformatted(aPerson.placeOfResidences[i].endDate);
+		}
+	}
+}
+
+void
+View::PrivShowRemarks(const Person& aPerson) {
+	if (IsDefaultString(myContext, aPerson.remark) == 0) {
+		ImGui::NewLine();
+		ImGui::TextUnformatted("Remarks:");
+		ImGui::TextUnformatted(aPerson.remark);
+	}
 }

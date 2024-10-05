@@ -25,4 +25,10 @@ private:
 	void PrivShowFilters();
 	void PrivDoSearch();
 	void PrivShowPerson(const Person& aPerson);
+
+	void PrivShowName(const Person& aPerson);
+	void PrivShowDates(const Person& aPerson);
+	void PrivShowProfessions(const Person& aPerson);
+	void PrivShowResidence(const Person& aPerson);
+	void PrivShowRemarks(const Person& aPerson);
 };
