@@ -26,3 +26,10 @@ main() { // NOLINT(bugprone-exception-escape)
 	view.Shutdown();
 	window->Shutdown();
 }
+
+// NOTE: this is here sothat no extra console window is opened.
+#include <windows.h>
+int APIENTRY
+WinMain(HINSTANCE /*unused*/, HINSTANCE /*unused*/, PSTR /*unused*/, int /*unused*/) {
+	return main();
+}

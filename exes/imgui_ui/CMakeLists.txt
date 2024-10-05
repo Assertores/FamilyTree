@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.20)
 
-add_executable(FamilyTreeGui EXCLUDE_FROM_ALL "main.cpp")
+add_executable(FamilyTreeGui WIN32 "main.cpp")
 
 target_sources(FamilyTreeGui
 	PRIVATE

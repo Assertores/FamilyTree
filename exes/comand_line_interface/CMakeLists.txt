@@ -1,6 +1,6 @@
 cmake_minimum_required (VERSION 3.20)
 
-add_executable(FamilyTreeCli EXCLUDE_FROM_ALL "main.cpp")
+add_executable(FamilyTreeCli "main.cpp")
 
 target_sources(FamilyTreeCli
 	PRIVATE
