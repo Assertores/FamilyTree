@@ -894,6 +894,142 @@ GetCommonChildren(
 	FREE_TRACE_AND_RETURN result;
 }
 
+// 1 if id was unique otherwise 0
+int
+AddIfUnique(PersonId** aArray, size_t aCount, PersonId aNewId) {
+	for (size_t i = 0; i < aCount; i++) {
+		if ((*aArray)[i] == aNewId) {
+			return 0;
+		}
+	}
+	*aArray = realloc(*aArray, (aCount + 1) * sizeof(PersonId));
+	(*aArray)[aCount] = aNewId;
+	return 1;
+}
+
+FT_API void
+BuildGraph(
+	Context* aContext,
+	PersonId aId,
+	size_t aDistance,
+	GraphBuilderStrategy* aStrategy,
+	ITrace* aTrace) {
+	SET_TRACE()
+
+	if (aContext == NULL) {
+		aTrace->Fail(aTrace, "Context is NULL");
+		FREE_TRACE_AND_RETURN;
+	}
+	if (aStrategy == NULL) {
+		aTrace->Fail(aTrace, "Strategy is NULL");
+		FREE_TRACE_AND_RETURN;
+	}
+	if (aStrategy->FamilieStrategy == NULL) {
+		aTrace->Fail(aTrace, "Strategy does not contain a FamilieStrategy method");
+		FREE_TRACE_AND_RETURN;
+	}
+	if (aStrategy->PersonInGenerationStrategy == NULL) {
+		aTrace->Fail(aTrace, "Strategy does not contain a PersonInGenerationStrategy method");
+		FREE_TRACE_AND_RETURN;
+	}
+
+	PersonId* personToShowSet = malloc(sizeof(PersonId));
+	personToShowSet[0] = aId;
+	size_t personToShowCount = 1;
+	int wasUnique = 0;
+	int othersGeneration = 0;
+
+	aTrace->AddEvent(aTrace, "Send requested person id into Strategy");
+	aStrategy->PersonInGenerationStrategy(aStrategy, aId, 0);
+
+	ITrace* realTrace = aTrace;
+	aTrace = realTrace->CreateSubTrace(realTrace, "Find unique persons");
+	ITrace* subtrace;
+	for (size_t currentDistance = 0; currentDistance < aDistance; currentDistance++) {
+		aTrace->AddEvent(aTrace, "search one distance futher away");
+		int newPersonCount = 0;
+		for (size_t i = 0; i < personToShowCount; i++) {
+			size_t count = 0;
+
+			SUBTRACE(
+				"Get relations",
+				Relation* array =
+					GetPersonRelations(aContext, personToShowSet[i], &count, subtrace));
+			for (size_t arrI = 0; arrI < count; arrI++) {
+				wasUnique = AddIfUnique(
+					&personToShowSet,
+					personToShowCount + newPersonCount,
+					array[arrI].id1);
+				if (wasUnique != 0) {
+					aTrace->AddEvent(aTrace, "found a new person");
+					newPersonCount++;
+
+					SUBTRACE(
+						"Get Generation for person",
+						othersGeneration =
+							GetRelativeGeneration(aContext, aId, array[arrI].id1, subtrace));
+
+					aTrace->AddEvent(aTrace, "Send person into Strategy");
+					aStrategy->PersonInGenerationStrategy(
+						aStrategy,
+						array[arrI].id1,
+						othersGeneration);
+				}
+				wasUnique = AddIfUnique(
+					&personToShowSet,
+					personToShowCount + newPersonCount,
+					array[arrI].id2);
+				if (wasUnique != 0) {
+					aTrace->AddEvent(aTrace, "found a new person");
+					newPersonCount++;
+
+					SUBTRACE(
+						"Get Generation for person",
+						othersGeneration =
+							GetRelativeGeneration(aContext, aId, array[arrI].id2, aTrace));
+
+					aTrace->AddEvent(aTrace, "Send person into Strategy");
+					aStrategy->PersonInGenerationStrategy(
+						aStrategy,
+						array[arrI].id2,
+						othersGeneration);
+				}
+			}
+		}
+		personToShowCount += newPersonCount;
+	}
+	aTrace->Free(aTrace);
+
+	aTrace = realTrace->CreateSubTrace(realTrace, "Generate Families");
+	for (size_t personIndex = 0; personIndex < personToShowCount; personIndex++) {
+		size_t count = 0;
+		SUBTRACE(
+			"Find Partners",
+			PersonId* partners =
+				GetPartners(aContext, personToShowSet[personIndex], &count, subtrace));
+		for (size_t i = 0; i < count; i++) {
+			PersonId parents[] = {personToShowSet[personIndex], partners[i]};
+			size_t childCount = 0;
+			SUBTRACE(
+				"Get Childrens of two parents",
+				PersonId* children = GetCommonChildren(aContext, 2, parents, &childCount, aTrace));
+
+			size_t parentCount = 0;
+			SUBTRACE(
+				"Get All Parents of the Familie",
+				PersonId* fullParents =
+					GetCommonParents(aContext, childCount, children, &parentCount, aTrace));
+
+			aTrace->AddEvent(aTrace, "Send familie into Strategy");
+			aStrategy->FamilieStrategy(aStrategy, fullParents, parentCount, children, childCount);
+		}
+	}
+	aTrace->Free(aTrace);
+
+	aTrace = realTrace;
+	FREE_TRACE_AND_RETURN;
+}
+
 FT_API int
 IsDefaultString(Context* aContext, const char* aStringToCheck) {
 	if (aContext == NULL) {

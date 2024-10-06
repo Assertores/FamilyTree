@@ -268,6 +268,20 @@ FT_API PersonId* GetCommonChildren(
 	size_t* aOutChildrenCount,
 	ITrace* aTrace);
 
+/// @brief a shortcut method using a bunch of the previous apis to build up a graph.
+/// @param aContext a pointer to the context.
+/// @param aId the id of the person interested in.
+/// @param aDistance the amount of relational hops from @a aId away still included in the graph.
+/// @param aStrategy a collection of function to whome calculated data is returned to.
+/// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
+/// interested.
+FT_API void BuildGraph(
+	Context* aContext,
+	PersonId aId,
+	size_t aDistance,
+	GraphBuilderStrategy* aStrategy,
+	ITrace* aTrace);
+
 /// @brief checks if a given string points to the default value.
 /// @param aContext a pointer to the context.
 /// @param aStringToCheck the string to check.

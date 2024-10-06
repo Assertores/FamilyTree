@@ -102,6 +102,7 @@ typedef struct IPersonals IPersonals;
 typedef struct IDataProvider IDataProvider;
 typedef struct IPlatform IPlatform;
 typedef struct ITrace ITrace;
+typedef struct GraphBuilderStrategy GraphBuilderStrategy;
 /// @endcond
 
 /// @brief an interface through which relational data can be retreaved.
@@ -217,6 +218,17 @@ struct ITrace {
 	void (*Fail)(ITrace* aThis, const char* aReason);
 	/// frees the object itself and all data allocated by it.
 	void (*Free)(ITrace* aThis);
+};
+
+struct GraphBuilderStrategy {
+	void (*PersonInGenerationStrategy)(GraphBuilderStrategy* aThis, PersonId aId, int aGeneration);
+	/// the arrays may only be valid turing the execution of this function
+	void (*FamilieStrategy)(
+		GraphBuilderStrategy* aThis,
+		PersonId* aParents,
+		size_t aParentCount,
+		PersonId* aChilds,
+		size_t aChildCount);
 };
 
 #ifdef __cplusplus
