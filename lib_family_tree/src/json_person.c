@@ -30,11 +30,19 @@ typedef struct {
 	FullPerson* myPersons;
 } JsonPerson;
 
+const char* const theCompatableVersion = "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57";
+
 FullPerson* thePerson = NULL;
 const char** theFirstNameBuffer = NULL;
 const char** theLastNameBuffer = NULL;
 const char** theProfessions = NULL;
 PersonId theId = 0;
+const char* theVersion = NULL;
+
+void
+PrivOnVersion(const char* aValue) {
+	theVersion = aValue;
+}
 
 void
 PrivOnId(int aValue) {
@@ -223,7 +231,7 @@ PrivOnResidence(const char* aKey) {
 		table.parseString = PrivOnName;
 	} else if (strcmp(aKey, "StartDate") == 0) {
 		table.parseString = PrivOnStartDate;
-	} else if (strcmp(aKey, "EndData") == 0) {
+	} else if (strcmp(aKey, "EndDate") == 0) {
 		table.parseString = PrivOnEndData;
 	}
 
@@ -239,6 +247,8 @@ PrivOnKey(const char* aKey) {
 
 	if (strcmp(aKey, "Id") == 0) {
 		table.parseInt = PrivOnId;
+	} else if (strcmp(aKey, "Version") == 0) {
+		table.parseString = PrivOnVersion;
 	} else if (strcmp(aKey, "FirstNames") == 0) {
 		table.parseString = PrivOnFirstName;
 	} else if (strcmp(aKey, "LastNames") == 0) {
@@ -288,6 +298,8 @@ PrivOnlyId(const char* aKey) {
 	table.parseString = PrivNoOpString;
 	if (strcmp(aKey, "Id") == 0) {
 		table.parseInt = PrivOnId;
+	} else if (strcmp(aKey, "Version") == 0) {
+		table.parseString = PrivOnVersion;
 	}
 	return table;
 }
@@ -329,12 +341,16 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath, aTrace);
 	thePerson->data = json;
 	thePerson->folder = self->myFolders[folderIndex];
+	theVersion = NULL;
 
 	JsonParsingDispatchTable table;
 	table.getKeyHandler = PrivOnKey;
 	table.parseInt = PrivNoOpInt;
 	table.parseString = PrivNoOpString;
 	ParseJson(json, table);
+	if (theVersion == NULL || strcmp(theVersion, theCompatableVersion) != 0) {
+		return NULL;
+	}
 	FullPerson* person = thePerson;
 
 	person->person.firstNames = theFirstNameBuffer;
@@ -392,7 +408,7 @@ JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 		aTrace->Fail(aTrace, "unable to find person");
 		return;
 	}
-	if(person->audioPath == NULL){
+	if (person->audioPath == NULL) {
 		aTrace->Fail(aTrace, "no audio to play");
 		return;
 	}
@@ -549,8 +565,11 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 		table.parseInt = PrivNoOpInt;
 		table.parseString = PrivNoOpString;
 		theId = 0;
+		theVersion = NULL;
 		ParseJson(file, table);
-		self->myIds[i] = theId;
+		if (theVersion != NULL && strcmp(theVersion, theCompatableVersion) == 0) {
+			self->myIds[i] = theId;
+		}
 
 		self->myPlatform->FreeString(self->myPlatform, file, aTrace);
 	}

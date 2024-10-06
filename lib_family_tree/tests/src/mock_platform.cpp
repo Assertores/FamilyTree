@@ -65,6 +65,7 @@ MockPlatform::ReadFile(const char* aPath) {
 	if (aPath == std::string_view("/abc/data.json")) {
 		const auto* backing =
 			R"json({
+	"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57",
 	"Id": 5,
 	"Title" : "Prof. Dr.",
 	"FirstNames" : [
@@ -93,7 +94,8 @@ MockPlatform::ReadFile(const char* aPath) {
 		return (new std::string(backing))->data();
 	}
 	if (aPath == std::string_view("/def/data.json")) {
-		const auto* backing = R"json({"Id": 32})json";
+		const auto* backing =
+			R"json({"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57","Id": 32})json";
 		return (new std::string(backing))->data();
 	}
 	const auto* backing = "id1,id2,type\n5,32,StrictlyLower";

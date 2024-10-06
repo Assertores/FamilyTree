@@ -1,6 +1,8 @@
 ﻿cmake_minimum_required (VERSION 3.20)
 
-project ("FamilyTree" LANGUAGES C CXX)
+project ("FamilyTree"
+		LANGUAGES C CXX
+		VERSION 0.1.0)
 
 include(CTest)
 include("CodeAnalysis.cmake")

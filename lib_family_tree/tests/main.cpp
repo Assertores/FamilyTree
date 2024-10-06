@@ -104,6 +104,7 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	}
 #endif
 
+	std::cout << (result ? "All Succeeded" : "Failure detected") << '\n';
 	std::cout << "===== DONE =====\n";
 	return result ? 0 : 1;
 }
