@@ -1,5 +1,6 @@
-#include "src/imgui_adapter.hpp"
 #include "src/view.hpp"
+
+#include <imgui_adapter.hpp>
 
 static constexpr auto theWindowWidth = 1280;
 static constexpr auto theWindowHight = 720;
