@@ -19,6 +19,24 @@ target_link_libraries(ImGuiAdapter
 		ImGui
 )
 
+add_library(FamilyTreeAdapter STATIC)
+
+target_sources(FamilyTreeAdapter
+	PUBLIC
+		"src/context_adapter.hpp"
+	PRIVATE
+		"src/context_adapter.cpp"
+)
+
+target_include_directories(FamilyTreeAdapter PUBLIC "src")
+
+target_compile_features(FamilyTreeAdapter PRIVATE cxx_std_17)
+
+target_link_libraries(FamilyTreeAdapter
+	PUBLIC
+		FT::LibFamilyTreeStatic
+)
+
 add_executable(FamilyTreeGui WIN32 "main.cpp")
 
 target_sources(FamilyTreeGui
