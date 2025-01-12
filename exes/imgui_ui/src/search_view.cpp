@@ -1,4 +1,4 @@
-#include "view.hpp"
+#include "search_view.hpp"
 
 #include <imgui.h>
 
@@ -11,13 +11,16 @@
 #include <tchar.h>
 // clang-format on
 
+namespace ui {
+constexpr auto theLocDefaultString = "N/A";
+
 void
-View::Print() {
+SearchView::Print() {
 	if (myContext == nullptr) {
 		if (ImGui::Button("Load Data")) {
 			auto folder = PrivGetFolder();
 			if (!folder.empty()) {
-				myContext = CreateWithCSVAndJSON(folder.c_str(), nullptr);
+				myContext = ContextAdapter::Create(folder.c_str());
 			}
 		}
 		return;
@@ -46,16 +49,8 @@ View::Print() {
 	ImGui::EndTabBar();
 }
 
-void
-View::Shutdown() {
-	if (myContext != nullptr) {
-		Free(myContext, nullptr);
-	}
-	myContext = nullptr;
-}
-
 std::string
-View::PrivGetFolder() {
+SearchView::PrivGetFolder() {
 	BROWSEINFOW setting{};
 	setting.ulFlags = BIF_RETURNONLYFSDIRS;
 	auto* result = SHBrowseForFolderW(&setting);
@@ -95,7 +90,7 @@ View::PrivGetFolder() {
 }
 
 void
-View::PrivShowFilters() {
+SearchView::PrivShowFilters() {
 	if (myFirstNameFilters.empty()) {
 		myFirstNameFilters.emplace_back();
 	}
@@ -127,29 +122,17 @@ View::PrivShowFilters() {
 }
 
 void
-View::PrivDoSearch() {
+SearchView::PrivDoSearch() {
 	Person prototype{};
 	prototype.title = myTitleFilter.data();
-	std::vector<const char*> firstNames{};
-	firstNames.reserve(myFirstNameFilters.size());
 	for (const auto& name : myFirstNameFilters) {
-		firstNames.emplace_back(name.data());
+		prototype.firstNames.emplace_back(name.data());
 	}
-	prototype.firstNameCount = firstNames.size();
-	prototype.firstNames = firstNames.data();
 	prototype.titleOfNobility = myTitleOfNobilityFilter.data();
-	std::vector<const char*> lastNames{};
-	lastNames.reserve(myLastNameFilters.size());
 	for (const auto& name : myLastNameFilters) {
-		lastNames.emplace_back(name.data());
+		prototype.lastNames.emplace_back(name.data());
 	}
-	prototype.lastNameCount = lastNames.size();
-	prototype.lastNames = lastNames.data();
-	size_t size = 0;
-	auto* persons = GetPersonsMatchingPattern(myContext, prototype, 1, &size, nullptr);
-	for (int i = 0; i < size; i++) {
-		mySearchResults.emplace_back(persons[i]);
-	}
+	mySearchResults = myContext->GetPersonsMatchingPattern(std::move(prototype), 1);
 
 	myTitleFilter = {};
 	myFirstNameFilters.clear();
@@ -158,25 +141,25 @@ View::PrivDoSearch() {
 }
 
 void
-View::PrivShowPerson(const Person& aPerson) {
+SearchView::PrivShowPerson(const Person& aPerson) {
 	ImGui::PushID(&aPerson);
 
 	if (ImGui::CollapsingHeader(
 			(std::to_string(aPerson.id) + ' ' + aPerson.firstNames[0] + ' ' + aPerson.lastNames[0])
 				.c_str())) {
 		if (ImGui::Button("Show Images")) {
-			ShowImagesOfPerson(myContext, aPerson.id, nullptr);
+			myContext->ShowImagesOfPerson(aPerson.id);
 		}
 		ImGui::SameLine();
 		if (ImGui::Button("Play Audio")) {
-			PlayPerson(myContext, aPerson.id, nullptr);
+			myContext->PlayPerson(aPerson.id);
 		}
 
 		PrivShowName(aPerson);
 
 		ImGui::TextUnformatted("Gender");
 		ImGui::SameLine();
-		ImGui::TextUnformatted(aPerson.gender);
+		ImGui::TextUnformatted(aPerson.gender.value_or(theLocDefaultString).c_str());
 
 		PrivShowDates(aPerson);
 		PrivShowProfessions(aPerson);
@@ -187,86 +170,91 @@ View::PrivShowPerson(const Person& aPerson) {
 }
 
 void
-View::PrivShowName(const Person& aPerson) {
-	if (IsDefaultString(myContext, aPerson.title) == 0) {
-		ImGui::TextUnformatted(aPerson.title);
+SearchView::PrivShowName(const Person& aPerson) {
+	if (aPerson.title.has_value()) {
+		ImGui::TextUnformatted(aPerson.title.value().c_str());
 		ImGui::SameLine();
 	}
-	for (int i = 0; i < aPerson.firstNameCount; i++) {
-		ImGui::TextUnformatted(aPerson.firstNames[i]);
+	for (const auto& firstName : aPerson.firstNames) {
+		ImGui::TextUnformatted(firstName.c_str());
 		ImGui::SameLine();
 	}
-	if (IsDefaultString(myContext, aPerson.titleOfNobility) == 0) {
-		ImGui::TextUnformatted(aPerson.titleOfNobility);
+	if (aPerson.titleOfNobility.has_value()) {
+		ImGui::TextUnformatted(aPerson.titleOfNobility.value().c_str());
 		ImGui::SameLine();
 	}
-	for (int i = 0; i < aPerson.lastNameCount; i++) {
-		ImGui::TextUnformatted(aPerson.lastNames[i]);
+	for (const auto& lastName : aPerson.lastNames) {
+		ImGui::TextUnformatted(lastName.c_str());
 		ImGui::SameLine();
 	}
 	ImGui::NewLine();
 }
 
 void
-View::PrivShowDates(const Person& aPerson) {
-	if (IsDefaultString(myContext, aPerson.dateOfBirth) == 0) {
+SearchView::PrivShowDates(const Person& aPerson) {
+	if (aPerson.dateOfBirth.has_value()) {
 		ImGui::TextUnformatted("Birth");
 		ImGui::SameLine();
-		ImGui::TextUnformatted(aPerson.dateOfBirth);
+		ImGui::TextUnformatted(aPerson.dateOfBirth.value().c_str());
 		ImGui::SameLine();
 		ImGui::TextUnformatted("at");
 		ImGui::SameLine();
-		ImGui::TextUnformatted(aPerson.placeOfBirth);
+		ImGui::TextUnformatted(aPerson.placeOfBirth.value_or(theLocDefaultString).c_str());
 	}
 
-	if (IsDefaultString(myContext, aPerson.dateOfDeath) == 0) {
+	if (aPerson.dateOfDeath.has_value()) {
 		ImGui::TextUnformatted("Death");
 		ImGui::SameLine();
-		ImGui::TextUnformatted(aPerson.dateOfDeath);
+		ImGui::TextUnformatted(aPerson.dateOfDeath.value().c_str());
 		ImGui::SameLine();
 		ImGui::TextUnformatted("at");
 		ImGui::SameLine();
-		ImGui::TextUnformatted(aPerson.placeOfDeath);
+		ImGui::TextUnformatted(aPerson.placeOfDeath.value_or(theLocDefaultString).c_str());
 	}
 }
 
 void
-View::PrivShowProfessions(const Person& aPerson) {
-	if (aPerson.professionCount > 0) {
-		ImGui::TextUnformatted("Professions:");
-		for (int i = 0; i < aPerson.professionCount; i++) {
-			ImGui::TextUnformatted(" -");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.professions[i]);
-		}
+SearchView::PrivShowProfessions(const Person& aPerson) {
+	if (aPerson.professions.empty()) {
+		return;
+	}
+
+	ImGui::TextUnformatted("Professions:");
+	for (const auto& provession : aPerson.professions) {
+		ImGui::TextUnformatted(" -");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(provession.c_str());
 	}
 }
 
 void
-View::PrivShowResidence(const Person& aPerson) {
-	if (aPerson.placeOfResidenceCount > 0) {
-		ImGui::TextUnformatted("Residence of:");
-		for (int i = 0; i < aPerson.placeOfResidenceCount; i++) {
-			ImGui::TextUnformatted(" -");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.placeOfResidences[i].name);
-			ImGui::SameLine();
-			ImGui::TextUnformatted("from");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.placeOfResidences[i].startDate);
-			ImGui::SameLine();
-			ImGui::TextUnformatted("to");
-			ImGui::SameLine();
-			ImGui::TextUnformatted(aPerson.placeOfResidences[i].endDate);
-		}
+SearchView::PrivShowResidence(const Person& aPerson) {
+	if (aPerson.placeOfResidences.empty()) {
+		return;
+	}
+
+	ImGui::TextUnformatted("Residence of:");
+	for (const auto& recidence : aPerson.placeOfResidences) {
+		ImGui::TextUnformatted(" -");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(recidence.name.value_or(theLocDefaultString).c_str());
+		ImGui::SameLine();
+		ImGui::TextUnformatted("from");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(recidence.startDate.value_or(theLocDefaultString).c_str());
+		ImGui::SameLine();
+		ImGui::TextUnformatted("to");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(recidence.endDate.value_or(theLocDefaultString).c_str());
 	}
 }
 
 void
-View::PrivShowRemarks(const Person& aPerson) {
-	if (IsDefaultString(myContext, aPerson.remark) == 0) {
+SearchView::PrivShowRemarks(const Person& aPerson) {
+	if (aPerson.remark.has_value()) {
 		ImGui::NewLine();
 		ImGui::TextUnformatted("Remarks:");
-		ImGui::TextUnformatted(aPerson.remark);
+		ImGui::TextUnformatted(aPerson.remark.value().c_str());
 	}
 }
+} // namespace ui

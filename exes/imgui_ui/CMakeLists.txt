@@ -41,7 +41,8 @@ add_executable(FamilyTreeGui WIN32 "main.cpp")
 
 target_sources(FamilyTreeGui
 	PRIVATE
-		"src/view.cpp"
+		"src/search_view.cpp"
+		"src/search_view.hpp"
 		"src/view.hpp"
 )
 
@@ -51,6 +52,6 @@ target_compile_features(FamilyTreeGui PRIVATE cxx_std_17)
 
 target_link_libraries(FamilyTreeGui
 	PRIVATE
-		FT::LibFamilyTreeStatic
+		FamilyTreeAdapter
 		ImGuiAdapter
 )
