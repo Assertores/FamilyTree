@@ -5,88 +5,29 @@
 #include <array>
 #include <iostream>
 
-// clang-format off
-#include <windows.h>
-#include <shlobj.h>
-#include <tchar.h>
-// clang-format on
-
 namespace ui {
 constexpr auto theLocDefaultString = "N/A";
 
-void
+SearchView::SearchView(std::shared_ptr<ContextAdapter> aContext)
+	: myContext(std::move(aContext)) {}
+
+std::shared_ptr<View>
 SearchView::Print() {
-	if (myContext == nullptr) {
-		if (ImGui::Button("Load Data")) {
-			auto folder = PrivGetFolder();
-			if (!folder.empty()) {
-				myContext = ContextAdapter::Create(folder.c_str());
-			}
+	if (mySearchResults.empty()) {
+		PrivShowFilters();
+		if (ImGui::Button("Search")) {
+			PrivDoSearch();
 		}
-		return;
+		return nullptr;
 	}
 
-	ImGui::BeginTabBar("Menu");
-	if (ImGui::BeginTabItem("Search")) {
-		if (mySearchResults.empty()) {
-			PrivShowFilters();
-			if (ImGui::Button("Search")) {
-				PrivDoSearch();
-			}
-		} else {
-			for (const auto& person : mySearchResults) {
-				PrivShowPerson(person);
-			}
-			if (ImGui::Button("Clear")) {
-				mySearchResults.clear();
-			}
-		}
-		ImGui::EndTabItem();
+	for (const auto& person : mySearchResults) {
+		PrivShowPerson(person);
 	}
-	if (ImGui::BeginTabItem("Graph")) {
-		ImGui::EndTabItem();
+	if (ImGui::Button("Clear")) {
+		mySearchResults.clear();
 	}
-	ImGui::EndTabBar();
-}
-
-std::string
-SearchView::PrivGetFolder() {
-	BROWSEINFOW setting{};
-	setting.ulFlags = BIF_RETURNONLYFSDIRS;
-	auto* result = SHBrowseForFolderW(&setting);
-	if (result == nullptr) {
-		return {};
-	}
-	// std::array<wchar_t, MAX_PATH> szDirectory{};
-	std::wstring szDirectory{};
-	szDirectory.resize(MAX_PATH);
-	SHGetPathFromIDListW(result, szDirectory.data());
-
-	int nameLengthAsUtf8Char = WideCharToMultiByte(
-		CP_UTF8,
-		0,
-		szDirectory.c_str(),
-		static_cast<int>(szDirectory.size()),
-		nullptr,
-		0,
-		nullptr,
-		nullptr);
-	if (nameLengthAsUtf8Char == 0) {
-		return {};
-	}
-	std::string convertedName{};
-	convertedName.resize(nameLengthAsUtf8Char);
-	WideCharToMultiByte(
-		CP_UTF8,
-		0,
-		szDirectory.c_str(),
-		static_cast<int>(szDirectory.size()),
-		convertedName.data(),
-		nameLengthAsUtf8Char,
-		nullptr,
-		nullptr);
-
-	return convertedName;
+	return nullptr;
 }
 
 void

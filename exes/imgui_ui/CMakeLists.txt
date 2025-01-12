@@ -43,6 +43,8 @@ target_sources(FamilyTreeGui
 	PRIVATE
 		"src/search_view.cpp"
 		"src/search_view.hpp"
+		"src/setup_view.cpp"
+		"src/setup_view.hpp"
 		"src/view.hpp"
 )
 

@@ -1,5 +1,7 @@
 #pragma once
 
+#include "view.hpp"
+
 #include <context_adapter.hpp>
 
 #include <array>
@@ -10,9 +12,10 @@ namespace ui {
 
 static constexpr auto theInputfieldSize = 256;
 
-class SearchView {
+class SearchView final : public View {
 public:
-	void Print();
+	explicit SearchView(std::shared_ptr<ContextAdapter> aContext);
+	std::shared_ptr<View> Print() override;
 
 private:
 	std::shared_ptr<ContextAdapter> myContext;
@@ -22,7 +25,6 @@ private:
 	std::array<char, theInputfieldSize> myTitleOfNobilityFilter{};
 	std::vector<std::array<char, theInputfieldSize>> myLastNameFilters;
 
-	static std::string PrivGetFolder();
 	void PrivShowFilters();
 	void PrivDoSearch();
 	void PrivShowPerson(const Person& aPerson);

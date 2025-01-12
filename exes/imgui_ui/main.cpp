@@ -1,4 +1,4 @@
-#include "src/search_view.hpp"
+#include "src/setup_view.hpp"
 
 #include <imgui_adapter.hpp>
 
@@ -14,14 +14,20 @@ void DoUi();
 int
 main() { // NOLINT(bugprone-exception-escape)
 	auto window = ImGuiAdapter::CreateWindows();
-	ui::SearchView view{};
+	std::shared_ptr<ui::View> view = std::make_shared<ui::SetupView>();
+	view->Enter();
 
 	for (window->Init(theWindowWidth, theWindowHight, "Family Tree UI", {}); window->Update();
 		 window->Show()) {
 		ImGui::SetNextWindowPos({});
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::Begin("MainWindow", nullptr, theWindowFlags);
-		view.Print();
+		auto newView = view->Print();
+		if (newView) {
+			view->Exit();
+			view = std::move(newView);
+			view->Enter();
+		}
 		ImGui::End();
 	}
 	window->Shutdown();
