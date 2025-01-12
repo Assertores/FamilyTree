@@ -41,6 +41,8 @@ add_executable(FamilyTreeGui WIN32 "main.cpp")
 
 target_sources(FamilyTreeGui
 	PRIVATE
+		"src/list_view.cpp"
+		"src/list_view.hpp"
 		"src/search_view.cpp"
 		"src/search_view.hpp"
 		"src/setup_view.cpp"
