@@ -16,28 +16,24 @@ DetaildView::DetaildView(std::shared_ptr<ContextAdapter> aContext, Person aPerso
 std::shared_ptr<View>
 DetaildView::Print(WindowFactory aWindowFactory) {
 	ImGui::PushID(&myPerson);
-	if (ImGui::CollapsingHeader((std::to_string(myPerson.id) + ' ' + myPerson.firstNames[0] + ' '
-								 + myPerson.lastNames[0])
-									.c_str())) {
-		if (ImGui::Button("Show Images")) {
-			myContext->ShowImagesOfPerson(myPerson.id);
-		}
-		ImGui::SameLine();
-		if (ImGui::Button("Play Audio")) {
-			myContext->PlayPerson(myPerson.id);
-		}
-
-		PrivShowName();
-
-		ImGui::TextUnformatted("Gender");
-		ImGui::SameLine();
-		ImGui::TextUnformatted(myPerson.gender.value_or(theDefaultString).c_str());
-
-		PrivShowDates();
-		PrivShowProfessions();
-		PrivShowResidence();
-		PrivShowRemarks();
+	if (ImGui::Button("Show Images")) {
+		myContext->ShowImagesOfPerson(myPerson.id);
 	}
+	ImGui::SameLine();
+	if (ImGui::Button("Play Audio")) {
+		myContext->PlayPerson(myPerson.id);
+	}
+
+	PrivShowName();
+
+	ImGui::TextUnformatted("Gender");
+	ImGui::SameLine();
+	ImGui::TextUnformatted(myPerson.gender.value_or(theDefaultString).c_str());
+
+	PrivShowDates();
+	PrivShowProfessions();
+	PrivShowResidence();
+	PrivShowRemarks();
 	ImGui::PopID();
 
 	return nullptr;

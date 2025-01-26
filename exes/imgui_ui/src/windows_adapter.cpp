@@ -153,6 +153,7 @@ void
 WindowsAdapter::Show() {
 	// Rendering
 	ImGui::Render();
+
 	glViewport(0, 0, theWidth, theHeight);
 	glClearColor(myClearColor.x, myClearColor.y, myClearColor.z, myClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT);
@@ -160,6 +161,9 @@ WindowsAdapter::Show() {
 
 	// Present
 	::SwapBuffers(myMainWindow.hDC);
+
+	ImGui::UpdatePlatformWindows();
+	ImGui::RenderPlatformWindowsDefault();
 }
 
 void
