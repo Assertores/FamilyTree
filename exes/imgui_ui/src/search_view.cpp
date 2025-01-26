@@ -14,7 +14,7 @@ SearchView::SearchView(std::shared_ptr<ContextAdapter> aContext)
 	: myContext(std::move(aContext)) {}
 
 std::shared_ptr<View>
-SearchView::Print() {
+SearchView::Print(WindowFactory aWindowFactory) {
 	PrivShowFilters();
 	if (ImGui::Button("Search")) {
 		auto searchResult = PrivDoSearch();

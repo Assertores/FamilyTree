@@ -22,7 +22,7 @@ main() { // NOLINT(bugprone-exception-escape)
 		ImGui::SetNextWindowPos({});
 		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		ImGui::Begin("MainWindow", nullptr, theWindowFlags);
-		auto newView = view->Print();
+		auto newView = view->Print([](const auto&) {});
 		if (newView) {
 			view->Exit();
 			view = std::move(newView);

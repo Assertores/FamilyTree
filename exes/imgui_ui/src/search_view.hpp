@@ -17,7 +17,7 @@ class SearchView final
 	, public std::enable_shared_from_this<SearchView> {
 public:
 	explicit SearchView(std::shared_ptr<ContextAdapter> aContext);
-	std::shared_ptr<View> Print() override;
+	std::shared_ptr<View> Print(WindowFactory aWindowFactory) override;
 
 private:
 	std::shared_ptr<ContextAdapter> myContext;

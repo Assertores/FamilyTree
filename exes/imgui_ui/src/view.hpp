@@ -1,34 +1,16 @@
 #pragma once
 
-#include <family_tree/api.h>
+#include <functional>
+#include <memory>
 
-#include <array>
-#include <string>
-#include <vector>
-
-static constexpr auto theInputfieldSize = 256;
-
+namespace ui {
 class View {
 public:
-	void Print();
-	void Shutdown();
+	using WindowFactory = std::function<void(std::shared_ptr<View>)>;
 
-private:
-	Context* myContext = nullptr;
-	std::vector<Person> mySearchResults;
-	std::array<char, theInputfieldSize> myTitleFilter{};
-	std::vector<std::array<char, theInputfieldSize>> myFirstNameFilters;
-	std::array<char, theInputfieldSize> myTitleOfNobilityFilter{};
-	std::vector<std::array<char, theInputfieldSize>> myLastNameFilters;
-
-	static std::string PrivGetFolder();
-	void PrivShowFilters();
-	void PrivDoSearch();
-	void PrivShowPerson(const Person& aPerson);
-
-	void PrivShowName(const Person& aPerson);
-	void PrivShowDates(const Person& aPerson);
-	void PrivShowProfessions(const Person& aPerson);
-	void PrivShowResidence(const Person& aPerson);
-	void PrivShowRemarks(const Person& aPerson);
+	virtual ~View() = default;
+	virtual void Enter() {};
+	virtual std::shared_ptr<View> Print(WindowFactory aWindowFactory) = 0;
+	virtual void Exit() {};
 };
+} // namespace ui
