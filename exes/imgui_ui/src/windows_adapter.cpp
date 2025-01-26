@@ -88,6 +88,8 @@ WindowsAdapter::Init(int aWidth, int aHight, std::string aName, ImVec4 aClearCol
 	theIo.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard; // Enable Keyboard Controls
 	// NOLINTNEXTLINE
 	theIo.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad; // Enable Gamepad Controls
+	// NOLINTNEXTLINE
+	theIo.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable; // Enable Multiple Viewports
 
 	// Setup Dear ImGui style
 	ImGui::StyleColorsDark();
