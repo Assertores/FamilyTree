@@ -2,6 +2,7 @@
 
 #include <family_tree/types.h>
 
+#include <limits>
 #include <map>
 #include <memory>
 #include <vector>
@@ -46,8 +47,8 @@ public:
 
 class FamilieBuilder {
 public:
-	void AddParent(IPerson* aParent, int aGeneraton);
-	void AddChild(IPerson* aChild, int aGeneraton);
+	void AddParent(IPerson* aParent, int aGeneration);
+	void AddChild(IPerson* aChild, int aGeneration);
 
 	[[nodiscard]] bool operator<(const FamilieBuilder& aOther) const;
 

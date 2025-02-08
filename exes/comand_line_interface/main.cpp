@@ -3,7 +3,9 @@
 #include <family_tree/api.h>
 
 #ifndef NDEBUG
+#if _WIN32
 #include <crtdbg.h>
+#endif
 #endif
 
 #include <iostream>

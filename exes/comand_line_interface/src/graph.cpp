@@ -79,7 +79,7 @@ private:
 Person::Person(::Person aPerson, std::function<bool(const char*)> aIsDefaultString) {
 	myContent.emplace_back(std::to_string(aPerson.id));
 
-	std::string line;
+	std::string line{};
 	if (!aIsDefaultString(aPerson.title)) {
 		line += aPerson.title;
 		line += ' ';
@@ -126,9 +126,7 @@ Person::Person(::Person aPerson, std::function<bool(const char*)> aIsDefaultStri
 
 	myHight = myContent.size() + 4;
 	for (const auto& line : myContent) {
-		if (line.size() > myWidth) {
-			myWidth = line.size();
-		}
+		myWidth = std::max(myWidth, line.size());
 	}
 	myWidth += 2;
 }
@@ -187,7 +185,7 @@ Person::CreatePort(bool aOnTop) {
 		start = myPreviousPort->GetEndOfElement();
 	}
 
-	auto offset = start + myWidth / 2 - ports.size();
+	auto offset = start + (myWidth / 2) - ports.size();
 	if (offset % 2 == (aOnTop ? 0 : 1)) {
 		offset++;
 	}
@@ -212,8 +210,8 @@ Person::SetPreviousPort(IPerson* aPort) {
 
 	// TODO: might still be broken if person connections aren't set up in order
 	auto start = myPreviousPort->GetEndOfElement();
-	auto topOffset = start + myWidth / 2 - myTopPorts.size();
-	auto bottomOffset = start + myWidth / 2 - myBottomPorts.size();
+	auto topOffset = start + (myWidth / 2) - myTopPorts.size();
+	auto bottomOffset = start + (myWidth / 2) - myBottomPorts.size();
 	if (topOffset % 2 == 0) {
 		topOffset++;
 	}
@@ -221,10 +219,10 @@ Person::SetPreviousPort(IPerson* aPort) {
 		bottomOffset++;
 	}
 	for (size_t i = 0; i < myTopPorts.size(); i++) {
-		myTopPorts[i]->SetPosition(topOffset + i * 2);
+		myTopPorts[i]->SetPosition(topOffset + (i * 2));
 	}
 	for (size_t i = 0; i < myBottomPorts.size(); i++) {
-		myBottomPorts[i]->SetPosition(bottomOffset + i * 2);
+		myBottomPorts[i]->SetPosition(bottomOffset + (i * 2));
 	}
 }
 
@@ -395,25 +393,17 @@ IFamilie::CreateProxy() {
 }
 
 void
-FamilieBuilder::AddParent(IPerson* aParent, int aGeneraton) {
-	myParents[aGeneraton].push_back(aParent);
-	if (aGeneraton < myMin) {
-		myMin = aGeneraton;
-	}
-	if (aGeneraton > myMax) {
-		myMax = aGeneraton;
-	}
+FamilieBuilder::AddParent(IPerson* aParent, int aGeneration) {
+	myParents[aGeneration].push_back(aParent);
+	myMin = std::min(myMin, aGeneration);
+	myMax = std::max(myMax, aGeneration);
 }
 
 void
-FamilieBuilder::AddChild(IPerson* aChild, int aGeneraton) {
-	myChildrens[aGeneraton].push_back(aChild);
-	if (aGeneraton < myMin) {
-		myMin = aGeneraton;
-	}
-	if (aGeneraton > myMax) {
-		myMax = aGeneraton;
-	}
+FamilieBuilder::AddChild(IPerson* aChild, int aGeneration) {
+	myChildrens[aGeneration].push_back(aChild);
+	myMin = std::min(myMin, aGeneration);
+	myMax = std::max(myMax, aGeneration);
 }
 
 bool
