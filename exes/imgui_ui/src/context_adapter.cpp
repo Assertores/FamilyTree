@@ -187,6 +187,7 @@ FullContextAdapter::GetPersonsMatchingPattern(Person aPrototype, size_t aMinMatc
 	auto* cArray = ::GetPersonsMatchingPattern(myContext, prototype, aMinMatches, &count, nullptr);
 
 	std::vector<Person> result;
+	result.reserve(count);
 	for (size_t i = 0; i < count; i++) {
 		result.emplace_back(FromApi(cArray[i], myContext));
 	}

@@ -10,6 +10,15 @@
 namespace ui {
 constexpr auto theLocDefaultString = "N/A";
 
+#ifndef _WIN32
+#include <filesystem>
+
+std::shared_ptr<View>
+View::CreateStartView() {
+	return std::make_shared<SearchView>(ContextAdapter::Create(std::filesystem::current_path()));
+}
+#endif
+
 SearchView::SearchView(std::shared_ptr<ContextAdapter> aContext)
 	: myContext(std::move(aContext)) {}
 

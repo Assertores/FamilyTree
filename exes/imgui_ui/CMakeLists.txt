@@ -5,10 +5,21 @@ add_library(ImGuiAdapter STATIC)
 target_sources(ImGuiAdapter
 	PUBLIC
 		"src/imgui_adapter.hpp"
-	PRIVATE
-		"src/windows_adapter.cpp"
-		"src/windows_adapter.hpp"
 )
+
+if(WIN32)
+	target_sources(ImGuiAdapter
+		PRIVATE
+			"src/windows_adapter.cpp"
+			"src/windows_adapter.hpp"
+	)
+else(WIN32)
+	target_sources(ImGuiAdapter
+		PRIVATE
+			"src/linux_adapter.cpp"
+			"src/linux_adapter.hpp"
+	)
+endif(WIN32)
 
 target_include_directories(ImGuiAdapter PUBLIC "src")
 
@@ -47,10 +58,16 @@ target_sources(FamilyTreeGui
 		"src/list_view.hpp"
 		"src/search_view.cpp"
 		"src/search_view.hpp"
-		"src/setup_view.cpp"
-		"src/setup_view.hpp"
 		"src/view.hpp"
 )
+
+if(WIN32)
+	target_sources(FamilyTreeGui
+		PRIVATE
+			"src/setup_view.cpp"
+			"src/setup_view.hpp"
+	)
+endif(WIN32)
 
 target_include_directories(FamilyTreeGui PRIVATE "src")
 

@@ -8,10 +8,8 @@ target_sources(ImGui
 	PUBLIC
 		"imgui/imgui.h"
 		"imgui/backends/imgui_impl_opengl3.h"
-		"imgui/backends/imgui_impl_win32.h"
 	PRIVATE
 		"imgui/backends/imgui_impl_opengl3.cpp"
-		"imgui/backends/imgui_impl_win32.cpp"
 		"imgui/imconfig.h"
 		"imgui/imgui_draw.cpp"
 		"imgui/imgui_internal.h"
@@ -22,6 +20,15 @@ target_sources(ImGui
 		"imgui/imstb_textedit.h"
 		"imgui/imstb_truetype.h"
 )
+
+if(WIN32)
+	target_sources(ImGui
+		PUBLIC
+			"imgui/backends/imgui_impl_win32.h"
+		PRIVATE
+			"imgui/backends/imgui_impl_win32.cpp"
+	)
+endif(WIN32)
 
 target_include_directories(ImGui
 	PUBLIC

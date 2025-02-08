@@ -1,4 +1,4 @@
-#include "src/setup_view.hpp"
+#include "src/view.hpp"
 
 #include <imgui_adapter.hpp>
 
@@ -59,7 +59,7 @@ int
 main() { // NOLINT(bugprone-exception-escape)
 	auto window = ImGuiAdapter::CreateWindows();
 
-	auto mainWindow = std::make_unique<MainWindow>(std::make_shared<ui::SetupView>());
+	auto mainWindow = std::make_unique<MainWindow>(ui::View::CreateStartView());
 	mainWindow->myView->Enter();
 
 	std::vector<std::unique_ptr<Window>> windows;
@@ -93,9 +93,11 @@ main() { // NOLINT(bugprone-exception-escape)
 	window->Shutdown();
 }
 
+#ifdef _WIN32
 // NOTE: this is here sothat no extra console window is opened.
 #include <windows.h>
 int APIENTRY
 WinMain(HINSTANCE /*unused*/, HINSTANCE /*unused*/, PSTR /*unused*/, int /*unused*/) {
 	return main();
 }
+#endif

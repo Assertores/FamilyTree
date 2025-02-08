@@ -55,6 +55,11 @@ GetFolder() {
 } // namespace
 
 std::shared_ptr<View>
+View::CreateStartView() {
+	return std::make_shared<SetupView>();
+}
+
+std::shared_ptr<View>
 SetupView::Print(WindowFactory aWindowFactory) {
 	if (ImGui::Button("Load Data")) {
 		auto folder = GetFolder();
