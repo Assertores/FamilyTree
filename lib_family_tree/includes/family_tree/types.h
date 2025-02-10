@@ -3,6 +3,7 @@
 
 #include <stddef.h>
 
+// NOLINTBEGIN
 #ifdef __cplusplus
 extern "C" {
 #endif
@@ -234,4 +235,5 @@ struct GraphBuilderStrategy {
 #ifdef __cplusplus
 }
 #endif
+// NOLINTEND
 #endif // FT_TYPES_H
