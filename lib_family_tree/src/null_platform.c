@@ -2,5 +2,6 @@
 
 IPlatform*
 CreatePlatform(ITrace* aTrace) {
+	aTrace->Fail(aTrace, "!!Reached NULL Platform!!");
 	return NULL;
 }

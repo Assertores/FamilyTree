@@ -40,18 +40,21 @@ size_t
 ForwardingProvider_GetAllIdsCount(IDataProvider* aThis, ITrace* aTrace) {
 	ForwardingProvider* self = (ForwardingProvider*)aThis;
 
-	size_t personalCount = self->myPersonals->GetAllIdsCount(self->myPersonals, aTrace);
-	PersonId* personalIds = calloc(personalCount, sizeof(PersonId));
-	self->myPersonals->GetAllIds(self->myPersonals, personalIds, aTrace);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Merge Persons and Relations list");
 
-	size_t relationCount = self->myRelations->GetAllIdsCount(self->myRelations, aTrace);
+	size_t personalCount = self->myPersonals->GetAllIdsCount(self->myPersonals, trace);
+	PersonId* personalIds = calloc(personalCount, sizeof(PersonId));
+	self->myPersonals->GetAllIds(self->myPersonals, personalIds, trace);
+
+	size_t relationCount = self->myRelations->GetAllIdsCount(self->myRelations, trace);
 	PersonId* relationIds = calloc(relationCount, sizeof(PersonId));
-	self->myRelations->GetAllIds(self->myRelations, relationIds, aTrace);
+	self->myRelations->GetAllIds(self->myRelations, relationIds, trace);
 
 	size_t result = personalCount + relationCount;
 	for (int i = 0; i < relationCount; i++) {
 		for (int j = 0; j < personalCount; j++) {
 			if (relationIds[i] == personalIds[j]) {
+				trace->AddEvent(trace, "Remove duplicate");
 				result--;
 				break;
 			}
@@ -60,6 +63,7 @@ ForwardingProvider_GetAllIdsCount(IDataProvider* aThis, ITrace* aTrace) {
 
 	free(personalIds);
 	free(relationIds);
+	trace->Free(trace);
 	return result;
 }
 
@@ -67,28 +71,34 @@ void
 ForwardingProvider_GetAllIds(IDataProvider* aThis, PersonId* aOutId, ITrace* aTrace) {
 	ForwardingProvider* self = (ForwardingProvider*)aThis;
 
-	size_t personalCount = self->myPersonals->GetAllIdsCount(self->myPersonals, aTrace);
-	self->myPersonals->GetAllIds(self->myPersonals, aOutId, aTrace);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Merge Persons and Relations list");
 
-	size_t relationCount = self->myRelations->GetAllIdsCount(self->myRelations, aTrace);
+	size_t personalCount = self->myPersonals->GetAllIdsCount(self->myPersonals, trace);
+	self->myPersonals->GetAllIds(self->myPersonals, aOutId, trace);
+
+	size_t relationCount = self->myRelations->GetAllIdsCount(self->myRelations, trace);
 	PersonId* relationIds = calloc(relationCount, sizeof(PersonId));
-	self->myRelations->GetAllIds(self->myRelations, relationIds, aTrace);
+	self->myRelations->GetAllIds(self->myRelations, relationIds, trace);
 
 	int newCount = 0;
-	for (int i = 0, duplicate = 0; i < relationCount; i++, duplicate = 0) {
+	for (int i = 0; i < relationCount; i++) {
+		int duplicate = 0;
 		for (int j = 0; j < personalCount; j++) {
 			if (relationIds[i] == aOutId[j]) {
+				trace->AddEvent(trace, "Duplicate detected");
 				duplicate = 1;
 				break;
 			}
 		}
 		if (!duplicate) {
+			trace->AddEvent(trace, "New Element Detected");
 			aOutId[personalCount + newCount] = relationIds[i];
 			newCount++;
 		}
 	}
 
 	free(relationIds);
+	trace->Free(trace);
 }
 
 size_t

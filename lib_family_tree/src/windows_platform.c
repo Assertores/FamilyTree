@@ -121,7 +121,7 @@ WindowsPlatform_OpenAudio(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	}
 
 	trace->AddEvent(trace, "Open file via system call");
-	system(path);
+	ShellExecuteA(NULL, "open", path, NULL, NULL, SW_SHOWNORMAL);
 
 	trace->Free(trace);
 	free(path);
@@ -146,7 +146,7 @@ WindowsPlatform_OpenImage(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 	}
 
 	trace->AddEvent(trace, "Show file via system call");
-	system(path);
+	ShellExecuteA(NULL, "open", path, NULL, NULL, SW_SHOWNORMAL);
 
 	trace->Free(trace);
 	free(path);

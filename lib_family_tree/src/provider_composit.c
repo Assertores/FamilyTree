@@ -1,8 +1,11 @@
 #include "internal_types.h"
 #include "patch.h"
 
+#include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
+
+#define LOG_STRING_SIZE 126
 
 typedef struct IdTranslation {
 	PersonId externalId;
@@ -34,11 +37,22 @@ ProviderComposit_GetPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) {
 			continue;
 		}
 
+		char string[LOG_STRING_SIZE];
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"translate id: %zu -> %zu",
+				self->myTranslations[i].externalId,
+				self->myTranslations[i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
 		Person result = provider->GetPerson(provider, self->myTranslations[i].internalId, aTrace);
 		result.id = self->myTranslations[i].externalId;
 		return result;
 	}
+	aTrace->Fail(aTrace, "Person not found");
 	Person result;
 	memset(&result, 0, sizeof(Person));
 	return result;
@@ -53,6 +67,16 @@ ProviderComposit_PlayPerson(IDataProvider* aThis, PersonId aId, ITrace* aTrace) 
 			continue;
 		}
 
+		char string[LOG_STRING_SIZE];
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"translate id: %zu -> %zu",
+				self->myTranslations[i].externalId,
+				self->myTranslations[i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
 		provider->PlayPerson(provider, self->myTranslations[i].internalId, aTrace);
 		return;
@@ -68,6 +92,16 @@ ProviderComposit_ShowImages(IDataProvider* aThis, PersonId aId, ITrace* aTrace) 
 			continue;
 		}
 
+		char string[LOG_STRING_SIZE];
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"translate id: %zu -> %zu",
+				self->myTranslations[i].externalId,
+				self->myTranslations[i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
 		provider->ShowImages(provider, self->myTranslations[i].internalId, aTrace);
 		return;
@@ -99,6 +133,16 @@ ProviderComposit_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId, IT
 			continue;
 		}
 
+		char string[LOG_STRING_SIZE];
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"translate id: %zu -> %zu",
+				self->myTranslations[i].externalId,
+				self->myTranslations[i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 		IDataProvider* provider = self->myTranslations[i].dataProvider;
 		return provider->GetAllRelationsOfIdCount(
 			provider,
@@ -110,7 +154,10 @@ ProviderComposit_GetAllRelationsOfIdCount(IDataProvider* aThis, PersonId aId, IT
 
 void
 ProviderComposit_GetAllRelationsOfId(
-	IDataProvider* aThis, PersonId aId, Relation* aOutRelation, ITrace* aTrace) {
+	IDataProvider* aThis,
+	PersonId aId,
+	Relation* aOutRelation,
+	ITrace* aTrace) {
 	ProviderComposit* self = (ProviderComposit*)aThis;
 
 	IDataProvider* provider = NULL;
@@ -120,6 +167,16 @@ ProviderComposit_GetAllRelationsOfId(
 			continue;
 		}
 
+		char string[LOG_STRING_SIZE];
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"translate id: %zu -> %zu",
+				self->myTranslations[i].externalId,
+				self->myTranslations[i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 		provider = self->myTranslations[i].dataProvider;
 		count = provider->GetAllRelationsOfIdCount(
 			provider,
@@ -133,6 +190,7 @@ ProviderComposit_GetAllRelationsOfId(
 		break;
 	}
 
+	aTrace->AddEvent(aTrace, "Patch Id's from internal to external");
 	for (size_t i = 0; i < count; i++) {
 		PersonId id1 = -1;
 		PersonId id2 = -1;
@@ -176,6 +234,7 @@ ProviderComposit_GetRelationType(IDataProvider* aThis, Relation aRelation, ITrac
 			dataProvider = self->myTranslations[i].dataProvider;
 		}
 	}
+	aTrace->AddEvent(aTrace, "Patch Ids");
 	aRelation.id1 = id1;
 	aRelation.id2 = id2;
 	if (dataProvider == NULL) {
@@ -227,6 +286,7 @@ AddDataProviderToArray(ProviderComposit* self, IDataProvider* aProvider, ITrace*
 		return;
 	}
 
+	aTrace->AddEvent(aTrace, "Track new Data Provider");
 	newArray[self->myDataProviderSize] = aProvider;
 	self->myDataProviderSize++;
 	self->myDataProviders = newArray;
@@ -234,33 +294,50 @@ AddDataProviderToArray(ProviderComposit* self, IDataProvider* aProvider, ITrace*
 
 void
 ExtendTranslationTable(ProviderComposit* self, IDataProvider* aProvider, ITrace* aTrace) {
-	size_t internalIdSize = aProvider->GetAllIdsCount(aProvider, aTrace);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "Extend Translation Table");
+	size_t internalIdSize = aProvider->GetAllIdsCount(aProvider, trace);
 
 	IdTranslation* newArray = realloc(
 		self->myTranslations,
 		sizeof(IdTranslation) * (self->myTranslationSize + internalIdSize));
 	if (newArray == NULL) {
+		trace->Fail(trace, "Unable to Allocate Memory");
+		trace->Free(trace);
 		return;
 	}
 
 	PersonId* internalIds = calloc(internalIdSize, sizeof(PersonId));
-	aProvider->GetAllIds(aProvider, internalIds, aTrace);
+	aProvider->GetAllIds(aProvider, internalIds, trace);
+	char string[LOG_STRING_SIZE];
 	for (size_t i = 0; i < internalIdSize; i++) {
 		newArray[self->myTranslationSize + i].dataProvider = aProvider;
 		newArray[self->myTranslationSize + i].internalId = internalIds[i];
 		// NOTE: maybe the externalId field could be droped. i don't know yet.
 		newArray[self->myTranslationSize + i].externalId = self->myTranslationSize + i;
+
+		// Negative if error occurt. in this case don't log then.
+		if (sprintf(
+				string,
+				"add translation: %zu -> %zu",
+				newArray[self->myTranslationSize + i].externalId,
+				newArray[self->myTranslationSize + i].internalId)
+			> 0) {
+			aTrace->AddEvent(aTrace, string);
+		}
 	}
 
 	self->myTranslationSize += internalIdSize;
 	self->myTranslations = newArray;
 
 	free(internalIds);
+	trace->Free(trace);
 }
 
 void
 ProviderComposit_AddDataProvider(
-	ProviderComposit* aThis, IDataProvider* aProvider, ITrace* aTrace) {
+	ProviderComposit* aThis,
+	IDataProvider* aProvider,
+	ITrace* aTrace) {
 	AddDataProviderToArray(aThis, aProvider, aTrace);
 	ExtendTranslationTable(aThis, aProvider, aTrace);
 }

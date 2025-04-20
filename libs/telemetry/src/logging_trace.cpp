@@ -32,7 +32,8 @@ LoggingTrace::LoggingTrace(
 
 std::shared_ptr<Trace>
 LoggingTrace::CreateSubTrace(std::string aSubtraceName) {
-	myFile << Now() << "|t|" << aSubtraceName << '\n' << std::flush;
+	myFile << Now() << "|t|" << std::to_string(*myIndexHandler) << '|' << aSubtraceName << '\n'
+		   << std::flush;
 	return std::make_shared<LoggingTrace>(aSubtraceName, myIndex, myIndexHandler, myFolder);
 }
 

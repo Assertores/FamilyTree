@@ -322,6 +322,7 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 		}
 	}
 
+	trace->AddEvent(trace, "Located folder, Building path");
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(self->myFolders[folderIndex]);
 	char* filePath = malloc(pathLength + 1 + folderLength + 11);
@@ -338,6 +339,8 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 		trace->Free(trace);
 		return NULL;
 	}
+
+	trace->AddEvent(trace, "Allocate and Pointing Static variable.");
 	thePerson = newArray + self->myPersonCount;
 	self->myPersons = newArray;
 	memset(thePerson, 0, sizeof(FullPerson));
@@ -347,6 +350,7 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	thePerson->folder = self->myFolders[folderIndex];
 	theVersion = NULL;
 
+	trace->AddEvent(trace, "Parse Json");
 	JsonParsingDispatchTable table;
 	table.getKeyHandler = PrivOnKey;
 	table.parseInt = PrivNoOpInt;
@@ -359,11 +363,13 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	}
 	FullPerson* person = thePerson;
 
+	trace->AddEvent(trace, "Transfer varias buffers");
 	person->person.firstNames = theFirstNameBuffer;
 	person->person.lastNames = theLastNameBuffer;
 	person->person.professions = theProfessions;
 	self->myPersonCount++;
 
+	trace->AddEvent(trace, "Free and reset global Data");
 	free(filePath);
 	thePerson = NULL;
 	theFirstNameBuffer = NULL;
@@ -421,6 +427,7 @@ JsonPerson_PlayPerson(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 		return;
 	}
 
+	aTrace->AddEvent(aTrace, "Assemble path");
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
 	size_t fileLength = strlen(person->audioPath);
@@ -449,6 +456,7 @@ JsonPerson_ShowImages(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	size_t pathLength = strlen(self->myPath);
 	size_t folderLength = strlen(person->folder);
 
+	aTrace->AddEvent(aTrace, "Evaluate Longest Possible path length");
 	size_t longestFileLength = 0;
 	for (size_t i = 0; i < person->imagePathCount; i++) {
 		size_t length = strlen(person->imagePaths[i]);
@@ -458,6 +466,7 @@ JsonPerson_ShowImages(IPersonals* aThis, PersonId aId, ITrace* aTrace) {
 	}
 	longestFileLength++;
 
+	aTrace->AddEvent(aTrace, "Prepare common part of path");
 	char* path = malloc(pathLength + 1 + folderLength + 1 + longestFileLength);
 	strcpy_s(path, pathLength + 1, self->myPath);
 	path[pathLength] = '/';
@@ -512,8 +521,11 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 	self->myPersonCount = 0;
 	self->myPersons = realloc(self->myPersons, sizeof(FullPerson));
 
-	char* folders = self->myPlatform->GetFolders(self->myPlatform, self->myPath, aTrace);
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "New Folders");
 
+	char* folders = self->myPlatform->GetFolders(self->myPlatform, self->myPath, trace);
+
+	trace->AddEvent(trace, "Calculate folder count");
 	int count = 0;
 	for (size_t i = 0;; i++) {
 		if (folders[i] == '\0') {
@@ -530,7 +542,10 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 	count++;
 	self->myFolderCount = count;
 
+	trace->AddEvent(trace, "Allocate Memory");
 	self->myFolders = realloc(self->myFolders, count * sizeof(char**));
+	
+	trace->AddEvent(trace, "Fill Array With Pointers to Foldernames");
 	self->myFolders[0] = folders;
 	count = 0;
 	for (size_t i = 0;; i++) {
@@ -542,12 +557,15 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 			self->myFolders[count] = folders + i + 1;
 		}
 	}
+	trace->Free(trace);
 }
 
 void
 ResetIds(JsonPerson* self, ITrace* aTrace) {
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "New Ids");
 	self->myIds = realloc(self->myIds, self->myFolderCount * sizeof(PersonId));
 
+	trace->AddEvent(trace, "Evaluate Longest Possible path length");
 	size_t longestFolderName = 0;
 	for (size_t i = 0; i < self->myFolderCount; i++) {
 		size_t length = strlen(self->myFolders[i]);
@@ -562,12 +580,14 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 	strcpy_s(path, rootLength + 1, self->myPath);
 	path[rootLength] = '/';
 
+	trace->AddEvent(trace, "Do Shallow Parsing of data files");
 	for (size_t i = 0; i < self->myFolderCount; i++) {
 		memset(path + rootLength + 1, '\0', longestFolderName);
 		strcpy_s(path + rootLength + 1, longestFolderName + 1, self->myFolders[i]);
 		strcpy_s(path + rootLength + 1 + strlen(self->myFolders[i]), 11, "/data.json");
-		char* file = self->myPlatform->ReadFile(self->myPlatform, path, aTrace);
+		char* file = self->myPlatform->ReadFile(self->myPlatform, path, trace);
 
+		trace->AddEvent(trace, "Parse");
 		JsonParsingDispatchTable table;
 		table.getKeyHandler = PrivOnlyId;
 		table.parseInt = PrivNoOpInt;
@@ -576,12 +596,14 @@ ResetIds(JsonPerson* self, ITrace* aTrace) {
 		theVersion = NULL;
 		ParseJson(file, table);
 		if (theVersion != NULL && strcmp(theVersion, theCompatableVersion) == 0) {
+			trace->AddEvent(trace, "Add");
 			self->myIds[i] = theId;
 		}
 
-		self->myPlatform->FreeString(self->myPlatform, file, aTrace);
+		self->myPlatform->FreeString(self->myPlatform, file, trace);
 	}
 	free(path);
+	trace->Free(trace);
 }
 
 IPersonals*
