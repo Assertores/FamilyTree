@@ -1,6 +1,7 @@
 #include "context_adapter.hpp"
 
 #include <family_tree/api.h>
+#include <telemetry/telemetry.hpp>
 
 #include <any>
 
@@ -162,6 +163,13 @@ FromApi(::Person aElement, ::Context* aContext) {
 class FullContextAdapter : public ContextAdapter {
 public:
 	explicit FullContextAdapter(std::filesystem::path aPath);
+	~FullContextAdapter() override;
+
+	FullContextAdapter(FullContextAdapter&& aOther) noexcept;
+	FullContextAdapter& operator=(FullContextAdapter&& aOther) noexcept;
+
+	FullContextAdapter(const FullContextAdapter& aOther) = delete;
+	FullContextAdapter& operator=(const FullContextAdapter& aOther) = delete;
 
 	std::vector<Person> GetPersonsMatchingPattern(Person aPrototype, size_t aMinMatches) override;
 	void ShowImagesOfPerson(PersonId aId) override;
@@ -172,7 +180,26 @@ private:
 };
 
 FullContextAdapter::FullContextAdapter(std::filesystem::path aPath) {
-	myContext = CreateWithCSVAndJSON(aPath.u8string().c_str(), nullptr);
+	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("CreateContext");
+	myContext = CreateWithCSVAndJSON(aPath.u8string().c_str(), *trace);
+}
+
+FullContextAdapter::~FullContextAdapter() {
+	if (myContext != nullptr) {
+		auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("FreeContext");
+		::Free(myContext, *trace);
+	}
+}
+
+FullContextAdapter::FullContextAdapter(FullContextAdapter&& aOther) noexcept {
+	*this = std::move(aOther);
+}
+
+FullContextAdapter&
+FullContextAdapter::operator=(FullContextAdapter&& aOther) noexcept {
+	myContext = aOther.myContext;
+	aOther.myContext = nullptr;
+	return *this;
 }
 
 std::vector<Person>
@@ -184,7 +211,9 @@ FullContextAdapter::GetPersonsMatchingPattern(Person aPrototype, size_t aMinMatc
 	auto prototype = ToApi(aPrototype, data1, data2, data3, data4);
 	size_t count = 0;
 
-	auto* cArray = ::GetPersonsMatchingPattern(myContext, prototype, aMinMatches, &count, nullptr);
+	auto trace =
+		tel::TelemetryFactory::GetInstance().CreateLoggingTrace("GetPersonsMatchingPattern");
+	auto* cArray = ::GetPersonsMatchingPattern(myContext, prototype, aMinMatches, &count, *trace);
 
 	std::vector<Person> result;
 	result.reserve(count);
@@ -197,12 +226,14 @@ FullContextAdapter::GetPersonsMatchingPattern(Person aPrototype, size_t aMinMatc
 
 void
 FullContextAdapter::ShowImagesOfPerson(PersonId aId) {
-	::ShowImagesOfPerson(myContext, aId, nullptr);
+	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("ShowImagesOfPerson");
+	::ShowImagesOfPerson(myContext, aId, *trace);
 }
 
 void
 FullContextAdapter::PlayPerson(PersonId aId) {
-	::PlayPerson(myContext, aId, nullptr);
+	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("PlayPerson");
+	::PlayPerson(myContext, aId, *trace);
 }
 } // namespace
 

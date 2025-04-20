@@ -46,6 +46,8 @@ target_compile_features(FamilyTreeAdapter PRIVATE cxx_std_17)
 target_link_libraries(FamilyTreeAdapter
 	PUBLIC
 		FT::LibFamilyTreeStatic
+	PRIVATE
+		Telemetry
 )
 
 add_executable(FamilyTreeGui WIN32 "main.cpp")

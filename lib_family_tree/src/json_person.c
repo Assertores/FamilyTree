@@ -308,9 +308,11 @@ FullPerson*
 PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		if (self->myPersons[i].person.id == aId) {
+			aTrace->AddEvent(aTrace, "Person Cashed");
 			return self->myPersons + i;
 		}
 	}
+	ITrace* trace = aTrace->CreateSubTrace(aTrace, "New Person");
 
 	size_t folderIndex = 0;
 	for (size_t i = 0; i < self->myFolderCount; i++) {
@@ -332,13 +334,15 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	if (newArray == NULL) {
 		// TODO: error handling
 		free(filePath);
+		trace->Fail(trace, "Unable to allocate enough memory for new Person");
+		trace->Free(trace);
 		return NULL;
 	}
 	thePerson = newArray + self->myPersonCount;
 	self->myPersons = newArray;
 	memset(thePerson, 0, sizeof(FullPerson));
 
-	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath, aTrace);
+	char* json = self->myPlatform->ReadFile(self->myPlatform, filePath, trace);
 	thePerson->data = json;
 	thePerson->folder = self->myFolders[folderIndex];
 	theVersion = NULL;
@@ -349,6 +353,8 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	table.parseString = PrivNoOpString;
 	ParseJson(json, table);
 	if (theVersion == NULL || strcmp(theVersion, theCompatableVersion) != 0) {
+		trace->Fail(trace, "Unsupported Data version.");
+		trace->Free(trace);
 		return NULL;
 	}
 	FullPerson* person = thePerson;
@@ -363,6 +369,8 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	theFirstNameBuffer = NULL;
 	theLastNameBuffer = NULL;
 	theProfessions = NULL;
+	
+	trace->Free(trace);
 	return person;
 }
 

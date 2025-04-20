@@ -4,6 +4,7 @@
 #include <memory>
 #include <optional>
 #include <vector>
+#include <string>
 
 namespace ui {
 using String = std::optional<std::string>;

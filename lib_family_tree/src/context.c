@@ -595,7 +595,7 @@ GetPersonsMatchingPattern(
 	for (size_t i = 0; i < idCount; i++) {
 		result[count] = data->GetPerson(data, ids[i], aTrace);
 		PopulateNullValues(result + count, aContext);
-		ITrace* subtrace = aTrace->CreateSubTrace(subtrace, result[count].firstNames[0]);
+		ITrace* subtrace = aTrace->CreateSubTrace(aTrace, result[count].firstNames[0]);
 
 		// TODO: handle error
 
