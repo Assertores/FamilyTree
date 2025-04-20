@@ -151,6 +151,8 @@ WindowsAdapter::Update() {
 
 void
 WindowsAdapter::Show() {
+	ImGui::EndFrame();
+
 	// Rendering
 	ImGui::Render();
 
@@ -159,11 +161,11 @@ WindowsAdapter::Show() {
 	glClear(GL_COLOR_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
-	// Present
-	::SwapBuffers(myMainWindow.hDC);
-
 	ImGui::UpdatePlatformWindows();
 	ImGui::RenderPlatformWindowsDefault();
+
+	// Present
+	::SwapBuffers(myMainWindow.hDC);
 }
 
 void

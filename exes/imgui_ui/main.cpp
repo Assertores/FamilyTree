@@ -67,8 +67,6 @@ main() { // NOLINT(bugprone-exception-escape)
 
 	for (window->Init(theWindowWidth, theWindowHight, "Family Tree UI", {}); window->Update();
 		 window->Show()) {
-		// ImGui::SetNextWindowPos({});
-		// ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
 		for (size_t i = 0; i < windows.size(); i++) {
 			windows[i]->Enter();
 			auto newView = windows[i]->myView->Print([&](auto aView) {
