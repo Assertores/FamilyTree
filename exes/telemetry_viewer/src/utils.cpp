@@ -1,9 +1,6 @@
-#include "setup_view.hpp"
+#include "utils.hpp"
 
-#include "search_view.hpp"
-
-#include <context_adapter.hpp>
-#include <imgui.h>
+#include <iostream>
 
 // clang-format off
 #include <windows.h>
@@ -12,8 +9,7 @@
 // clang-format on
 
 namespace ui {
-namespace {
-std::string
+std::filesystem::path
 GetFolder() {
 	BROWSEINFOW setting{};
 	setting.ulFlags = BIF_RETURNONLYFSDIRS;
@@ -53,21 +49,16 @@ GetFolder() {
 	// NOLINTNEXTLINE(readability-redundant-string-cstr) to remove additional 0 bytes at the end.
 	return convertedName.c_str();
 }
-} // namespace
 
-std::shared_ptr<View>
-View::CreateStartView() {
-	return std::make_shared<SetupView>();
-}
-
-std::shared_ptr<View>
-SetupView::Print(WindowFactory aWindowFactory) {
-	if (ImGui::Button("Load Data")) {
-		auto folder = GetFolder();
-		if (!folder.empty()) {
-			return std::make_shared<SearchView>(ContextAdapter::Create(folder.c_str()));
+std::vector<std::filesystem::path>
+GetDirs(std::filesystem::path aPath) {
+	std::vector<std::filesystem::path> result;
+	for (const auto& dir : std::filesystem::directory_iterator{aPath}) {
+		if (!dir.is_directory()) {
+			continue;
 		}
+		result.emplace_back(dir.path());
 	}
-	return nullptr;
+	return result;
 }
 } // namespace ui
