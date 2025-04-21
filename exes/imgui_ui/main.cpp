@@ -2,7 +2,7 @@
 #include "src/on_frame_trace_decorator.hpp"
 #include "src/view.hpp"
 
-#include <imgui_adapter.hpp>
+#include <imgui_adapter/imgui_adapter.hpp>
 #include <telemetry/telemetry.hpp>
 
 static constexpr auto theWindowWidth = 1280;

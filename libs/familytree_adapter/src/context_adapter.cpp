@@ -1,4 +1,4 @@
-#include "context_adapter.hpp"
+#include "familytree_adapter/context_adapter.hpp"
 
 #include <family_tree/api.h>
 #include <telemetry/telemetry.hpp>

@@ -3,7 +3,7 @@
 #include "global_trace.hpp"
 #include "search_view.hpp"
 
-#include <context_adapter.hpp>
+#include <familytree_adapter/context_adapter.hpp>
 #include <imgui.h>
 
 // clang-format off

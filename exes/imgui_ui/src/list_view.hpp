@@ -2,7 +2,7 @@
 
 #include "view.hpp"
 
-#include <context_adapter.hpp>
+#include <familytree_adapter/context_adapter.hpp>
 
 #include <array>
 #include <string>
