@@ -1,5 +1,6 @@
 #include "setup_view.hpp"
 
+#include "global_trace.hpp"
 #include "search_view.hpp"
 
 #include <context_adapter.hpp>
@@ -64,6 +65,7 @@ std::shared_ptr<View>
 SetupView::Print(WindowFactory aWindowFactory) {
 	if (ImGui::Button("Load Data")) {
 		auto folder = GetFolder();
+		theGlobalTrace->AddEvent("Load Data from " + folder);
 		if (!folder.empty()) {
 			return std::make_shared<SearchView>(ContextAdapter::Create(folder.c_str()));
 		}

@@ -11,8 +11,8 @@ static constexpr auto theIndentWidth = 10;
 
 class Event : public Entry {
 public:
-	Event(std::string aText)
-		: myText(aText) {}
+	explicit Event(std::string aText)
+		: myText(std::move(aText)) {}
 
 	void Show() const override { ImGui::TextUnformatted(myText.c_str()); }
 
@@ -27,8 +27,8 @@ public:
 
 class Failed : public Entry {
 public:
-	Failed(std::string aText)
-		: myText(aText) {}
+	explicit Failed(std::string aText)
+		: myText(std::move(aText)) {}
 
 	void Show() const override { ImGui::TextUnformatted(("FAILED: " + myText).c_str()); }
 
@@ -36,9 +36,8 @@ private:
 	std::string myText;
 };
 
-Trace::Trace(std::filesystem::path aPath) {
-	myName = aPath.filename().u8string();
-
+Trace::Trace(std::filesystem::path aPath)
+	: myName(aPath.filename().u8string()) {
 	std::ifstream file(aPath);
 
 	std::string line;

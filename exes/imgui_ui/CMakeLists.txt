@@ -56,8 +56,11 @@ target_sources(FamilyTreeGui
 	PRIVATE
 		"src/detailed_view.cpp"
 		"src/detailed_view.hpp"
+		"src/global_trace.hpp"
 		"src/list_view.cpp"
 		"src/list_view.hpp"
+		"src/on_frame_trace_decorator.cpp"
+		"src/on_frame_trace_decorator.hpp"
 		"src/search_view.cpp"
 		"src/search_view.hpp"
 		"src/view.hpp"
@@ -79,4 +82,5 @@ target_link_libraries(FamilyTreeGui
 	PRIVATE
 		FamilyTreeAdapter
 		ImGuiAdapter
+		Telemetry
 )

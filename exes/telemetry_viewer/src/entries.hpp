@@ -7,6 +7,8 @@
 namespace ui {
 class Entry {
 public:
+	virtual ~Entry() = default;
+
 	virtual void Show() const = 0;
 };
 
@@ -14,7 +16,7 @@ class Trace : public Entry {
 public:
 	explicit Trace(std::filesystem::path aPath);
 
-	std::string GetName() const;
+	[[nodiscard]] std::string GetName() const;
 
 	void Show() const override;
 

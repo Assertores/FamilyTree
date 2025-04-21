@@ -1,5 +1,6 @@
 #include "search_view.hpp"
 
+#include "global_trace.hpp"
 #include "list_view.hpp"
 
 #include <imgui.h>
@@ -26,6 +27,7 @@ std::shared_ptr<View>
 SearchView::Print(WindowFactory aWindowFactory) {
 	PrivShowFilters();
 	if (ImGui::Button("Search")) {
+		theGlobalTrace->AddEvent("Requested Search");
 		auto searchResult = PrivDoSearch();
 		return std::make_shared<ListView>(myContext, std::move(searchResult), shared_from_this());
 	}

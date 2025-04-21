@@ -1,5 +1,7 @@
 #include "detailed_view.hpp"
 
+#include "global_trace.hpp"
+
 #include <imgui.h>
 
 #include <string>
@@ -17,10 +19,14 @@ std::shared_ptr<View>
 DetaildView::Print(WindowFactory aWindowFactory) {
 	ImGui::PushID(&myPerson);
 	if (ImGui::Button("Show Images")) {
+		theGlobalTrace->AddEvent(
+			"Show Images of " + myPerson.firstNames[0] + " " + myPerson.lastNames[0]);
 		myContext->ShowImagesOfPerson(myPerson.id);
 	}
 	ImGui::SameLine();
 	if (ImGui::Button("Play Audio")) {
+		theGlobalTrace->AddEvent(
+			"Play Audio of " + myPerson.firstNames[0] + " " + myPerson.lastNames[0]);
 		myContext->PlayPerson(myPerson.id);
 	}
 

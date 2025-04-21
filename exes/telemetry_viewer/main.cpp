@@ -21,9 +21,6 @@ SetupFrame() {
 int
 main() { // NOLINT(bugprone-exception-escape)
 	auto window = ImGuiAdapter::CreateWindows();
-
-	auto path = std::filesystem::current_path();
-
 	window->Init(theWindowWidth, theWindowHight, "Family Tree UI", {});
 
 	std::filesystem::path folder;
@@ -49,7 +46,7 @@ main() { // NOLINT(bugprone-exception-escape)
 	for (const auto& rootPath : ui::GetDirs(folder)) {
 		std::vector<ui::Trace> traces;
 		for (const auto& path : ui::GetDirs(rootPath)) {
-			traces.emplace_back(ui::Trace(path / (path.filename().u8string() + ".trace")));
+			traces.emplace_back(path / (path.filename().u8string() + ".trace"));
 		}
 		roots.emplace_back(std::move(traces));
 	}

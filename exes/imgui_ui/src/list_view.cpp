@@ -1,6 +1,7 @@
 #include "list_view.hpp"
 
 #include "detailed_view.hpp"
+#include "global_trace.hpp"
 
 #include <imgui.h>
 
@@ -28,6 +29,7 @@ ListView::Print(WindowFactory aWindowFactory) {
 		person.Print(aWindowFactory);
 	}
 	if (ImGui::Button("Clear")) {
+		theGlobalTrace->AddEvent("Clear List");
 		return myClearView;
 	}
 	return nullptr;
@@ -46,6 +48,8 @@ ListView::PersonPrinter::Print(WindowFactory aWindowFactory) {
 			false,
 			ImGuiSelectableFlags_None,
 			{ImGui::GetColumnWidth(), ImGui::GetTextLineHeightWithSpacing() * 2})) {
+		theGlobalTrace->AddEvent(
+			"Open Details of " + myPerson.firstNames[0] + " " + myPerson.lastNames[0]);
 		aWindowFactory(std::make_shared<DetaildView>(myContext, myPerson));
 	}
 	auto endCurserPos = ImGui::GetCursorPos();
