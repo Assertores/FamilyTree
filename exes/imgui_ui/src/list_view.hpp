@@ -9,7 +9,9 @@
 #include <vector>
 
 namespace ui {
-class ListView final : public View {
+class ListView final
+	: public View
+	, public std::enable_shared_from_this<ListView> {
 public:
 	ListView(
 		std::shared_ptr<ContextAdapter> aContext,
@@ -22,9 +24,11 @@ private:
 	public:
 		PersonPrinter(std::shared_ptr<ContextAdapter> aContext, Person aPerson);
 		void Print(WindowFactory aWindowFactory);
+		[[nodiscard]] PersonId GetId() const;
 
 	private:
 		std::shared_ptr<ContextAdapter> myContext;
+
 		Person myPerson;
 	};
 

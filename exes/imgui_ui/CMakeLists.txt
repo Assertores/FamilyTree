@@ -13,6 +13,8 @@ target_sources(FamilyTreeGui
 		"src/on_frame_trace_decorator.hpp"
 		"src/search_view.cpp"
 		"src/search_view.hpp"
+		"src/tree_view.cpp"
+		"src/tree_view.hpp"
 		"src/view.hpp"
 )
 

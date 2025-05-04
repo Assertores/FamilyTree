@@ -2,6 +2,7 @@
 
 #include "detailed_view.hpp"
 #include "global_trace.hpp"
+#include "tree_view.hpp"
 
 #include <imgui.h>
 
@@ -10,7 +11,8 @@
 namespace ui {
 namespace {
 constexpr auto theDefaultString = "N/A";
-}
+constexpr auto theDefaultTreeDistance = 5;
+} // namespace
 
 ListView::ListView(
 	std::shared_ptr<ContextAdapter> aContext,
@@ -26,7 +28,18 @@ ListView::ListView(
 std::shared_ptr<View>
 ListView::Print(WindowFactory aWindowFactory) {
 	for (auto& person : mySearchResults) {
+		ImGui::PushID(&person);
+		if (ImGui::Button("Select")) {
+			ImGui::PopID();
+			return std::make_shared<TreeView>(
+				myContext,
+				person.GetId(),
+				theDefaultTreeDistance,
+				shared_from_this());
+		}
+		ImGui::SameLine();
 		person.Print(aWindowFactory);
+		ImGui::PopID();
 	}
 	if (ImGui::Button("Clear")) {
 		theGlobalTrace->AddEvent("Clear List");
@@ -41,7 +54,6 @@ ListView::PersonPrinter::PersonPrinter(std::shared_ptr<ContextAdapter> aContext,
 
 void
 ListView::PersonPrinter::Print(WindowFactory aWindowFactory) {
-	ImGui::PushID(this);
 	auto startCurserPos = ImGui::GetCursorPos();
 	if (ImGui::Selectable(
 			"",
@@ -72,6 +84,10 @@ ListView::PersonPrinter::Print(WindowFactory aWindowFactory) {
 	ImGui::TextUnformatted(myPerson.dateOfDeath.value_or(theDefaultString).c_str());
 
 	ImGui::SetCursorPos(endCurserPos);
-	ImGui::PopID();
+}
+
+PersonId
+ListView::PersonPrinter::GetId() const {
+	return myPerson.id;
 }
 } // namespace ui

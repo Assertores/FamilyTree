@@ -120,6 +120,34 @@ ToApi(
 	return result;
 }
 
+struct CGraphBuilderStrategy {
+	GraphBuilderStrategy myInterface{};
+	IGraphBuilderStrategy* myThis{};
+};
+
+CGraphBuilderStrategy
+ToApi(IGraphBuilderStrategy& aStrategy) {
+	CGraphBuilderStrategy result{};
+	result.myThis = &aStrategy;
+	result.myInterface.PersonInGenerationStrategy =
+		[](GraphBuilderStrategy* aThis, PersonId aId, int aGeneration) {
+			// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+			((CGraphBuilderStrategy*)aThis)->myThis->PersonInGenerationStrategy(aId, aGeneration);
+		};
+	result.myInterface.FamilieStrategy = [](GraphBuilderStrategy* aThis,
+											PersonId* aParents,
+											size_t aParentCount,
+											PersonId* aChilds,
+											size_t aChildCount) {
+		// NOLINTNEXTLINE(cppcoreguidelines-pro-type-cstyle-cast)
+		((CGraphBuilderStrategy*)aThis)
+			->myThis->FamilieStrategy(
+				{aParents, aParents + aParentCount},
+				{aChilds, aChilds + aChildCount});
+	};
+	return result;
+}
+
 ui::Residence
 FromApi(::Residence aElement, ::Context* aContext) {
 	ui::Residence result{};
@@ -174,6 +202,8 @@ public:
 	std::vector<Person> GetPersonsMatchingPattern(Person aPrototype, size_t aMinMatches) override;
 	void ShowImagesOfPerson(PersonId aId) override;
 	void PlayPerson(PersonId aId) override;
+	void BuildGraph(PersonId aId, size_t aDistance, IGraphBuilderStrategy& aStrategy) override;
+	Person GetPerson(PersonId aId) override;
 
 private:
 	Context* myContext{};
@@ -234,6 +264,19 @@ void
 FullContextAdapter::PlayPerson(PersonId aId) {
 	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("PlayPerson");
 	::PlayPerson(myContext, aId, *trace);
+}
+
+void
+FullContextAdapter::BuildGraph(PersonId aId, size_t aDistance, IGraphBuilderStrategy& aStrategy) {
+	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("BuildGraph");
+	auto strategy = ToApi(aStrategy);
+	::BuildGraph(myContext, aId, aDistance, &strategy.myInterface, *trace);
+}
+
+Person
+FullContextAdapter::GetPerson(PersonId aId) {
+	auto trace = tel::TelemetryFactory::GetInstance().CreateLoggingTrace("GetPerson");
+	return FromApi(::GetPerson(myContext, aId, *trace), myContext);
 }
 } // namespace
 
