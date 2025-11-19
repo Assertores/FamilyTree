@@ -88,6 +88,30 @@ HookRendererSwapBuffers(ImGuiViewport* aViewport, void* /*unused*/) {
 
 void
 WindowsAdapter::Init(int aWidth, int aHight, std::string aName, ImVec4 aClearColor) {
+	theWidth = aWidth;
+	theHeight = aHight;
+	myClearColor = aClearColor;
+
+	int nameLengthAsWChar = MultiByteToWideChar(
+		CP_UTF8,
+		MB_USEGLYPHCHARS,
+		aName.c_str(),
+		static_cast<int>(aName.size()),
+		nullptr,
+		0);
+	if (nameLengthAsWChar == 0) {
+		return;
+	}
+	std::wstring convertedName{};
+	convertedName.resize(nameLengthAsWChar);
+	MultiByteToWideChar(
+		CP_UTF8,
+		MB_USEGLYPHCHARS,
+		aName.c_str(),
+		static_cast<int>(aName.size()),
+		convertedName.data(),
+		nameLengthAsWChar);
+
 	// Create application window
 	// ImGui_ImplWin32_EnableDpiAwareness();
 	myWc = {
@@ -106,12 +130,12 @@ WindowsAdapter::Init(int aWidth, int aHight, std::string aName, ImVec4 aClearCol
 	::RegisterClassExW(&myWc);
 	myHwnd = ::CreateWindowW(
 		myWc.lpszClassName,
-		L"Dear ImGui Win32+OpenGL3 Example",
+		convertedName.c_str(),
 		WS_OVERLAPPEDWINDOW,
 		100,
 		100,
-		1280,
-		800,
+		theWidth,
+		theHeight,
 		nullptr,
 		nullptr,
 		myWc.hInstance,
@@ -222,11 +246,10 @@ WindowsAdapter::Update() {
 
 void
 WindowsAdapter::Show() {
-	ImVec4 constexpr clearColor = ImVec4(0.45F, 0.55F, 0.60F, 1.00F);
 	// Rendering
 	ImGui::Render();
 	glViewport(0, 0, theWidth, theHeight);
-	glClearColor(clearColor.x, clearColor.y, clearColor.z, clearColor.w);
+	glClearColor(myClearColor.x, myClearColor.y, myClearColor.z, myClearColor.w);
 	glClear(GL_COLOR_BUFFER_BIT);
 	ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
