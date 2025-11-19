@@ -1,5 +1,8 @@
 #include "tree_view.hpp"
 
+#include "detailed_view.hpp"
+#include "global_trace.hpp"
+
 #include <imgui_adapter/imgui_adapter.hpp>
 
 #include <array>
@@ -98,6 +101,17 @@ TreeView::Print(WindowFactory aWindowFactory) {
 		ImGui::SetCursorPos({person.myX, person.myY - myMinNumber});
 		ImGui::PushID(&person);
 		ImGui::BeginChild("", {theBoxWidth, theBoxHight});
+		if (ImGui::Selectable(
+				"##Selection",
+				false,
+				ImGuiSelectableFlags_None,
+				{theBoxWidth, theBoxHight})) {
+			theGlobalTrace->AddEvent(
+				"Open Details of " + person.myPersonData.firstNames[0] + " "
+				+ person.myPersonData.lastNames[0]);
+			aWindowFactory(std::make_shared<DetaildView>(myContext, person.myPersonData));
+		}
+		ImGui::SetCursorPos({});
 		person.Print();
 		ImGui::EndChild();
 		ImGui::PopID();
