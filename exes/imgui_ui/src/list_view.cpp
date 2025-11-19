@@ -55,17 +55,8 @@ ListView::PersonPrinter::PersonPrinter(std::shared_ptr<ContextAdapter> aContext,
 void
 ListView::PersonPrinter::Print(WindowFactory aWindowFactory) {
 	auto startCurserPos = ImGui::GetCursorPos();
-	if (ImGui::Selectable(
-			"",
-			false,
-			ImGuiSelectableFlags_None,
-			{ImGui::GetColumnWidth(), ImGui::GetTextLineHeightWithSpacing() * 2})) {
-		theGlobalTrace->AddEvent(
-			"Open Details of " + myPerson.firstNames[0] + " " + myPerson.lastNames[0]);
-		aWindowFactory(std::make_shared<DetaildView>(myContext, myPerson));
-	}
-	auto endCurserPos = ImGui::GetCursorPos();
-	ImGui::SetCursorPos(startCurserPos);
+
+	ImGui::BeginGroup();
 
 	ImGui::TextUnformatted(
 		myPerson.firstNames.empty() ? theDefaultString : myPerson.firstNames[0].c_str());
@@ -82,6 +73,21 @@ ListView::PersonPrinter::Print(WindowFactory aWindowFactory) {
 	ImGui::TextUnformatted("Death:");
 	ImGui::SameLine();
 	ImGui::TextUnformatted(myPerson.dateOfDeath.value_or(theDefaultString).c_str());
+
+	ImGui::EndGroup();
+
+	auto endCurserPos = ImGui::GetCursorPos();
+	ImGui::SetCursorPos(startCurserPos);
+
+	if (ImGui::Selectable(
+			"",
+			false,
+			ImGuiSelectableFlags_None,
+			{ImGui::GetColumnWidth(), endCurserPos.y - startCurserPos.y})) {
+		theGlobalTrace->AddEvent(
+			"Open Details of " + myPerson.firstNames[0] + " " + myPerson.lastNames[0]);
+		aWindowFactory(std::make_shared<DetaildView>(myContext, myPerson));
+	}
 
 	ImGui::SetCursorPos(endCurserPos);
 }
