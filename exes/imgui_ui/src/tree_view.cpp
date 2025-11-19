@@ -7,13 +7,14 @@
 
 namespace ui {
 constexpr auto theBoxHight = 80;
-constexpr auto theBoxWidth = 120;
+constexpr auto theBoxWidth = 200;
 constexpr auto theBoxVerticalSpacing = 40;
-constexpr auto theBoxHorizontalSpacing = 5;
+constexpr auto theBoxHorizontalSpacing = 10;
 constexpr auto theBoxHorizontalCenter = theBoxWidth / 2;
 constexpr auto theBoxVerticalCenter = theBoxHight / 2;
-constexpr auto theFamilySpacing = 4;
-constexpr auto thePortOffset = 2;
+constexpr auto theFamilySpacing = 8;
+constexpr auto thePortOffset = 10;
+constexpr auto theCircleRadius = 3;
 
 TreeView::TreeView(
 	std::shared_ptr<ContextAdapter> aContext,
@@ -62,25 +63,33 @@ TreeView::Print(WindowFactory aWindowFactory) {
 			second);
 		for (const auto& personId : family.myParents) {
 			auto target = myPersons.at(personId);
-			canvas->AddLine(
-				{target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
-				 target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber},
-				{target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
-				 family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
-				second);
+
+			ImVec2 startPos = {
+				target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
+				target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber};
+			ImVec2 endPos = {
+				target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
+				family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber};
+
+			canvas->AddLine(startPos, endPos, second);
+
+			canvas->AddCircleFilled(startPos, theCircleRadius, second);
+			canvas->AddCircleFilled(endPos, theCircleRadius, second);
 		}
 		for (const auto& personId : family.myChildrens) {
 			auto target = myPersons.at(personId);
-			canvas->AddLine(
-				ImVec2{
-					target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset
-						- scrollXOffset,
-					target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber},
-				ImVec2{
-					target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset
-						- scrollXOffset,
-					family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
-				second);
+
+			ImVec2 startPos = {
+				target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset - scrollXOffset,
+				target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber};
+			ImVec2 endPos = {
+				target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset - scrollXOffset,
+				family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber};
+
+			canvas->AddLine(startPos, endPos, second);
+
+			canvas->AddCircleFilled(startPos, theCircleRadius, second);
+			canvas->AddCircleFilled(endPos, theCircleRadius, second);
 		}
 	}
 	constexpr ImVec4 boxColor = {0.2, 0.2, 0.2, 1};
