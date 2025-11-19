@@ -5,6 +5,9 @@
 #include <family_tree/types.h>
 
 #include <chrono>
+#include <cstdlib>
+
+using namespace std::chrono_literals;
 
 namespace tel {
 struct CTrace {
@@ -63,10 +66,30 @@ TelemetryFactory::GetInstance() {
 }
 
 TelemetryFactory::TelemetryFactory() {
+	auto constexpr day = 24h;
+	auto constexpr base = 10;
+
+	auto logPath = std::filesystem::current_path() / "Logs";
+
 	auto now = std::chrono::system_clock::now().time_since_epoch();
 	auto seconds = std::chrono::duration_cast<std::chrono::seconds>(now);
-	myFolder = std::filesystem::current_path() / "Logs" / std::to_string(seconds.count());
+	myFolder = logPath / std::to_string(seconds.count());
 	std::filesystem::create_directories(myFolder);
+
+	auto cutoffTime = (seconds - day).count();
+
+	for (const auto& folder : std::filesystem::directory_iterator(logPath)) {
+		if (!folder.is_directory()) {
+			continue;
+		}
+
+		char* end{};
+		auto folderNumber = std::strtol(folder.path().stem().u8string().c_str(), &end, base);
+
+		if (*end == '\0' && folderNumber < cutoffTime) {
+			std::filesystem::remove_all(folder);
+		}
+	}
 }
 
 std::shared_ptr<Trace>
