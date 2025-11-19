@@ -47,6 +47,9 @@ private:
 	std::map<PersonId, LocPerson> myPersons;
 	std::vector<Family> myFamilies;
 
+	float myMinNumber = 0;
+	bool myFirstFrame = true;
+
 	std::shared_ptr<ContextAdapter> myContext;
 	PersonId myPerson;
 	size_t myDistance;

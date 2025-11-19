@@ -44,6 +44,10 @@ TreeView::Print(WindowFactory aWindowFactory) {
 		ImGuiChildFlags_None,
 		// NOLINTNEXTLINE
 		ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar);
+	if (myFirstFrame) {
+		ImGui::SetScrollY(-myMinNumber);
+		myFirstFrame = false;
+	}
 	ImVec2 windowPos = ImGui::GetWindowPos();
 	auto* canvas = ImGui::GetWindowDrawList();
 	const auto scrollXOffset = ImGui::GetScrollX();
@@ -51,17 +55,17 @@ TreeView::Print(WindowFactory aWindowFactory) {
 	for (const auto& family : myFamilies) {
 		canvas->AddLine(
 			{family.myLeft + windowPos.x + theBoxHorizontalCenter - scrollXOffset,
-			 family.myHorizontalLine + windowPos.y - scrollYOffset},
+			 family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
 			{family.myRight + windowPos.x + theBoxHorizontalCenter - scrollXOffset,
-			 family.myHorizontalLine + windowPos.y - scrollYOffset},
+			 family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
 			second);
 		for (const auto& personId : family.myParents) {
 			auto target = myPersons.at(personId);
 			canvas->AddLine(
 				{target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
-				 target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset},
+				 target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber},
 				{target.myX + windowPos.x + theBoxHorizontalCenter + thePortOffset - scrollXOffset,
-				 family.myHorizontalLine + windowPos.y - scrollYOffset},
+				 family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
 				second);
 		}
 		for (const auto& personId : family.myChildrens) {
@@ -70,18 +74,18 @@ TreeView::Print(WindowFactory aWindowFactory) {
 				ImVec2{
 					target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset
 						- scrollXOffset,
-					target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset},
+					target.myY + windowPos.y + theBoxVerticalCenter - scrollYOffset - myMinNumber},
 				ImVec2{
 					target.myX + windowPos.x + theBoxHorizontalCenter - thePortOffset
 						- scrollXOffset,
-					family.myHorizontalLine + windowPos.y - scrollYOffset},
+					family.myHorizontalLine + windowPos.y - scrollYOffset - myMinNumber},
 				second);
 		}
 	}
 	constexpr ImVec4 boxColor = {0.2, 0.2, 0.2, 1};
 	ImGui::PushStyleColor(ImGuiCol_ChildBg, boxColor);
 	for (const auto& [_, person] : myPersons) {
-		ImGui::SetCursorPos({person.myX, person.myY});
+		ImGui::SetCursorPos({person.myX, person.myY - myMinNumber});
 		ImGui::PushID(&person);
 		ImGui::BeginChild("", {theBoxWidth, theBoxHight});
 		ImGui::TextUnformatted(person.myPersonData.firstNames[0].c_str());
@@ -166,6 +170,11 @@ TreeView::PrivCalculateFamiltyMetadata() {
 			family.myHorizontalLine += theFamilySpacing;
 		}
 		takenHights.insert(family.myHorizontalLine);
+	}
+
+	myMinNumber = 0;
+	for (const auto& [_, person] : myPersons) {
+		myMinNumber = std::min(myMinNumber, person.myY);
 	}
 }
 
