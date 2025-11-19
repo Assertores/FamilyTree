@@ -220,17 +220,18 @@ TreeView::LocPerson::Print() const {
 		ImGui::SameLine();
 	}
 
-	if (myPersonData.title) {
-		ImGui::TextUnformatted(myPersonData.title->c_str());
-		ImGui::SameLine();
+	if (myPersonData.firstNames.empty()) {
+		ImGui::TextUnformatted("N/A");
+	} else {
+		ImGui::TextUnformatted(myPersonData.firstNames[0].c_str());
 	}
-	ImGui::TextUnformatted(myPersonData.firstNames[0].c_str());
 	ImGui::SameLine();
-	if (myPersonData.titleOfNobility) {
-		ImGui::TextUnformatted(myPersonData.titleOfNobility->c_str());
-		ImGui::SameLine();
+
+	if (myPersonData.lastNames.empty()) {
+		ImGui::TextUnformatted("N/A");
+	} else {
+		ImGui::TextUnformatted(myPersonData.lastNames[0].c_str());
 	}
-	ImGui::TextUnformatted(myPersonData.lastNames[0].c_str());
 
 	if (myPersonData.dateOfBirth) {
 		ImGui::TextUnformatted("*");
