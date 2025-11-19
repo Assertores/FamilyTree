@@ -2,6 +2,7 @@
 
 #include <imgui_adapter/imgui_adapter.hpp>
 
+#include <array>
 #include <set>
 
 namespace ui {
@@ -88,9 +89,7 @@ TreeView::Print(WindowFactory aWindowFactory) {
 		ImGui::SetCursorPos({person.myX, person.myY - myMinNumber});
 		ImGui::PushID(&person);
 		ImGui::BeginChild("", {theBoxWidth, theBoxHight});
-		ImGui::TextUnformatted(person.myPersonData.firstNames[0].c_str());
-		ImGui::SameLine();
-		ImGui::TextUnformatted(person.myPersonData.lastNames[0].c_str());
+		person.Print();
 		ImGui::EndChild();
 		ImGui::PopID();
 	}
@@ -187,5 +186,39 @@ TreeView::Family::operator==(const Family& aOther) const {
 		return false;
 	}
 	return true;
+}
+
+void
+TreeView::LocPerson::Print() const {
+	if (myPersonData.gender) {
+		std::array<char, 2> str{};
+		str[0] = (*myPersonData.gender)[0];
+		ImGui::TextUnformatted(str.data());
+		ImGui::SameLine();
+	}
+
+	if (myPersonData.title) {
+		ImGui::TextUnformatted(myPersonData.title->c_str());
+		ImGui::SameLine();
+	}
+	ImGui::TextUnformatted(myPersonData.firstNames[0].c_str());
+	ImGui::SameLine();
+	if (myPersonData.titleOfNobility) {
+		ImGui::TextUnformatted(myPersonData.titleOfNobility->c_str());
+		ImGui::SameLine();
+	}
+	ImGui::TextUnformatted(myPersonData.lastNames[0].c_str());
+
+	if (myPersonData.dateOfBirth) {
+		ImGui::TextUnformatted("*");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(myPersonData.dateOfBirth->c_str());
+	}
+
+	if (myPersonData.dateOfDeath) {
+		ImGui::TextUnformatted("+");
+		ImGui::SameLine();
+		ImGui::TextUnformatted(myPersonData.dateOfDeath->c_str());
+	}
 }
 } // namespace ui

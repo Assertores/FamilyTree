@@ -29,6 +29,8 @@ private:
 		float myX = 0;
 		float myY = 0;
 		Person myPersonData{};
+
+		void Print() const;
 	};
 	struct Family {
 		Family(std::vector<PersonId> aParents, std::vector<PersonId> aChildrens)
