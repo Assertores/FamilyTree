@@ -36,3 +36,7 @@ target_link_libraries(FamilyTreeGui
 		ImGuiAdapter
 		Telemetry
 )
+
+target_link_options(FamilyTreeGui PRIVATE
+	-static
+)

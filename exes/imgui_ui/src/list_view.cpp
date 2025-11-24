@@ -11,7 +11,6 @@
 namespace ui {
 namespace {
 constexpr auto theDefaultString = "N/A";
-constexpr auto theDefaultTreeDistance = 5;
 } // namespace
 
 ListView::ListView(
@@ -27,6 +26,7 @@ ListView::ListView(
 
 std::shared_ptr<View>
 ListView::Print(WindowFactory aWindowFactory) {
+	ImGui::InputInt("Distance", &myDistance);
 	for (auto& person : mySearchResults) {
 		ImGui::PushID(&person);
 		if (ImGui::Button("Select")) {
@@ -34,7 +34,7 @@ ListView::Print(WindowFactory aWindowFactory) {
 			return std::make_shared<TreeView>(
 				myContext,
 				person.GetId(),
-				theDefaultTreeDistance,
+				myDistance,
 				shared_from_this());
 		}
 		ImGui::SameLine();

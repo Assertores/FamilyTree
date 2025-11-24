@@ -306,9 +306,15 @@ main() { // NOLINT(bugprone-exception-escape)
 
 	for (window->Init(theWindowWidth, theWindowHight, "Family Tree UI", {}); window->Update();
 		 window->Show()) {
-		ImGui::SetNextWindowPos({});
-		ImGui::SetNextWindowSize(ImGui::GetIO().DisplaySize);
-		ImGui::Begin("MainWindow", nullptr, theWindowFlags);
+		ImGuiViewport* viewport = ImGui::GetMainViewport();
+		ImGui::SetNextWindowPos(viewport->WorkPos);
+		ImGui::SetNextWindowSize(viewport->WorkSize);
+		ImGui::SetNextWindowViewport(viewport->ID);
+		ImGui::Begin(
+			"MainWindow",
+			nullptr,
+			// NOLINTNEXTLINE
+			ImGuiWindowFlags_NoDecoration | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
 		Clear();
 		UI();

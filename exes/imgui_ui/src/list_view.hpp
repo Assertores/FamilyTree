@@ -35,6 +35,7 @@ private:
 	std::shared_ptr<ContextAdapter> myContext;
 	std::vector<PersonPrinter> mySearchResults;
 	std::shared_ptr<View> myClearView;
+	int myDistance = 5; // NOLINT
 
 	void PrivShowPerson(const Person& aPerson);
 
