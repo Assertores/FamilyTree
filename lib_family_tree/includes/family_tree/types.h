@@ -8,6 +8,9 @@
 extern "C" {
 #endif
 
+/// @defgroup Types Types
+/// @{
+
 /// @brief a opaque type used for almost all api calls.
 /// @note the api is not threadsave.
 typedef struct Context Context;
@@ -97,6 +100,8 @@ typedef enum {
 	RelationType_StrictlyHigher,
 } RelationType;
 
+/// @}
+
 /// @cond
 typedef struct IRelationals IRelationals;
 typedef struct IPersonals IPersonals;
@@ -105,6 +110,9 @@ typedef struct IPlatform IPlatform;
 typedef struct ITrace ITrace;
 typedef struct GraphBuilderStrategy GraphBuilderStrategy;
 /// @endcond
+
+/// @defgroup Interfaces Interfaces
+/// @{
 
 /// @brief an interface through which relational data can be retreaved.
 struct IRelationals {
@@ -231,6 +239,8 @@ struct GraphBuilderStrategy {
 		PersonId* aChilds,
 		size_t aChildCount);
 };
+
+/// @}
 
 #ifdef __cplusplus
 }

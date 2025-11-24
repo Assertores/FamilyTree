@@ -7,7 +7,7 @@
 #ifdef __cplusplus
 extern "C" {
 #endif
-/// \cond DO_NOT_DOCUMENT
+/// @cond DO_NOT_DOCUMENT
 #ifndef FT_API
 #ifdef _MSC_VER
 #define EXPORT __declspec(dllexport)
@@ -27,7 +27,10 @@ extern "C" {
 #define FT_API IMPORT
 #endif // FT_BUILD_STATIC
 #endif // FT_API
-/// \endcond
+/// @endcond
+
+/// @defgroup API API
+/// @{
 
 /// @brief creates a context instance.
 /// @param aTrace a trace object that reseaves all relevant internals. set it to @a NULL if not
@@ -291,6 +294,8 @@ FT_API void BuildGraph(
 /// @return 1 if @a aStringToCheck points at the adress the default string is stored in. otherwise
 /// 0.
 FT_API int IsDefaultString(Context* aContext, const char* aStringToCheck);
+
+/// @}
 
 #ifdef __cplusplus
 }
