@@ -3,3 +3,4 @@
 **/build/
 .vscode
 **/doxygen_generated
+/.cache/**
