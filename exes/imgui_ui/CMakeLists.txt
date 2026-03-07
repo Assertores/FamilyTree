@@ -37,6 +37,8 @@ target_link_libraries(FamilyTreeGui
 		Telemetry
 )
 
-target_link_options(FamilyTreeGui PRIVATE
-	-static
-)
+if(WIN32)
+	target_link_options(FamilyTreeGui PRIVATE
+		-static
+	)
+endif(WIN32)
