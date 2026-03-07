@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 import argparse
 import pathlib
@@ -6,7 +6,7 @@ import shutil
 import subprocess
 import sys
 
-def FileList(aArgs):
+def FileList(aArgs : argparse.Namespace):
 	if aArgs.files == "all":
 		# Run by hand
 		return subprocess.check_output(["git", "ls-files"]).decode("utf-8").splitlines()
