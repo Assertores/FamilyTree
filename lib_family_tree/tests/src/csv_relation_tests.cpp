@@ -35,6 +35,13 @@ CSVRelationsCanHandleEmptyFile() {
 bool
 CSVRelationsCanComputeCountOfAllUniqueIds() {
 	MockPlatform platform{};
+	platform.myFiles.emplace("/relations.csv", R"csv(personA,personB,type,relationship,start,end
+1,2,StrictlyLower
+1,3,StrictlyLower
+2,3,Unrestricted
+3,4,StrictlyLower
+4,5,StrictlyLower)csv");
+
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -47,6 +54,13 @@ CSVRelationsCanComputeCountOfAllUniqueIds() {
 bool
 CSVRelationsCanComputeAllUniqueIds() {
 	MockPlatform platform{};
+	platform.myFiles.emplace("/relations.csv", R"csv(personA,personB,type,relationship,start,end
+5,8,StrictlyLower
+5,9,StrictlyLower
+8,9,Unrestricted
+9,13,StrictlyLower
+13,32,StrictlyLower)csv");
+
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -70,6 +84,13 @@ CSVRelationsCanComputeAllUniqueIds() {
 bool
 CSVRelationsCanComputeRelationsCount() {
 	MockPlatform platform{};
+	platform.myFiles.emplace("/relations.csv", R"csv(personA,personB,type,relationship,start,end
+5,8,StrictlyLower
+5,9,StrictlyLower
+8,9,Unrestricted
+9,13,StrictlyLower
+13,32,StrictlyLower)csv");
+
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -82,6 +103,13 @@ CSVRelationsCanComputeRelationsCount() {
 bool
 CSVRelationsCanComputeRelationsOfPerson() {
 	MockPlatform platform{};
+	platform.myFiles.emplace("/relations.csv", R"csv(personA,personB,type,relationship,start,end
+5,8,StrictlyLower
+5,9,StrictlyLower
+8,9,Unrestricted
+9,13,StrictlyLower
+13,32,StrictlyLower)csv");
+
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 

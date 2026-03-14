@@ -12,6 +12,49 @@
 bool
 CanRetreavePersonThroughAPI() {
 	MockPlatform platform{};
+	platform.myFolders.emplace("", "abc");
+	platform.myFiles.emplace(
+		"/abc/data.json",
+		R"json({
+	"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57",
+	"Id": 5,
+	"Title": "Prof. Dr.",
+	"FirstNames": [
+		"Philippa",
+		"Rosa",
+		"Polly"
+	],
+	"TitleOfNobility": "von und zu",
+	"LastNames": [
+		"Perry",
+		"Figueroa",
+		"Russell"
+	],
+	"Gender": "male",
+	"DateOfBirth": "04.05.1996",
+	"PlaceOfBirth": "PlaceA",
+	"DateOfDeath": "11.11.2021",
+	"PlaceOfDeath": "PlaceB",
+	"Profession": ["AWork", "BWork"],
+	"PlaceOfResidence": [
+		{
+			"Name": "Place A",
+			"StartDate": "04.05.1996",
+			"EndDate": "05.05.1996"
+		},
+		{
+			"Name": "Place B",
+			"StartDate": "06.05.1996"
+		}
+	],
+	"Audio": "Sunday_plans.mp3",
+	"Images":[
+		"Trohnsaal.png",
+		"Bauhaus.png"
+	],
+	"Remarks": "RemarkA"
+})json");
+
 	AutoFree context = Create(nullptr);
 
 	AddDataProvider(
@@ -46,6 +89,49 @@ CanRetreavePersonThroughAPI() {
 bool
 CanPlayMusicThroughAPI() {
 	MockPlatform platform{};
+	platform.myFolders.emplace("", "abc");
+	platform.myFiles.emplace(
+		"/abc/data.json",
+		R"json({
+	"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57",
+	"Id": 5,
+	"Title": "Prof. Dr.",
+	"FirstNames": [
+		"Philippa",
+		"Rosa",
+		"Polly"
+	],
+	"TitleOfNobility": "von und zu",
+	"LastNames": [
+		"Perry",
+		"Figueroa",
+		"Russell"
+	],
+	"Gender": "male",
+	"DateOfBirth": "04.05.1996",
+	"PlaceOfBirth": "PlaceA",
+	"DateOfDeath": "11.11.2021",
+	"PlaceOfDeath": "PlaceB",
+	"Profession": ["AWork", "BWork"],
+	"PlaceOfResidence": [
+		{
+			"Name": "Place A",
+			"StartDate": "04.05.1996",
+			"EndDate": "05.05.1996"
+		},
+		{
+			"Name": "Place B",
+			"StartDate": "06.05.1996"
+		}
+	],
+	"Audio": "Sunday_plans.mp3",
+	"Images":[
+		"Trohnsaal.png",
+		"Bauhaus.png"
+	],
+	"Remarks": "RemarkA"
+})json");
+
 	AutoFree context = Create(nullptr);
 	int audioLoadedCount = 0;
 	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { audioLoadedCount++; };
@@ -67,6 +153,49 @@ CanPlayMusicThroughAPI() {
 bool
 CanShowImagesThroughAPI() {
 	MockPlatform platform{};
+	platform.myFolders.emplace("", "abc");
+	platform.myFiles.emplace(
+		"/abc/data.json",
+		R"json({
+	"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57",
+	"Id": 5,
+	"Title": "Prof. Dr.",
+	"FirstNames": [
+		"Philippa",
+		"Rosa",
+		"Polly"
+	],
+	"TitleOfNobility": "von und zu",
+	"LastNames": [
+		"Perry",
+		"Figueroa",
+		"Russell"
+	],
+	"Gender": "male",
+	"DateOfBirth": "04.05.1996",
+	"PlaceOfBirth": "PlaceA",
+	"DateOfDeath": "11.11.2021",
+	"PlaceOfDeath": "PlaceB",
+	"Profession": ["AWork", "BWork"],
+	"PlaceOfResidence": [
+		{
+			"Name": "Place A",
+			"StartDate": "04.05.1996",
+			"EndDate": "05.05.1996"
+		},
+		{
+			"Name": "Place B",
+			"StartDate": "06.05.1996"
+		}
+	],
+	"Audio": "Sunday_plans.mp3",
+	"Images":[
+		"Trohnsaal.png",
+		"Bauhaus.png"
+	],
+	"Remarks": "RemarkA"
+})json");
+
 	AutoFree context = Create(nullptr);
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;

@@ -22,10 +22,7 @@ AbstractPlatform_ReadFile(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 
 void
 AbstractPlatform_FreeString(IPlatform* aThis, char* aString, ITrace* aTrace) {
-	//((CPlatform*)aThis)->myThis->FreeString(aString);
-	auto* cast = (CPlatform*)aThis;
-	auto* mine = cast->myThis;
-	mine->FreeString(aString);
+	((CPlatform*)aThis)->myThis->FreeString(aString);
 }
 
 void
@@ -85,8 +82,8 @@ MockPlatform::GetFolders(const char* aPath) {
 
 char*
 MockPlatform::ReadFile(const char* aPath) {
-	auto file = myFolders.find(aPath);
-	if (file == myFolders.end()) {
+	auto file = myFiles.find(aPath);
+	if (file == myFiles.end()) {
 		myUnexpectedFolder = true;
 		return (char*)calloc(1, 1); // NOLINT
 	}
