@@ -300,5 +300,5 @@ FT_API int IsDefaultString(Context* aContext, const char* aStringToCheck);
 #ifdef __cplusplus
 }
 #endif
-// NOLINTBEGIN
+// NOLINTEND
 #endif // FT_API_H

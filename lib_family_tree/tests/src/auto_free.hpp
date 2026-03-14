@@ -31,6 +31,27 @@ private:
 };
 
 template <>
+class AutoFree<ITrace> {
+public:
+	// NOLINTNEXTLINE(hicpp-explicit-conversions) to seamlessly interact with c API
+	AutoFree(ITrace* aBacking)
+		: myBacking(aBacking) {}
+	~AutoFree() { myBacking->Free(myBacking); }
+
+	AutoFree(const AutoFree&) = delete;
+	AutoFree(AutoFree&&) noexcept = default;
+	AutoFree& operator=(const AutoFree&) = delete;
+	AutoFree& operator=(AutoFree&&) noexcept = default;
+
+	// NOLINTNEXTLINE(hicpp-explicit-conversions) to seamlessly interact with c API
+	operator ITrace*() { return myBacking; }
+	ITrace* operator->() { return myBacking; }
+
+private:
+	ITrace* myBacking;
+};
+
+template <>
 class AutoFree<Context> {
 public:
 	// NOLINTNEXTLINE(hicpp-explicit-conversions) to seamlessly interact with c API

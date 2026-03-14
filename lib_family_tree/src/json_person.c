@@ -306,6 +306,10 @@ PrivOnlyId(const char* aKey) {
 
 FullPerson*
 PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
+	if(self->myFolderCount == 0){
+		aTrace->AddEvent(aTrace, "No folders");
+		return NULL;
+	}
 	for (size_t i = 0; i < self->myPersonCount; i++) {
 		if (self->myPersons[i].person.id == aId) {
 			aTrace->AddEvent(aTrace, "Person Cashed");
@@ -537,6 +541,8 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 	}
 	if (count == 0) {
 		// TODO: error handling
+		self->myPlatform->FreeString(self->myPlatform, folders, trace);
+		trace->Free(trace);
 		return;
 	}
 	count++;
@@ -632,5 +638,6 @@ CreateJSONPerson(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 	ResetFolders(result, trace);
 	ResetIds(result, trace);
 
+	trace->Free(trace);
 	return &result->interface;
 }

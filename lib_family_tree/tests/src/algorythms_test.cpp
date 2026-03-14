@@ -10,7 +10,7 @@
 bool
 ChildRelationIsCorrectlyUnderstood() {
 	MockDataProvider data{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
 	auto result = ComputeRelativeGeneration(metadata, 1, 3, trace); // NOLINT
@@ -25,7 +25,7 @@ ChildRelationIsCorrectlyUnderstood() {
 bool
 ParentRelationIsCorrectlyUnderstood() {
 	MockDataProvider data{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
 	auto result = ComputeRelativeGeneration(metadata, 9, 1, trace); // NOLINT
@@ -40,7 +40,7 @@ ParentRelationIsCorrectlyUnderstood() {
 bool
 GrandParentAndChildRelationIsCorrectlyUnderstood() {
 	MockDataProvider data{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
 	auto result = ComputeRelativeGeneration(metadata, 1, 7, trace); // NOLINT

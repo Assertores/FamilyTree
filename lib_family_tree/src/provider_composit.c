@@ -274,7 +274,8 @@ CreateProviderComposit(ITrace* aTrace) {
 	result->interface.GetAllRelationsOfId = ProviderComposit_GetAllRelationsOfId;
 	result->interface.GetRelationType = ProviderComposit_GetRelationType;
 	result->interface.Free = ProviderComposit_Free;
-
+	
+	trace->Free(trace);
 	return result;
 }
 

@@ -12,7 +12,7 @@
 bool
 JSONPersonIsZeroIfNoFoldersExist() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	auto size = person->GetAllIdsCount(person, trace);
@@ -24,7 +24,7 @@ JSONPersonIsZeroIfNoFoldersExist() {
 bool
 JSONPersonIsAmountOfFolders() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	auto size = person->GetAllIdsCount(person, trace);
@@ -36,7 +36,7 @@ JSONPersonIsAmountOfFolders() {
 bool
 CanRetreavePersonIds() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	std::array<PersonId, 2> ids{};
@@ -50,7 +50,7 @@ CanRetreavePersonIds() {
 bool
 PersonDataCanBeRetreaved() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 
 	Person result = person->GetPerson(person, 5, trace); // NOLINT
@@ -77,7 +77,7 @@ PersonDataCanBeRetreaved() {
 bool
 PlayMusicTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	int audioLoadedCount = 0;
 	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { audioLoadedCount++; };
 
@@ -90,7 +90,7 @@ PlayMusicTriggersCorrectPathOnPlatform() {
 bool
 OpenImageTriggersCorrectPathOnPlatform() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;
 	platform.myImageDeprecates["/abc/Trohnsaal.png"] = [&]() { firstImageLoadedCount++; };

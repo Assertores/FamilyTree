@@ -23,7 +23,7 @@ operator<<(std::basic_ostream<char, T>& aOstr, const Relation& aVal) {
 bool
 CSVRelationsCanHandleEmptyFile() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	auto size = rel->GetAllIdsCount(rel, trace);
@@ -35,7 +35,7 @@ CSVRelationsCanHandleEmptyFile() {
 bool
 CSVRelationsCanComputeCountOfAllUniqueIds() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	auto size = rel->GetAllIdsCount(rel, trace);
@@ -47,7 +47,7 @@ CSVRelationsCanComputeCountOfAllUniqueIds() {
 bool
 CSVRelationsCanComputeAllUniqueIds() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	constexpr auto arraysize = 5;
@@ -70,7 +70,7 @@ CSVRelationsCanComputeAllUniqueIds() {
 bool
 CSVRelationsCanComputeRelationsCount() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	auto size = rel->GetAllRelationsOfIdCount(rel, 13, trace); // NOLINT
@@ -82,7 +82,7 @@ CSVRelationsCanComputeRelationsCount() {
 bool
 CSVRelationsCanComputeRelationsOfPerson() {
 	MockPlatform platform{};
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
 	std::array<Relation, 2> relations{};

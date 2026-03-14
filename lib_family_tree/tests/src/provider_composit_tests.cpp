@@ -11,7 +11,7 @@
 bool
 ProviderCompositGetPersonDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	auto* composit = CreateProviderComposit(trace);
 	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);
@@ -25,7 +25,7 @@ ProviderCompositGetPersonDoesNotLeakInternalId() {
 bool
 ProviderCompositGetRelationsDoesNotLeakInternalId() {
 	MockDataProvider dataProvider;
-	auto* trace = CreateNoOpTrace();
+	AutoFree trace = CreateNoOpTrace();
 	auto* composit = CreateProviderComposit(trace);
 	ProviderComposit_AddDataProvider(composit, dataProvider, trace);
 	AutoFree iface = ProviderComposit_Cast(composit);

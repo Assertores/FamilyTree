@@ -1,5 +1,6 @@
 #include "algorythms.h"
 #include "family_tree/api.h"
+#include "family_tree/types.h"
 #include "internal_types.h"
 #include "patch.h"
 
@@ -41,6 +42,9 @@ struct Context {
 	size_t myCreatedPlatformSize;
 	IPlatform** myCreatedPlatforms;
 	Person* myCreatedPersons;
+	Relation* myCreatedRelationData;
+	size_t myPersonIdsSize;
+	PersonId** myPersonIds;
 };
 
 FT_API Context*
@@ -107,6 +111,12 @@ Free(Context* aContext, ITrace* aTrace) {
 	free(aContext->myCreatedPersons);
 	aTrace->AddEvent(aTrace, "Free Meta data for graph");
 	FreeMetaData(&aContext->myMedaData);
+	free(aContext->myCreatedRelationData);
+	aTrace->AddEvent(aTrace, "Free PersonIds array");
+	for (size_t i = 0; i < aContext->myPersonIdsSize; i++) {
+		free(aContext->myPersonIds[i]);
+	}
+	free(aContext->myPersonIds);
 
 	aTrace->AddEvent(aTrace, "Free context");
 	free(aContext);
@@ -725,6 +735,8 @@ GetPersonRelations(Context* aContext, PersonId aId, size_t* aOutRelationsCount, 
 		}
 	}
 
+	aContext->myCreatedRelationData = result;
+
 	aTrace->AddEvent(aTrace, "set output variable");
 	*aOutRelationsCount = count;
 	FREE_TRACE_AND_RETURN result;
@@ -744,6 +756,23 @@ GetRelativeGeneration(Context* aContext, PersonId aRefId, PersonId aTargetId, IT
 	FREE_TRACE_AND_RETURN result;
 }
 
+int TrackPersonIdsMemory(Context* aContext, PersonId* aMemory, ITrace* aTrace){
+	aTrace->AddEvent(aTrace, "Keep track of constructed PersonIds");
+	PersonId** newArray = realloc(
+		aContext->myPersonIds,
+		sizeof(IRelationals*) * (aContext->myPersonIdsSize + 1));
+	if (newArray == NULL) {
+		aTrace->Fail(aTrace, "Unable to realloc array");
+		free(aMemory);
+		return 0;
+	}
+	newArray[aContext->myPersonIdsSize] = aMemory;
+	aContext->myPersonIdsSize++;
+	aContext->myPersonIds = newArray;
+
+	return 1;
+}
+
 FT_API PersonId*
 GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aTrace) {
 	SET_TRACE()
@@ -756,6 +785,7 @@ GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aT
 		aTrace->Fail(aTrace, "Parter Count is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
+	*aOutParterCount = 0;
 
 	size_t minCount = ComputePartnersMinimalCount(aContext->myMedaData, aId, aTrace);
 	if (minCount == 0) {
@@ -773,7 +803,9 @@ GetPartners(Context* aContext, PersonId aId, size_t* aOutParterCount, ITrace* aT
 	}
 
 	result = realloc(result, minCount * sizeof(PersonId));
-	// TODO: keep track of memory
+	if(!TrackPersonIdsMemory(aContext, result, aTrace)){
+		FREE_TRACE_AND_RETURN NULL;
+	}
 
 	*aOutParterCount = minCount;
 	FREE_TRACE_AND_RETURN result;
@@ -806,9 +838,12 @@ GetSiblings(Context* aContext, PersonId aId, size_t* aOutSiblingCount, ITrace* a
 		aTrace->Succeed(aTrace);
 		FREE_TRACE_AND_RETURN NULL;
 	}
+	*aOutSiblingCount = 0;
 
 	result = realloc(result, minCount * sizeof(PersonId));
-	// TODO: keep track of memory
+	if(!TrackPersonIdsMemory(aContext, result, aTrace)){
+		FREE_TRACE_AND_RETURN NULL;
+	}
 
 	*aOutSiblingCount = minCount;
 	FREE_TRACE_AND_RETURN result;
@@ -840,6 +875,7 @@ GetCommonParents(
 		aTrace->Fail(aTrace, "Ids is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
+	*aOutParentCount = 0;
 
 	size_t count = GetParentsCount(aContext->myMedaData, aIds[0], aTrace);
 	PersonId* result = calloc(count, sizeof(PersonId));
@@ -847,8 +883,11 @@ GetCommonParents(
 	for (size_t i = 1; i < aIdCount; i++) {
 		count = IntersectParents(aContext->myMedaData, aIds[i], count, result, aTrace);
 	}
+
 	result = realloc(result, count * sizeof(PersonId));
-	// TODO: keep track of memory
+	if(!TrackPersonIdsMemory(aContext, result, aTrace)){
+		FREE_TRACE_AND_RETURN NULL;
+	}
 
 	*aOutParentCount = count;
 	FREE_TRACE_AND_RETURN result;
@@ -880,6 +919,7 @@ GetCommonChildren(
 		aTrace->Fail(aTrace, "Ids is NULL");
 		FREE_TRACE_AND_RETURN NULL;
 	}
+	*aOutChildrenCount = 0;
 
 	size_t count = GetChildrenCount(aContext->myMedaData, aIds[0], aTrace);
 	PersonId* result = calloc(count, sizeof(PersonId));
@@ -887,8 +927,11 @@ GetCommonChildren(
 	for (size_t i = 1; i < aIdCount; i++) {
 		count = IntersectChildrens(aContext->myMedaData, aIds[i], count, result, aTrace);
 	}
+
 	result = realloc(result, count * sizeof(PersonId));
-	// TODO: keep track of memory
+	if(!TrackPersonIdsMemory(aContext, result, aTrace)){
+		FREE_TRACE_AND_RETURN NULL;
+	}
 
 	*aOutChildrenCount = count;
 	FREE_TRACE_AND_RETURN result;

@@ -153,5 +153,6 @@ CreateForwardingProvider(IRelationals* aRelations, IPersonals* aPersonals, ITrac
 	result->myPersonals = aPersonals;
 	result->myRelations = aRelations;
 
+	trace->Free(trace);
 	return &result->interface;
 }

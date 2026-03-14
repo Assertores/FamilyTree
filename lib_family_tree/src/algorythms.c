@@ -182,6 +182,9 @@ CreateMetaData(IDataProvider* aDataProvider, ITrace* aTrace) {
 
 		free(relations);
 	}
+	if(data.myPersonCount == 0){
+		free(data.myPersons);
+	}
 	trace->Free(trace);
 
 	ResolveGraph(&data, aTrace);

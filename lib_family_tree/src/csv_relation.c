@@ -327,5 +327,6 @@ CreateCSVRelation(const char* aPath, IPlatform* aPlatform, ITrace* aTrace) {
 
 	ResetRelations(result, trace);
 
+	trace->Free(trace);
 	return &result->interface;
 }
