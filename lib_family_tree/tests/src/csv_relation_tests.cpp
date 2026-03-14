@@ -22,7 +22,7 @@ operator<<(std::basic_ostream<char, T>& aOstr, const Relation& aVal) {
 
 bool
 CSVRelationsCanHandleEmptyFile() {
-	AbstractPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -34,7 +34,7 @@ CSVRelationsCanHandleEmptyFile() {
 
 bool
 CSVRelationsCanComputeCountOfAllUniqueIds() {
-	CsvPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -46,7 +46,7 @@ CSVRelationsCanComputeCountOfAllUniqueIds() {
 
 bool
 CSVRelationsCanComputeAllUniqueIds() {
-	CsvPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -69,7 +69,7 @@ CSVRelationsCanComputeAllUniqueIds() {
 
 bool
 CSVRelationsCanComputeRelationsCount() {
-	CsvPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 
@@ -81,7 +81,7 @@ CSVRelationsCanComputeRelationsCount() {
 
 bool
 CSVRelationsCanComputeRelationsOfPerson() {
-	CsvPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree rel = CreateCSVRelation("", platform, trace);
 

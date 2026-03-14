@@ -1,6 +1,7 @@
 #include "mock_platform.hpp"
 
 #include <cstdlib>
+#include <cstring>
 #include <string_view>
 
 // NOLINTBEGIN
@@ -21,7 +22,10 @@ AbstractPlatform_ReadFile(IPlatform* aThis, const char* aPath, ITrace* aTrace) {
 
 void
 AbstractPlatform_FreeString(IPlatform* aThis, char* aString, ITrace* aTrace) {
-	((CPlatform*)aThis)->myThis->FreeString(aString);
+	//((CPlatform*)aThis)->myThis->FreeString(aString);
+	auto* cast = (CPlatform*)aThis;
+	auto* mine = cast->myThis;
+	mine->FreeString(aString);
 }
 
 void
@@ -39,7 +43,7 @@ AbstractPlatform_Free(IPlatform* aThis, ITrace* aTrace) {
 	// TODO: figure this out
 }
 
-AbstractPlatform::AbstractPlatform() {
+MockPlatform::MockPlatform() {
 	myInterface.myInterface.Copy = AbstractPlatform_Copy;
 	myInterface.myInterface.GetFolders = AbstractPlatform_GetFolders;
 	myInterface.myInterface.ReadFile = AbstractPlatform_ReadFile;
@@ -51,59 +55,56 @@ AbstractPlatform::AbstractPlatform() {
 }
 // NOLINTEND
 
-AbstractPlatform::operator IPlatform*() { return &myInterface.myInterface; }
+MockPlatform::operator IPlatform*() { return &myInterface.myInterface; }
 
 char*
 MockPlatform::GetFolders(const char* aPath) {
-	const char backing[] = "abc\0def\0"; // NOLINT std::array is unable to correctly deduce type
-	auto* copy = (new std::string(std::begin(backing), std::end(backing)))->data();
-	return copy;
+	auto folders = myFolders.equal_range(aPath);
+	if (folders.first == myFolders.end()) {
+		myUnexpectedFolder = true;
+		return (char*)calloc(2, 1); // NOLINT
+	}
+
+	// NOTE: intential leak of memory, as the user is expected to call free on this object.
+	std::string result;
+	for (auto iterator = folders.first; iterator != folders.second; iterator++) {
+		result += iterator->second;
+		result += (char)0; // insert intermediate null terminator.
+	}
+	// result already has two null terminators at the end, so it ready to be returned.
+
+	// NOTE: intential leak of memory, as the user is expected to call free on this object.
+	// NOLINTBEGIN
+	char* c_str = (char*)malloc(result.size() + 1);
+	if (c_str) {
+		memcpy(c_str, result.c_str(), result.size() + 1);
+	}
+	// NOLINTEND
+	return c_str;
 }
 
 char*
 MockPlatform::ReadFile(const char* aPath) {
-	if (aPath == std::string_view("/abc/data.json")) {
-		const auto* backing =
-			R"json({
-	"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57",
-	"Id": 5,
-	"Title" : "Prof. Dr.",
-	"FirstNames" : [
-		"Philippa",
-		"Rosa",
-		"Polly"
-	],
-	"TitleOfNobility" : "von und zu",
-	"LastNames" : [
-		"Perry",
-		"Figueroa",
-		"Russell"
-	],
-	"Gender" : "male",
-	"DateOfBirth" : "04.05.1996",
-	"PlaceOfBirth" : "PlaceA",
-	"DateOfDeath" : "11.11.2021",
-	"PlaceOfDeath" : "PlaceB",
-	"Audio" : "Sunday_plans.mp3",
-	"Images" : [
-		"Trohnsaal.png",
-		"Bauhaus.png"
-	] ,
-	"Remarks": "RemarkA"
-})json";
-		return (new std::string(backing))->data();
+	auto file = myFolders.find(aPath);
+	if (file == myFolders.end()) {
+		myUnexpectedFolder = true;
+		return (char*)calloc(1, 1); // NOLINT
 	}
-	if (aPath == std::string_view("/def/data.json")) {
-		const auto* backing =
-			R"json({"Version": "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57","Id": 32})json";
-		return (new std::string(backing))->data();
+
+	// NOTE: intential leak of memory, as the user is expected to call free on this object.
+	// NOLINTBEGIN
+	char* c_str = (char*)malloc(file->second.size() + 1);
+	if (c_str) {
+		memcpy(c_str, file->second.c_str(), file->second.size() + 1);
 	}
-	const auto* backing = "id1,id2,type\n5,32,StrictlyLower";
-	return (new std::string(backing))->data();
+	// NOLINTEND
+	return c_str;
 }
 
-void
-MockPlatform::FreeString(char* aString) {}
+void // NOLINTNEXTLINE(readability-non-const-parameter,-warnings-as-errors)
+MockPlatform::FreeString(char* aString) {
+	free(aString); // NOLINT
+}
 
 void
 MockPlatform::OpenAudio(const char* aPath) {
@@ -123,12 +124,4 @@ MockPlatform::OpenImage(const char* aPath) {
 		return;
 	}
 	expectation->second();
-}
-
-char*
-CsvPlatform::ReadFile(const char* aPath) {
-	const auto* backing =
-		"id1,id2,type\n5,32,StrictlyLower\n13,8,StrictlyLower\n5,13,StrictlyLower\n32,9,"
-		"StrictlyLower";
-	return (new std::string(backing))->data();
 }

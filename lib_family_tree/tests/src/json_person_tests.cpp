@@ -11,7 +11,7 @@
 
 bool
 JSONPersonIsZeroIfNoFoldersExist() {
-	AbstractPlatform platform{};
+	MockPlatform platform{};
 	auto* trace = CreateNoOpTrace();
 	AutoFree person = CreateJSONPerson("", platform, trace);
 

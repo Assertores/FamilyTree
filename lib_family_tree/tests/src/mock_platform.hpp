@@ -7,45 +7,36 @@
 #include <map>
 #include <string>
 
-class AbstractPlatform;
+class MockPlatform;
 struct CPlatform {
 	IPlatform myInterface{};
-	AbstractPlatform* myThis{};
+	MockPlatform* myThis{};
 };
 
-class AbstractPlatform {
+class MockPlatform {
 public:
-	AbstractPlatform();
+	MockPlatform();
 	operator IPlatform*(); // NOLINT(hicpp-explicit-conversions) to seamlessly interact with c API
-	virtual ~AbstractPlatform() = default;
 
-	// TODO: fix default implimentation
-	virtual char* GetFolders(const char* aPath) { return "\0"; } // NOLINT
-	virtual char* ReadFile(const char* aPath) { return ""; }	 // NOLINT
-	virtual void FreeString(char* aString) {}
-	virtual void OpenAudio(const char* aPath) {}
-	virtual void OpenImage(const char* aPath) {}
+	char* GetFolders(const char* aPath);
+	char* ReadFile(const char* aPath);
+	void FreeString(char* aString);
+	void OpenAudio(const char* aPath);
+	void OpenImage(const char* aPath);
 
-private:
-	CPlatform myInterface;
-};
-
-class MockPlatform : public AbstractPlatform {
-public:
-	char* GetFolders(const char* aPath) override;
-	char* ReadFile(const char* aPath) override;
-	void FreeString(char* aString) override;
-	void OpenAudio(const char* aPath) override;
-	void OpenImage(const char* aPath) override;
-
+	// NOLINTBEGIN
+	// to ease testing direct access is fine.
+	std::multimap<std::string, std::string> myFolders;
+	std::map<std::string, std::string> myFiles;
 	std::map<std::string, std::function<void()>> myAudioDeprecates;
 	std::map<std::string, std::function<void()>> myImageDeprecates;
 
 	bool myUnexpectedAudio = false;
 	bool myUnexpectedImage = false;
-};
+	bool myUnexpectedFolder = false;
+	bool myUnexpectedFile = false;
+	// NOLINTEND
 
-class CsvPlatform : public AbstractPlatform {
-public:
-	char* ReadFile(const char* aPath) override;
+private:
+	CPlatform myInterface;
 };
