@@ -11,7 +11,11 @@ public:
 	// NOLINTNEXTLINE(hicpp-explicit-conversions) to seamlessly interact with c API
 	AutoFree(T* aBacking)
 		: myBacking(aBacking) {}
-	~AutoFree() { myBacking->Free(myBacking, CreateNoOpTrace()); }
+	~AutoFree() {
+		auto* trace = CreateNoOpTrace();
+		myBacking->Free(myBacking, trace);
+		trace->Free(trace);
+	}
 
 	AutoFree(const AutoFree&) = delete;
 	AutoFree(AutoFree&&) noexcept = default;

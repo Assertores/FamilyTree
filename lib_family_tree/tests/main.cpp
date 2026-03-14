@@ -5,8 +5,12 @@
 #include "json_person_tests.hpp"
 #include "provider_composit_tests.hpp"
 
+#if _WIN32
 #ifndef NDEBUG
 #include <crtdbg.h>
+#endif
+#else
+#include <sanitizer/lsan_interface.h>
 #endif
 
 #include <csignal>
@@ -24,10 +28,12 @@ private:
 	std::string myReason;
 };
 
+#if _WIN32
 void
 SignalHandler(int aSignal) {
 	throw Exept("Signal: " + std::to_string(aSignal));
 }
+#endif
 
 static bool
 Run(const char* aTestName, bool (*aTest)()) {
@@ -47,7 +53,9 @@ Run(const char* aTestName, bool (*aTest)()) {
 
 int
 main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
+#if _WIN32
 	(void)signal(SIGSEGV, SignalHandler);
+#endif
 
 	bool result = true;
 	std::cout << "[ SUITE ] JSONPerson\n";
@@ -98,10 +106,14 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= RUN(InnerKeysAreCalledOnInnerDispatchTable);
 	result &= RUN(CanHandlerArrayOfObjects);
 
+#if _WIN32
 #ifndef NDEBUG
 	if (_CrtDumpMemoryLeaks() != 0) {
 		std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";
 	}
+#endif
+#else
+	__lsan_do_leak_check();
 #endif
 
 	std::cout << (result ? "All Succeeded" : "Failure detected") << '\n';

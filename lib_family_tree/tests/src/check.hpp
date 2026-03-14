@@ -16,6 +16,12 @@ Equal(const Lhs& aLhs, const Rhs& aRhs) {
 template <class Lhs = char*, class Rhs = char*>
 bool
 Equal(const char* aLhs, const char* aRhs) {
+	if(aLhs == aRhs){
+		return true;
+	}
+	if(aLhs == nullptr){
+		return false;
+	}
 	return std::string_view(aLhs) == aRhs;
 }
 

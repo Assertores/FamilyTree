@@ -1,5 +1,7 @@
 cmake_minimum_required (VERSION 3.20)
 
+set(ASAN_FLAGS "-fsanitize=address" "-fno-omit-frame-pointer")
+
 add_executable(FT_Test "main.cpp")
 
 target_sources(FT_Test
@@ -29,6 +31,11 @@ target_include_directories(FT_Test
         "src"
         "../src"
 )
+
+if(NOT WIN32)
+	target_compile_options(FT_Test PRIVATE $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
+	target_link_options(FT_Test PRIVATE $<$<CONFIG:Debug>:${ASAN_FLAGS}>)
+endif(NOT WIN32)
 
 target_compile_features(FT_Test PRIVATE cxx_std_17)
 

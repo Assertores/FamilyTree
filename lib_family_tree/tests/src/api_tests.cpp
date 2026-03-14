@@ -11,8 +11,8 @@
 
 bool
 CanRetreavePersonThroughAPI() {
-	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
+	AutoFree context = Create(nullptr);
 
 	AddDataProvider(
 		context,
@@ -45,8 +45,8 @@ CanRetreavePersonThroughAPI() {
 
 bool
 CanPlayMusicThroughAPI() {
-	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
+	AutoFree context = Create(nullptr);
 	int audioLoadedCount = 0;
 	platform.myAudioDeprecates["/abc/Sunday_plans.mp3"] = [&]() { audioLoadedCount++; };
 
@@ -66,8 +66,8 @@ CanPlayMusicThroughAPI() {
 
 bool
 CanShowImagesThroughAPI() {
-	AutoFree context = Create(nullptr);
 	MockPlatform platform{};
+	AutoFree context = Create(nullptr);
 	int firstImageLoadedCount = 0;
 	int secondImageLoadedCount = 0;
 	platform.myImageDeprecates["/abc/Trohnsaal.png"] = [&]() { firstImageLoadedCount++; };
@@ -89,8 +89,8 @@ CanShowImagesThroughAPI() {
 
 bool
 CanRetreaveRelationsOfPerson() {
+	MockPlatform platform{};
 	AutoFree context = Create(nullptr);
-	CsvPlatform platform{};
 
 	AddDataProvider(
 		context,
@@ -110,8 +110,8 @@ CanRetreaveRelationsOfPerson() {
 
 bool
 CanRetreavePartners() {
-	AutoFree context = Create(nullptr);
 	MockDataProvider data{};
+	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
 
@@ -126,8 +126,8 @@ CanRetreavePartners() {
 
 bool
 CanRetreaveSiblings() {
-	AutoFree context = Create(nullptr);
 	MockDataProvider data{};
+	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
 
@@ -142,8 +142,8 @@ CanRetreaveSiblings() {
 
 bool
 CanRetreaveCommonParents() {
-	AutoFree context = Create(nullptr);
 	MockDataProvider data{};
+	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
 
@@ -162,8 +162,8 @@ CanRetreaveCommonParents() {
 
 bool
 CanRetreaveCommonChildren() {
-	AutoFree context = Create(nullptr);
 	MockDataProvider data{};
+	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
 
