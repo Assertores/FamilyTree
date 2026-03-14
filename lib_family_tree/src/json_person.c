@@ -319,11 +319,19 @@ PrivGetPerson(JsonPerson* self, PersonId aId, ITrace* aTrace) {
 	ITrace* trace = aTrace->CreateSubTrace(aTrace, "New Person");
 
 	size_t folderIndex = 0;
+	int found = 0;
 	for (size_t i = 0; i < self->myFolderCount; i++) {
 		if (self->myIds[i] == aId) {
 			folderIndex = i;
+			found = 1;
 			break;
 		}
+	}
+	if(!found){
+		// TODO: error handling
+		trace->Fail(trace, "No Person with this id exists");
+		trace->Free(trace);
+		return NULL;
 	}
 
 	trace->AddEvent(trace, "Located folder, Building path");
@@ -500,6 +508,8 @@ JsonPerson_Free(IPersonals* aThis, ITrace* aTrace) {
 		free(self->myPersons[i].imagePaths);
 		free((void*)self->myPersons[i].person.firstNames);
 		free((void*)self->myPersons[i].person.lastNames);
+		free((void*)self->myPersons[i].person.placeOfResidences);
+		free((void*)self->myPersons[i].person.professions);
 		self->myPlatform->FreeString(self->myPlatform, self->myPersons[i].data, aTrace);
 	}
 	self->myPlatform->Free(self->myPlatform, aTrace);
@@ -530,7 +540,14 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 	char* folders = self->myPlatform->GetFolders(self->myPlatform, self->myPath, trace);
 
 	trace->AddEvent(trace, "Calculate folder count");
-	int count = 0;
+	if (folders[0] == '\0' && folders[1] == '\0') {
+		// TODO: error handling
+		self->myPlatform->FreeString(self->myPlatform, folders, trace);
+		trace->Free(trace);
+		return;
+	}
+
+	int count = 1;
 	for (size_t i = 0;; i++) {
 		if (folders[i] == '\0') {
 			if (folders[i + 1] == '\0') {
@@ -539,13 +556,6 @@ ResetFolders(JsonPerson* self, ITrace* aTrace) {
 			count++;
 		}
 	}
-	if (count == 0) {
-		// TODO: error handling
-		self->myPlatform->FreeString(self->myPlatform, folders, trace);
-		trace->Free(trace);
-		return;
-	}
-	count++;
 	self->myFolderCount = count;
 
 	trace->AddEvent(trace, "Allocate Memory");
