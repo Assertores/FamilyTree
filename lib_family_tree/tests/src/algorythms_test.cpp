@@ -49,3 +49,13 @@ GrandParentAndChildRelationIsCorrectlyUnderstood() {
 	CHECK(result, -2);
 	return true;
 }
+
+bool
+AlgorythemsSuit() {
+	bool result = true;
+	std::cout << "\n[ SUITE ] Algorythems\n";
+	result &= RUN(ChildRelationIsCorrectlyUnderstood);
+	result &= RUN(ParentRelationIsCorrectlyUnderstood);
+	result &= RUN(GrandParentAndChildRelationIsCorrectlyUnderstood);
+	return result;
+}

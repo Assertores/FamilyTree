@@ -58,9 +58,25 @@ CheckExclude(
 	}
 	return result;
 }
+
+static bool
+Run(const char* aTestName, bool (*aTest)()) {
+	std::cout << "[TEST   ] ===== " << aTestName << '\n';
+	auto result = false;
+	try {
+		result = aTest();
+	} catch (const std::exception& e) {
+		std::cout << "catched exeption: " << e.what() << '\n';
+	} catch (...) {
+		std::cout << "catched exeption.\n";
+	}
+	std::cout << "[" << (result ? "SUCCESS" : " FAILED") << "]\n";
+	return result;
+}
 } // namespace intern
 
 #define CHECK(aValue, ...) \
 	if (!intern::Check(__FILE__, __LINE__, #aValue, aValue, __VA_ARGS__)) return false
 #define CHECK_EXCLUDE(aValue, ...) \
 	if (!intern::CheckExclude(__FILE__, __LINE__, #aValue, aValue, __VA_ARGS__)) return false
+#define RUN(aTest) intern::Run(#aTest, &(aTest))

@@ -307,3 +307,18 @@ CanRetreaveCommonChildren() {
 
 	return true;
 }
+
+bool
+APISuit() {
+	bool result = true;
+	std::cout << "\n[ SUITE ] API\n";
+	result &= RUN(CanRetreavePersonThroughAPI);
+	result &= RUN(CanPlayMusicThroughAPI);
+	result &= RUN(CanShowImagesThroughAPI);
+	result &= RUN(CanRetreaveRelationsOfPerson);
+	result &= RUN(CanRetreavePartners);
+	result &= RUN(CanRetreaveSiblings);
+	result &= RUN(CanRetreaveCommonParents);
+	result &= RUN(CanRetreaveCommonChildren);
+	return result;
+}

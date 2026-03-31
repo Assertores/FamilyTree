@@ -40,3 +40,12 @@ ProviderCompositGetRelationsDoesNotLeakInternalId() {
 	CHECK_EXCLUDE(relations[1].id2, 234, 34, 9754, 26);
 	return true;
 }
+
+bool
+DataProviderSuit() {
+	bool result = true;
+	std::cout << "\n[ SUITE ] DataProviderComposit\n";
+	result &= RUN(ProviderCompositGetPersonDoesNotLeakInternalId);
+	result &= RUN(ProviderCompositGetRelationsDoesNotLeakInternalId);
+	return result;
+}

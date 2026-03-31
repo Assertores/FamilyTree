@@ -46,3 +46,4 @@ public:
 	std::map<PersonId, std::vector<Relation>> myRelations;
 	std::vector<Relation> myChildRelations;
 };
+

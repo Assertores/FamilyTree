@@ -121,3 +121,15 @@ CSVRelationsCanComputeRelationsOfPerson() {
 	CHECK_EXCLUDE(relations[0], relations[1]);
 	return true;
 }
+
+bool
+CSVRelationSuit() {
+	bool result = true;
+	std::cout << "\n[ SUITE ] CSVRelations\n";
+	result &= RUN(CSVRelationsCanHandleEmptyFile);
+	result &= RUN(CSVRelationsCanComputeCountOfAllUniqueIds);
+	result &= RUN(CSVRelationsCanComputeAllUniqueIds);
+	result &= RUN(CSVRelationsCanComputeRelationsCount);
+	result &= RUN(CSVRelationsCanComputeRelationsOfPerson);
+	return result;
+}

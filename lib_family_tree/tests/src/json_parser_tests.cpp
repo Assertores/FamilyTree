@@ -352,3 +352,27 @@ CanHandlerArrayOfObjects() {
 	}
 	return true;
 }
+
+bool
+JsonParserSuit() {
+	bool result = true;
+	std::cout << "\n[ SUITE ] JsonParser\n";
+	result &= RUN(NullptrWillNotDoAnything);
+	result &= RUN(EmptyStringWillNotDoAnything);
+	result &= RUN(EmptyJsonWillNotCallParsingOnTheHandler);
+	result &= RUN(AKeyIsSuccessfulyParsed);
+	result &= RUN(StringValueIsNotConsideredAKey);
+	result &= RUN(MultipleKeysAreDetected);
+	result &= RUN(StringValueParserIsCalled);
+	result &= RUN(IntParserIsNotCalledForStringValue);
+	result &= RUN(IntValueParserIsCalled);
+	result &= RUN(IgnoresWhitespaceCharacters);
+	result &= RUN(CanDealWithArrayOfInts);
+	result &= RUN(CallsKeyHandlerOnceForEveryElementInArray);
+	result &= RUN(ArrayCanCountainStrings);
+	result &= RUN(ArrayCanCountainMultipleStrings);
+	result &= RUN(CanDealWithObjectInObject);
+	result &= RUN(InnerKeysAreCalledOnInnerDispatchTable);
+	result &= RUN(CanHandlerArrayOfObjects);
+	return result;
+}

@@ -1,4 +1,3 @@
 #pragma once
 
-bool ProviderCompositGetPersonDoesNotLeakInternalId();
-bool ProviderCompositGetRelationsDoesNotLeakInternalId();
+bool DataProviderSuit();

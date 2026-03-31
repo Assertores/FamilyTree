@@ -191,3 +191,16 @@ OpenImageTriggersCorrectPathOnPlatform() {
 	CHECK(secondImageLoadedCount, 1);
 	return true;
 }
+
+bool
+JSONPersonSuit() {
+	bool result = true;
+	std::cout << "[ SUITE ] JSONPerson\n";
+	result &= RUN(JSONPersonIsZeroIfNoFoldersExist);
+	result &= RUN(JSONPersonIsAmountOfFolders);
+	result &= RUN(CanRetreavePersonIds);
+	result &= RUN(PersonDataCanBeRetreaved);
+	result &= RUN(PlayMusicTriggersCorrectPathOnPlatform);
+	result &= RUN(OpenImageTriggersCorrectPathOnPlatform);
+	return result;
+}
