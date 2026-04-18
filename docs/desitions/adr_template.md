@@ -1,13 +1,14 @@
+---
+ID: #ADR 0000
+Obsoleted by:
+  - #"[ADR 0000](adr_0000.md)"
+Revises:
+  - #"[ADR 0000](adr_0000.md)"
+Author: #NAME
+Created at: #DATE
+Last updated: #DATE
+---
 # <!-- TITLE --> TEMPLATE
-## Header
-| ID           | <!-- ADR 0000 --> |
-| -----------: | ---- |
-| Obsoleted by | <!-- [ADR 0000](adr_0000.md) --> |
-| Revises      | <!-- [ADR 0000](adr_0000.md) --> |
-| Author       | <!-- NAME --> |
-| Created at   | <!-- DATE --> |
-| Last updated | <!-- DATE --> |
-
 ## Context
 <!-- What is the issue that we're seeing that is motivating this decision or change? -->
 

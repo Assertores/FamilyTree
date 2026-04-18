@@ -1,12 +1,11 @@
+---
+ID: #TDR 0000
+State: #Identified, Analyzed, Resolved, OR Rejected
+Author: #NAME
+Created at: #DATE
+Last updated: #DATE
+---
 # <!-- TITLE --> TEMPLATE
-## Header
-| ID           | <!-- TDR 0000 --> |
-| -----------: | ---- |
-| State        | <!-- Identified, Analyzed, Resolved, OR Rejected --> |
-| Author       | <!-- NAME --> |
-| Created at   | <!-- DATE --> |
-| Last updated | <!-- DATE --> |
-
 ## Symptoms
 <!-- must be filled in `Identified` state-->
 <!-- Observable signs indicating the presence of the technical debt (e.g., frequent bugs, slow performance). -->
