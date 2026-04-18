@@ -8,9 +8,6 @@
 #include <iostream>
 
 #if _WIN32
-#ifndef NDEBUG
-#include <crtdbg.h>
-#endif
 #include <csignal>
 #include <string>
 
@@ -30,7 +27,18 @@ SignalHandler(int aSignal) {
 	throw Exept("Signal: " + std::to_string(aSignal));
 }
 #else
+#endif
+
+#ifndef NDEBUG
+#if _WIN32
+#include <crtdbg.h>
+#define LEAK_CHECK _CrtDumpMemoryLeaks() != 0
+#else
 #include <sanitizer/lsan_interface.h>
+#define LEAK_CHECK __lsan_do_recoverable_leak_check() != 0
+#endif
+#else
+#define LEAK_CHECK false
 #endif
 
 int
@@ -47,15 +55,9 @@ main(int argc, char** argv) { // NOLINT(bugprone-exception-escape)
 	result &= AlgorythemsSuit();
 	result &= JsonParserSuit();
 
-#if _WIN32
-#ifndef NDEBUG
-	if (_CrtDumpMemoryLeaks() != 0) {
+	if (LEAK_CHECK) {
 		std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";
 	}
-#endif
-#else
-	__lsan_do_leak_check();
-#endif
 
 	std::cout << '\n' << (result ? "All Succeeded" : "Failure detected") << '\n';
 	std::cout << "===== DONE =====\n";

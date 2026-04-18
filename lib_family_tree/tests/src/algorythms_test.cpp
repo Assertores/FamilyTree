@@ -9,7 +9,7 @@
 
 bool
 ChildRelationIsCorrectlyUnderstood() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
@@ -24,7 +24,7 @@ ChildRelationIsCorrectlyUnderstood() {
 
 bool
 ParentRelationIsCorrectlyUnderstood() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 
@@ -39,7 +39,7 @@ ParentRelationIsCorrectlyUnderstood() {
 
 bool
 GrandParentAndChildRelationIsCorrectlyUnderstood() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree trace = CreateNoOpTrace();
 	AutoFree<MetaData> metadata = CreateMetaData(data, trace);
 

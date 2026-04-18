@@ -239,7 +239,7 @@ CanRetreaveRelationsOfPerson() {
 
 bool
 CanRetreavePartners() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
@@ -255,7 +255,7 @@ CanRetreavePartners() {
 
 bool
 CanRetreaveSiblings() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
@@ -271,7 +271,7 @@ CanRetreaveSiblings() {
 
 bool
 CanRetreaveCommonParents() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
@@ -291,7 +291,7 @@ CanRetreaveCommonParents() {
 
 bool
 CanRetreaveCommonChildren() {
-	MockDataProvider data{};
+	MockDataProvider data = MockDataProvider::CreateComplex();
 	AutoFree context = Create(nullptr);
 
 	AddDataProvider(context, data, nullptr);
