@@ -153,15 +153,17 @@ typedef struct {
 	QuestionType question;
 	union {
 		Utf8_String qFilename;
+		Utf8_String qFoldername;
 		Utf8_String qString;
 		Context* context;
 	};
 	union {
 		PersonExt* aPerson;
-		RelationExt** aRelations;
+		RelationExt* aRelations;
 		Utf8_String aString;
 		Utf8_String* aStrings;
 	};
+	void* data;
 } ContextBuilder;
 
 typedef struct {
@@ -191,8 +193,9 @@ struct GraphBuilderStrategy {
 /// @param aDebug a trace object that reseaves all relevant internals. set it to @a NULL if not
 /// interested.
 /// @return a valid context.
-FT_API Context* Create(DebuggingData* aDebug);
-FT_API ContextBuilder StartCreate(DebuggingData* aDebug);
+FT_API Context* Create(Utf8_String aPath, DebuggingData* aDebug);
+FT_API ContextBuilder StartCreate(Utf8_String aPath, DebuggingData* aDebug);
+FT_API ContextBuilder Continue(ContextBuilder aPreviousStep, DebuggingData* aDebug);
 FT_API Context* Merge(Context* aContext1, Context* aContext2, DebuggingData* aDebug);
 
 /// @brief frees the context and all allocations done with that conetxt.

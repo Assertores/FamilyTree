@@ -11,31 +11,12 @@ target_sources(${libName}
 	PUBLIC
 		"includes/family_tree/api.h"
 	PRIVATE
-		"src/algorythms.c"
-		"src/algorythms.h"
-		"src/context.c"
-		"src/csv_relation.c"
-		"src/forwarding_provider.c"
-		"src/internal_types.h"
-		"src/json_parser.c"
-		"src/json_parser.h"
-		"src/json_person.c"
-		"src/noop_trace.c"
-		"src/provider_composit.c"
-		"src/shared_type_decorator.c"
+		"src/api.c"
+		"src/context.h"
+		"src/platform.h"
+		"src/setup.h"
+		"src/setup.c"
 )
-
-if(WIN32)
-	target_sources(${libName}
-		PUBLIC
-			"src/windows_platform.c"
-	)
-else()
-	target_sources(${libName}
-		PUBLIC
-			"src/null_platform.c"
-	)
-endif()
 endfunction(FT_declare libName)
 
 add_library(LibFamilyTree SHARED)
