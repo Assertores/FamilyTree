@@ -10,7 +10,6 @@ target_include_directories(${libName}
 target_sources(${libName}
 	PUBLIC
 		"includes/family_tree/api.h"
-		"includes/family_tree/types.h"
 	PRIVATE
 		"src/algorythms.c"
 		"src/algorythms.h"
