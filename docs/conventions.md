@@ -65,7 +65,7 @@ spikes/
 
 ## Logging
 <!-- What gets logged, and at which level. -->
-The Library writes its reports as lines into the Trace buffer of the Application, see [ADR 0007](decisions/adr_0007.md).
+The Library writes its reports as lines into the Trace buffer of the Application, see [ADR 0007](decisions/adr_0007.md). Every public function, and every internal function that does a task worth skipping when it worked, e.g. reading one Person File, opens a Subtrace and closes it with its outcome. Decisions the code takes, e.g. which branch of a condition, are reported as steps.
 
 | Level | Used for |
 | ---: | :--- |

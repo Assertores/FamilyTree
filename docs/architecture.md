@@ -200,16 +200,18 @@ The functions of the Library, by group. The full signatures are in [ADR 0013](de
 | Creation | `FT_CancelCreate` | stops a creation that is not over |
 | Creation | `FT_Free` | frees a Context and everything it returned |
 | Upper bounds | `FT_GetPersonCount`, `FT_GetFamilyCount` | the sizes every caller buffer can be allocated with |
-| Views | `FT_GetPerson` | all Details and the Generation of a Person |
+| Views | `FT_GetPerson` | all Details of a Person |
 | Views | `FT_GetRelations` | the Relations of a Person |
 | Views | `FT_GetParents`, `FT_GetChildren`, `FT_GetSiblings`, `FT_GetPartners` | the closest relatives of a Person |
 | Views | `FT_GetFamiliesOf`, `FT_GetFamily` | the Families of a Person, and the members of a Family |
 | Views | `FT_GetPicturePaths`, `FT_GetRecordingPath` | the paths of the Media of a Person |
 | Values | `FT_GetRelativeGeneration` | the Generation of a Person relative to another |
+| Values | `FT_IsDefaultString` | whether a Detail is the default string, i.e. missing in the Person File |
 | Buffer queries | `FT_Search` | the Persons matching a search; without search texts and with a minimum of 0, every Person |
 | Buffer queries | `FT_GetCommonParents`, `FT_GetCommonChildren` | the Parents or Children a set of Persons have in common |
 | Buffer queries | `FT_GetFamilyTree` | the Persons and Families of the Family Tree around a Person |
 | Media defaults | `FT_DefaultShowPicture`, `FT_DefaultPlayRecording` | open a Picture or a Recording with the program of the operating system |
+| Media defaults | `FT_ShowPicturesOfPerson`, `FT_PlayRecordingOfPerson` | look up the Media of a Person and open them the default way, in one call |
 
 ## See Also
  - [ADR 0013](decisions/adr_0013.md) the full Public API of the Library

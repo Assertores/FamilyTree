@@ -114,6 +114,9 @@ Two [Persons](#person) are Siblings if they have at least one [Parent](#parent) 
 ### Step
 Something the [Library](#library) did, reported to the [Trace](#trace) to follow its flow, e.g. reading a [Person File](#person-file).
 
+### Subtrace
+A part of the [Trace](#trace) that covers one task of the [Library](#library), e.g. reading a [Person File](#person-file), and shows its outcome, so that a successful task can be skipped without reading it.
+
 ### Trace
 A record of the steps the [Library](#library) takes and the failures it runs into, handed to the Library by an [Application](#application). If the Application hands none over, the Library uses a Trace that discards every report.
 
