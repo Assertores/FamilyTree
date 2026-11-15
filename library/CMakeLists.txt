@@ -8,8 +8,7 @@ add_library(FamilyTree::FamilyTree ALIAS FamilyTree)
 target_sources(
 	FamilyTree
 	PUBLIC "include/family_tree/api.h"
-	# The source files in src/ are added here as they are written.
-)
+	PRIVATE "src/builder.c" "src/context.c" "src/default_platform.c" "src/queries.c")
 
 target_include_directories(FamilyTree PUBLIC "${CMAKE_CURRENT_SOURCE_DIR}/include")
 
