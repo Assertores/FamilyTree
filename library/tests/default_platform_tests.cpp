@@ -30,6 +30,8 @@ public:
 	DiskFolder& operator=(const DiskFolder&) = delete;
 	DiskFolder(DiskFolder&&) = delete;
 	DiskFolder& operator=(DiskFolder&&) = delete;
+	// Only running out of memory can still throw here, which may end the run.
+	// NOLINTNEXTLINE(bugprone-exception-escape)
 	~DiskFolder() {
 		// A folder that cannot be removed is left behind; the next run removes it.
 		std::error_code ignored;
