@@ -14,4 +14,5 @@
 - [DEP 0004](dep_0004.md) clang-tidy
 - [DEP 0005](dep_0005.md) clang
 - [DEP 0006](dep_0006.md) GitHub Actions
+- [DEP 0007](dep_0007.md) Doxygen
 

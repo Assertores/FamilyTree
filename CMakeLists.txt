@@ -27,6 +27,7 @@ include(CTest)
 include(CompilerWarnings)
 include(ClangTidy)
 include(ClangFormat)
+include(Documentation)
 
 # The tests fail on any leak (docs/conventions.md). The sanitizers have to be on for the Library as
 # well, so they are set before any target is defined.

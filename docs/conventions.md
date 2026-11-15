@@ -13,6 +13,7 @@ Last reviewed: 2026-11-15
 | [clang-tidy](dependencies/dep_0004.md) | static analysis of the Library, with checks for C and the Power of Ten rules | `library/.clang-tidy` |
 | [clang-tidy](dependencies/dep_0004.md) | static analysis of the Applications and tests, with checks for C++ | `.clang-tidy`, taken over from the original implementation |
 | [clang](dependencies/dep_0005.md) | the compiler for the Library, the Applications and the tests, on Windows and Linux; the Library is compiled with `-std=c99 -pedantic-errors -Wall -Wextra -Werror` | `library/CMakeLists.txt` |
+| [Doxygen](dependencies/dep_0007.md) | HTML documentation of the public header; the target `documentation` fails on any undocumented function or parameter | `cmake/Documentation.cmake` |
 | AddressSanitizer, LeakSanitizer | memory errors and leaks while the tests run on Linux | `CMakeLists.txt` |
 
 - clang-tidy runs on the C files too, through `CMAKE_C_CLANG_TIDY`; the original implementation only ran it on C++. CMake passes each language its configuration file explicitly (`cmake/ClangTidy.cmake`), because the tests of the Library are C++ but live below `library/.clang-tidy`.
@@ -33,7 +34,7 @@ applications/
     data_entry/             Data Entry Tool
     command_line/           Command Line Application
     translations/           Qt Linguist files shared by the Applications
-cmake/                      CMake modules: warnings, clang-tidy, clang-format
+cmake/                      CMake modules: warnings, clang-tidy, clang-format, Doxygen
 tests/
     framework/              the own test framework, check.hpp
     end_to_end/             end-to-end tests from the scenarios of the features
