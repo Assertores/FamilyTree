@@ -13,6 +13,7 @@
 #include <ios>
 #include <sstream>
 #include <string>
+#include <system_error>
 #include <vector>
 
 namespace {
@@ -32,7 +33,13 @@ public:
 	DiskFolder& operator=(const DiskFolder&) = delete;
 	DiskFolder(DiskFolder&&) = delete;
 	DiskFolder& operator=(DiskFolder&&) = delete;
-	~DiskFolder() { std::filesystem::remove_all(myPath); }
+	// Only running out of memory can still throw here, which may end the run.
+	// NOLINTNEXTLINE(bugprone-exception-escape)
+	~DiskFolder() {
+		// A folder that cannot be removed is left behind; the next run removes it.
+		std::error_code ignored;
+		std::filesystem::remove_all(myPath, ignored);
+	}
 
 	std::filesystem::path operator/(const std::string& aRelativePath) const {
 		return myPath / std::filesystem::u8path(aRelativePath);
