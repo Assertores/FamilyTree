@@ -1,17 +1,17 @@
-# Familie Tree Documentation
-## API
-all public facing APIs are documented in there header file in [Doxygen](https://www.doxygen.nl/manual/commands.html) format in plain english.
-
-the api and all it's implimentation is written in [c](https://en.cppreference.com/w/c).
-## Architecture desition record
-all architecture desition are recorded and stored with there reasoning. these should provide guidence on the reasonings of this project.
-
-the file names follow the following standard: `adr_0000.md` where the `0` are a ever increasing number.
-
-find a template [here](desitions/adr_template.md)
-## Technical debt record
-all known techncial debts are recorded with reasongings for or against fixing it. these should be consulted befor making fixes to enshure all the known context about it is known.
-
-the file names follow the following standard: `tdr_0000.md` where the `0` are a ever increasing number.
-
-find a template [here](debt/tdr_template.md)
+# Documentation
+- [Vision](vision.md) why the project exists and what it aims to achieve
+- [Architecture](architecture.md) how the system is structured
+- [Coding Conventions](conventions.md) how the code is written
+- [Glossary](glossary.md) terms with a specific meaning in this project
+- [Open Questions](open_questions.md) questions that are not answered yet
+- [Requirements](requirements/README.md) what the system must do or comply with
+- [Decisions](decisions/README.md) how and why parts of the system are built the way they are
+- [Features](features/README.md) what users can do with the system, and how it behaves
+- [Dependencies](dependencies/README.md) external software the project uses, and why
+- [Issues](issues/README.md) technical debt that was taken on knowingly
+- [Spikes](spikes/README.md) experiments that investigate open questions, and what they found
+- [Operations](operations/README.md) running the system: incident procedure, object pages and incidents
+- Workspace
+    - [Handover](workspace/handover.md) notes from writing the documentation for the implementation
+    - [Implementer's Notes](workspace/implementers_notes.md) notes and work log for implementing the source code
+    - [Growing the Project](workspace/growing_the_project.md) how to split the project into subsystems once it outgrows a single documentation tree
