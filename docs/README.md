@@ -10,7 +10,6 @@
 - [Dependencies](dependencies/README.md) external software the project uses, and why
 - [Issues](issues/README.md) technical debt that was taken on knowingly
 - [Spikes](spikes/README.md) experiments that investigate open questions, and what they found
-- [Operations](operations/README.md) running the system: incident procedure, object pages and incidents
 - Workspace
     - [Handover](workspace/handover.md) notes from writing the documentation for the implementation
     - [Implementer's Notes](workspace/implementers_notes.md) notes and work log for implementing the source code

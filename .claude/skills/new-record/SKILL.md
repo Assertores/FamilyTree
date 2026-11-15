@@ -1,6 +1,6 @@
 ---
 name: new-record
-description: Creates a new documentation record (REQ, ADR, FTR, DEP, TDR, SPK or INC) from its template with the next free number, today's date and the author, and lists it in the folder's README. Can also create a record that replaces an existing one. Use when the user wants to add a new requirement, decision, feature, dependency, technical debt, spike or incident record, or to change, revise or replace an existing REQ, ADR, DEP, FTR or SPK.
+description: Creates a new documentation record (REQ, ADR, FTR, DEP, TDR or SPK) from its template with the next free number, today's date and the author, and lists it in the folder's README. Can also create a record that replaces an existing one. Use when the user wants to add a new requirement, decision, feature, dependency, technical debt or spike record, or to change, revise or replace an existing REQ, ADR, DEP, FTR or SPK.
 argument-hint: "<req|adr|ftr|dep|tdr|spk|inc> <title> [replaces <IDs>] [content to draft]"
 ---
 
@@ -16,11 +16,10 @@ argument-hint: "<req|adr|ftr|dep|tdr|spk|inc> <title> [replaces <IDs>] [content 
 | DEP | `docs/dependencies/` | `dep_template.md` | none | `Replaces` |
 | TDR | `docs/issues/` | `tdr_template.md` | Identified | none |
 | SPK | `docs/spikes/` | `spk_template.md` | In Progress | `Replaces` |
-| INC | `docs/operations/incidents/` | `inc_template.md` | Open | none |
 
 If the type or the title is missing from the arguments, ask for it.
 
-**Replacement:** if the user wants to change an existing REQ, ADR, DEP or FTR, or a SPK that is no longer `In Progress` (e.g. "replaces REQ 0003", or "REQ 0003 needs to change"), the new record replaces the old one. Records are never edited to change their meaning; a change is always a new record. TDRs, INCs, and SPKs while `In Progress`, are edited directly instead.
+**Replacement:** if the user wants to change an existing REQ, ADR, DEP or FTR, or a SPK that is no longer `In Progress` (e.g. "replaces REQ 0003", or "REQ 0003 needs to change"), the new record replaces the old one. Records are never edited to change their meaning; a change is always a new record. TDRs, and SPKs while `In Progress`, are edited directly instead.
 
 A replacement can be:
 
@@ -39,7 +38,6 @@ A replacement can be:
     - `ID`: e.g. `REQ 0007`.
     - `State`: the initial state from the table above, if the template has a state.
     - `Scope` (DEP only): ask whether it is Runtime or Development, unless the arguments make it clear. For a replacement, take it from the old record.
-    - `Severity` (INC only): take it from the arguments or the incident chat, or leave the placeholder.
     - `Replaced by`: an empty list.
     - Back link field `Replaces`: for a replacement, one link per old record, e.g. `- "[REQ 0003](req_0003.md)"`. Otherwise an empty list.
     - `Author`: the output of `git config user.name`.
@@ -79,6 +77,5 @@ Name the created file and the README entry in one or two lines. For a replacemen
 Then point out what else the new record may affect, and suggest the changes; make them only once the user agrees:
 
 - ADR or DEP: whether `docs/architecture.md` or `docs/conventions.md` describes something the record changes.
-- INC: the object pages in `docs/operations/objects/` of the affected containers, e.g. a new failure mode or a missing shut-off. Once the post-mortem is done, the records, tests and work packages its consequences call for.
 - REQ: the wording is often refined with the user first. Only once the user says the requirement is settled, suggest checking it against the other requirements with `/check-requirements <ID>` and writing its tests with `/requirements-to-tests <ID>`, unless `/implement` already does both.
 - Any record: terms it uses with a specific meaning that are missing from `docs/glossary.md`.

@@ -31,13 +31,6 @@ The tests are derived from the documentation. If a test looks wrong, do not chan
 
 When a document turns out to be out of date, point it out and suggest the update; do not quietly work around it.
 
-## Operations
-Only for a system that runs as a service. Otherwise delete `docs/operations/`, this section, the INC rows in the Records table here and in `.claude/skills/new-record/SKILL.md`, and the Operations entry in [docs/README.md](docs/README.md).
-
-- Once a container is deployed, it gets an object page in `docs/operations/objects/`, named after the container in lower case with hyphens, from `object_template.md`. Object pages are edited directly; alerts link to their failure modes. When someone leaves or changes roles, their name is searched in the object pages, and each role they held is handed over.
-- Incidents follow [docs/operations/incident_procedure.md](docs/operations/incident_procedure.md). The post-mortem is recorded in an INC, and each of its consequences becomes a record, a test or a work package.
-- Service level objectives, e.g. availability or latency, are REQs.
-
 ## Records
 | Prefix | Folder | Content |
 | ---: | :--- | :--- |
@@ -47,10 +40,9 @@ Only for a system that runs as a service. Otherwise delete `docs/operations/`, t
 | DEP | `docs/dependencies/` | external software, Runtime or Development scope |
 | TDR | `docs/issues/` | technical debt taken on knowingly |
 | SPK | `docs/spikes/` | experiments that answer open questions: question, approach, findings |
-| INC | `docs/operations/incidents/` | incidents of the running system and their post-mortems |
 
 - Create records with `/new-record`. `<prefix>_0000.md` is an example and `<prefix>_template.md` the template; neither is a real record.
-- A record's meaning is never edited. A change is a new record that replaces the old one (`/new-record ... replaces <ID>`): REQ, ADR, FTR, DEP and SPK link both ways through `Replaced by` and `Replaces`. An FTR that is dropped without a successor gets the state `Rejected`. Replacements can split or merge records. TDRs, INCs, and SPKs while `In Progress`, are edited directly.
+- A record's meaning is never edited. A change is a new record that replaces the old one (`/new-record ... replaces <ID>`): REQ, ADR, FTR, DEP and SPK link both ways through `Replaced by` and `Replaces`. An FTR that is dropped without a successor gets the state `Rejected`. Replacements can split or merge records. TDRs, and SPKs while `In Progress`, are edited directly.
 - Requirement Statements use [RFC 2119](https://datatracker.ietf.org/doc/html/rfc2119) keywords and contain no definitions and no links. Terms are defined in [docs/glossary.md](docs/glossary.md).
 
 ## Writing Documentation

@@ -12,11 +12,20 @@ A program built on top of the [Library](#library), e.g. the [Browsing Applicatio
 ### Browsing Application
 The [Application](#application) with which family members explore a [Data Set](#data-set): they search for [Persons](#person), see their [Details](#detail), look at the [Family Tree](#family-tree) around them, look at their [Pictures](#picture) and listen to their [Recording](#recording).
 
+### Builder
+The part of the [Library](#library) that creates a [Context](#context): it asks the [Questions](#question), has the answers parsed, and hands the parsed data on to be resolved.
+
+### Caller Buffer
+Memory an [Application](#application) provides for a result of the [Library](#library) that depends on parameters, e.g. a search; its largest needed size is known before the call.
+
 ### Child
 [Person](#person) B is a Child of Person A if a [Relation](#relation) from A to B has the [Relation Type](#relation-type) Strictly Lower, or a Relation from B to A has the Relation Type Strictly Higher.
 
 ### Context
 One independent instance of the [Library](#library) that holds one [Data Set](#data-set). Everything the Library stores belongs to a Context.
+
+### Data Collector
+The family member who gathers and records the data of the family, usually with the [Data Entry Tool](#data-entry-tool); not a programmer, and may only speak German.
 
 ### Data Entry Tool
 The [Application](#application) with which a data collector fills in the [Details](#detail) of a [Person](#person) in a form and saves them as a [Person File](#person-file).
@@ -33,6 +42,9 @@ All [Persons](#person) and [Relations](#relation) read into one [Context](#conte
 ### Default Platform
 The [Platform](#platform) the [Library](#library) brings along for Windows and Linux. It is used for every part of the Platform that an [Application](#application) does not replace, i.e. for every [Question](#question) the Application leaves to the default.
 
+### Default String
+The empty text a [Context](#context) returns for every missing [Detail](#detail). It is recognized by its address, not by its content.
+
 ### Detail
 One piece of information about a [Person](#person) from a [Person File](#person-file): title, first names, title of nobility, last names, gender, date of birth, place of birth, date of death, place of death, professions, [Places of Residence](#place-of-residence), or remarks.
 
@@ -48,6 +60,9 @@ A group of [Parents](#parent) together with all the [Children](#child) they have
 ### Family Graph
 All [Persons](#person) that are connected to each other by a chain of [Parents](#parent) and [Children](#child). A [Data Set](#data-set) can consist of several Family Graphs that are not connected to each other.
 
+### Family Member
+Anyone in the family who explores its history, today or generations from now, usually with the [Browsing Application](#browsing-application).
+
 ### Family Tree
 The selected [Person](#person), and all [Families](#family) within a given [Distance](#distance) of them together with all their members, ordered by [Generation](#generation). The Family Tree always contains the selected Person, also if they are a member of no Family.
 
@@ -56,6 +71,9 @@ A UUID in every data file that states which version of the file format the file 
 
 ### Generation
 The level of a [Person](#person) in their [Family Graph](#family-graph), counted from 0 at the highest level downwards, i.e. towards the [Children](#child). A higher Generation has a smaller number, a lower Generation a larger one.
+
+### Integrator
+A programmer who builds an own [Application](#application) on the [Library](#library).
 
 ### Library
 The C library at the core of the project, which reads [Data Sets](#data-set) and answers questions about them.
@@ -119,6 +137,9 @@ A part of the [Trace](#trace) that covers one task of the [Library](#library), e
 
 ### Trace
 A record of the steps the [Library](#library) takes and the failures it runs into, handed to the Library by an [Application](#application). If the Application hands none over, the Library uses a Trace that discards every report.
+
+### View
+A read only pointer into a [Context](#context), returned by the [Library](#library) instead of a copy; valid until the Context is freed.
 
 ### Warning
 A problem in the data that the [Library](#library) worked around, while the call still did what was asked, e.g. a skipped [Person File](#person-file) or an unknown key.
