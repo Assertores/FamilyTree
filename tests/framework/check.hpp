@@ -15,7 +15,7 @@
 #include <string>
 
 namespace intern {
-void
+inline void
 SignalHandler(int aSignal) {
 	throw std::runtime_error("Signal: " + std::to_string(aSignal));
 }
@@ -195,6 +195,9 @@ public:
 	ResultTracker(ResultTracker&&) = delete;
 	ResultTracker& operator=(ResultTracker&&) = delete;
 
+	// Nothing can be reported if writing to std::cout fails at the very end, so ending the run is
+	// the right outcome.
+	// NOLINTNEXTLINE(bugprone-exception-escape)
 	~ResultTracker() {
 		if (!myIsTestSuite && LEAK_CHECK) {
 			std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";

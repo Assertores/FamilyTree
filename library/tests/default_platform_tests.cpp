@@ -12,6 +12,7 @@
 #include <fstream>
 #include <ios>
 #include <string>
+#include <system_error>
 
 namespace {
 
@@ -29,7 +30,11 @@ public:
 	DiskFolder& operator=(const DiskFolder&) = delete;
 	DiskFolder(DiskFolder&&) = delete;
 	DiskFolder& operator=(DiskFolder&&) = delete;
-	~DiskFolder() { std::filesystem::remove_all(myPath); }
+	~DiskFolder() {
+		// A folder that cannot be removed is left behind; the next run removes it.
+		std::error_code ignored;
+		std::filesystem::remove_all(myPath, ignored);
+	}
 
 	void Write(const std::string& aRelativePath, const std::string& aContent) const {
 		const auto path = myPath / std::filesystem::u8path(aRelativePath);

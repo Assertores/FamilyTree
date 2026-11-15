@@ -128,6 +128,9 @@ struct AskedQuestion {
 
 // A Data Folder that only exists in memory. It answers the Questions of the Library from its
 // files, and leaves the parsing Questions to the Library, unless a test answers them itself.
+// Moving it may throw with the standard library of MSVC, whose std::map allocates when it is
+// moved; a test that runs out of memory there may end the run.
+// NOLINTNEXTLINE(bugprone-exception-escape)
 class DataFolder {
 public:
 	// Adds a file, given by its path relative to the Data Folder, e.g. "1_Anna/data.json".
