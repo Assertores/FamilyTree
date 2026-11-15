@@ -9,7 +9,7 @@ Questions about the project that are not answered yet. Once a question is answer
 - **OQ 0006** (stretch goal) Sensitive Details are kept in a separate Data Folder and combined with the openly shared one by the Library. How does the Library find which Person in one Data Folder is the same as a Person in another? Which value wins if both describe the same Detail?
 - **OQ 0007** (stretch goal) Data Sets are expected to diverge, so the same Person Id can mean different Persons in different Data Folders. How does the Library tell them apart when the Data Folders are combined?
 - **OQ 0008** (stretch goal) The same Person Id in two Person Folders of one Data Folder is an error in the data. What does the Library do with it?
-- **OQ 0019** How does the Library tell steps, warnings and errors apart, in the Trace and in what it returns to the Application? To be decided in the architecture.
+- **OQ 0020** How does the Browsing Application place the boxes of the Persons within their rows of the Family Tree? Investigated by [SPK 0001](spikes/spk_0001.md).
 
 ## Answered
 <!-- Answered questions with their ID unchanged, and a link to where the answer was recorded. -->
@@ -31,3 +31,4 @@ Questions about the project that are not answered yet. Once a question is answer
 - **OQ 0016** Should an Application let the data collector enter Relations? Answered in the [Vision](vision.md#could-have-stretch).
 - **OQ 0017** Does a search ignore upper and lower case? Left to the implementation, see the [Handover](workspace/handover.md#other).
 - **OQ 0018** Which controls does the story player need beyond pausing and continuing? Left to the implementation, see the [Handover](workspace/handover.md#other).
+- **OQ 0019** How does the Library tell steps, warnings and errors apart? Answered in [ADR 0008](decisions/adr_0008.md).

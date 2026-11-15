@@ -31,8 +31,8 @@
 - [REQ 0047](req_0047.md) Conflicting Generations
 
 ## Media
-- [REQ 0023](req_0023.md) Showing Pictures
-- [REQ 0024](req_0024.md) Playing the Recording
+- [REQ 0023](req_0023.md) Paths of the Pictures
+- [REQ 0024](req_0024.md) Path of the Recording
 - [REQ 0025](req_0025.md) Missing Media
 
 ## Browsing Application

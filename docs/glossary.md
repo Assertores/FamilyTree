@@ -31,13 +31,16 @@ A folder that contains one [Person Folder](#person-folder) for every [Person](#p
 All [Persons](#person) and [Relations](#relation) read into one [Context](#context), from one or more [Data Folders](#data-folder).
 
 ### Default Platform
-The [Platform](#platform) the [Library](#library) brings along for Windows and Linux. It is used for every part of the Platform that an [Application](#application) does not replace.
+The [Platform](#platform) the [Library](#library) brings along for Windows and Linux. It is used for every part of the Platform that an [Application](#application) does not replace, i.e. for every [Question](#question) the Application leaves to the default.
 
 ### Detail
 One piece of information about a [Person](#person) from a [Person File](#person-file): title, first names, title of nobility, last names, gender, date of birth, place of birth, date of death, place of death, professions, [Places of Residence](#place-of-residence), or remarks.
 
 ### Distance
 The smallest number of steps from a [Person](#person) to a [Family](#family), where a step goes from one Family to another through a Person who is a member of both. The Families the Person is a member of have the Distance 0.
+
+### Error
+A failure that kept a call of the [Library](#library) from doing what was asked, e.g. conflicting [Generations](#generation) or an unknown [Person Id](#person-id).
 
 ### Family
 A group of [Parents](#parent) together with all the [Children](#child) they have in common. The Parents and the Children are the members of the Family. A [Person](#person) is a member of the Family they are a Child in, and of every Family they are a Parent in.
@@ -85,7 +88,10 @@ An image file of a [Person](#person), referenced by the [Person File](#person-fi
 A place where a [Person](#person) lived, with an optional start date and end date.
 
 ### Platform
-The replaceable part through which the [Library](#library) accesses the operating system: listing folders, reading files, showing [Pictures](#picture) and playing [Recordings](#recording).
+The replaceable part through which the [Library](#library) accesses the operating system: listing folders, checking whether files exist, and reading files. The Library reaches it by asking [Questions](#question).
+
+### Question
+A request the [Library](#library) makes to the [Application](#application) while it creates a [Context](#context), e.g. for the folders in a path or the content of a file. The Application answers it itself, or leaves the answer to the [Default Platform](#default-platform).
 
 ### Recording
 An audio file of a [Person](#person), referenced by the [Person File](#person-file), e.g. the Person telling a story about their life.
@@ -105,5 +111,11 @@ A free text that describes a [Relation](#relation) from the point of view of the
 ### Sibling
 Two [Persons](#person) are Siblings if they have at least one [Parent](#parent) in common.
 
+### Step
+Something the [Library](#library) did, reported to the [Trace](#trace) to follow its flow, e.g. reading a [Person File](#person-file).
+
 ### Trace
 A record of the steps the [Library](#library) takes and the failures it runs into, handed to the Library by an [Application](#application). If the Application hands none over, the Library uses a Trace that discards every report.
+
+### Warning
+A problem in the data that the [Library](#library) worked around, while the call still did what was asked, e.g. a skipped [Person File](#person-file) or an unknown key.

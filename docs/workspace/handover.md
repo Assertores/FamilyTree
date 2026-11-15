@@ -6,6 +6,15 @@ Notes from writing the documentation that matter for implementing the source cod
 <!-- TEMPLATE
 1. STEP, and why it comes at this point
 -->
+1. Build setup, `.clang-tidy` for the Library, compiler flags, sanitizers, and the test framework `check.hpp` carried over from `partial_rewrite/lib_family_tree/tests/src/check.hpp` into `tests/framework/` ([ADR 0014](../decisions/adr_0014.md)), because every later step relies on them catching mistakes ([ADR 0011](../decisions/adr_0011.md)).
+2. Trace writer and `FT_Result`, because every other function of the Library reports through them ([ADR 0007](../decisions/adr_0007.md), [ADR 0008](../decisions/adr_0008.md)).
+3. JSON and CSV parsers, because the Builder needs them, and they can be tested on strings alone.
+4. Builder with its Questions and the Default Platform, because it is the only way into a Context ([ADR 0005](../decisions/adr_0005.md)).
+5. Resolver: Parents, Children, Siblings, Partners, Families and Generations, including the detection of conflicting Generations ([REQ 0045](../requirements/req_0045.md), [REQ 0047](../requirements/req_0047.md)).
+6. Queries, including the search and the Family Tree query ([ADR 0004](../decisions/adr_0004.md), [ADR 0009](../decisions/adr_0009.md)).
+7. Command Line Application, because the end-to-end tests of every feature need it ([ADR 0012](../decisions/adr_0012.md)).
+8. Data Entry Tool, before the Browsing Application, because the data collector can start recording the family with it while the rest is built.
+9. Browsing Application, after [SPK 0001](../spikes/spk_0001.md) has settled the layout of the Family Tree.
 
 ## Pitfalls
 <!-- Things that are easy to get wrong when implementing, e.g. subtle edge cases, misleading names, or behavior that looks like a bug but is intended. -->
@@ -18,6 +27,11 @@ Notes from writing the documentation that matter for implementing the source cod
 - The [Distance](../glossary.md#distance) of the [Family Tree](../glossary.md#family-tree) is counted on a graph in which every Family is a node and every Person is an edge between the Families they are a member of; a Person who is a Parent in several Families connects all of them. Starting from the Families of the selected Person at Distance 0, the walk goes from Family to Family, and collects all members of every Family it reaches. The earlier attempt counted Relations from Person to Person, which tore Families apart and showed Children with only one Parent.
 - [Partners](../glossary.md#partner) come only from common Children. An Unrestricted Relation, e.g. a marriage, does not make two Persons Partners, because it can also describe a best friend.
 - The Format Version of the existing data is the UUID `3B5589D2-D9AF-40A8-BC40-574DAB6FFC57`. Files with any other Format Version, or without one, are skipped.
+
+- The answers to Questions point to memory of the Application. The Library copies what it needs before `FT_Continue` returns ([ADR 0005](../decisions/adr_0005.md)); keeping a pointer into an answer is a use after free waiting to happen.
+- Views are `const` pointers into the Context ([ADR 0004](../decisions/adr_0004.md)). Nothing may write through them, and the Context may not be reallocated after creation, or every view an Application holds becomes invalid.
+- The Library uses the Person Id of the Person File everywhere, and never assigns ids of its own, unlike the original implementation, which gave every Person a new id. Person Ids need not be consecutive, so looking a Person up needs an index built at creation, e.g. the Persons sorted by Person Id and a binary search ([ADR 0013](../decisions/adr_0013.md)).
+- Qt has to be linked dynamically because of its LGPL license ([DEP 0001](../dependencies/dep_0001.md)); the Library itself may be linked statically.
 
 ## Testing Notes
 <!-- Details needed for writing tests that the scenarios do not cover, e.g. required test data, hard to reproduce states, or external systems that need to be mocked. -->
