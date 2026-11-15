@@ -4,3 +4,4 @@
 .vscode
 **/doxygen_generated
 /.cache/**
+**/.cache/
