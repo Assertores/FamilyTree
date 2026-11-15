@@ -24,7 +24,7 @@ jobs:
   linux:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     - name: Install LLVM
       run: |
@@ -72,7 +72,7 @@ jobs:
 
     - name: Upload documentation
       if: ${{ !cancelled() && steps.documentation.outcome == 'success' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: Documentation
         path: build/documentation/html/
@@ -85,7 +85,7 @@ jobs:
       run:
         shell: pwsh
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v7
 
     # The runner has an older LLVM of its own; this one is unpacked next to it and put first on the
     # path.
@@ -105,9 +105,11 @@ jobs:
         if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) { choco install ninja --yes --no-progress }
 
     # aqtinstall, which installs Qt, needs packages that have no Windows builds for Python 3.15 yet,
-    # the version the action would choose itself.
+    # the version the action would choose itself. Its release 3.3.0 cannot find Qt 6.11 or newer on
+    # Windows; the commit below contains the fix (aqtinstall pull request 1000). Switch back to a
+    # release once aqtinstall 3.4.0 is out (docs/dependencies/dep_0008.md).
     - name: Install Python for aqtinstall
-      uses: actions/setup-python@v5
+      uses: actions/setup-python@v7
       with:
         python-version: "3.14"
 
@@ -118,6 +120,7 @@ jobs:
         arch: win64_msvc2022_64
         cache: true
         setup-python: false
+        aqtsource: git+https://github.com/miurahr/aqtinstall.git@076e1659807d0b362a3ed684d54c2e9c775eb9c7
 
     - name: Check tool versions
       run: |
@@ -162,7 +165,7 @@ jobs:
     # Only a version that passed all tests is handed to the data collector.
     - name: Upload the folder for the data collector
       if: ${{ steps.test.outcome == 'success' && steps.bundle.outcome == 'success' }}
-      uses: actions/upload-artifact@v4
+      uses: actions/upload-artifact@v7
       with:
         name: FamilyTree-Windows
         path: deploy/
