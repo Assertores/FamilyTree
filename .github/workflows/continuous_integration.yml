@@ -1,0 +1,158 @@
+# Builds and tests the project on Linux and Windows (docs/decisions/adr_0015.md). The tool versions
+# are the ones of the dependency records in docs/dependencies/; a different clang-format would fail
+# the test Formatting.
+name: Continuous Integration
+
+on:
+  push:
+    branches: [ "main", "rewrite_claude" ]
+  pull_request:
+    branches: [ "main" ]
+
+permissions:
+  contents: read
+
+env:
+  LLVM_VERSION: "23"
+  LLVM_WINDOWS_RELEASE: "23.1.5"
+  QT_VERSION: "6.12.0"
+  DOXYGEN_VERSION: "1.18.0"
+
+jobs:
+  # Debug build with clang-tidy, all tests with AddressSanitizer and LeakSanitizer, and the
+  # documentation of the Library.
+  linux:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: actions/checkout@v4
+
+    - name: Install LLVM
+      run: |
+        wget --quiet https://apt.llvm.org/llvm.sh
+        chmod +x llvm.sh
+        sudo ./llvm.sh "$LLVM_VERSION"
+        sudo apt-get install --yes ninja-build \
+          "clang-tidy-$LLVM_VERSION" "clang-format-$LLVM_VERSION" "libclang-rt-$LLVM_VERSION-dev"
+        "clang-$LLVM_VERSION" --version
+
+    - name: Install Doxygen
+      run: |
+        wget --quiet "https://www.doxygen.nl/files/doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz"
+        tar --extract --gzip --file "doxygen-$DOXYGEN_VERSION.linux.bin.tar.gz" --directory "$RUNNER_TEMP"
+        echo "$RUNNER_TEMP/doxygen-$DOXYGEN_VERSION/bin" >> "$GITHUB_PATH"
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4.5.0
+      with:
+        version: ${{ env.QT_VERSION }}
+        cache: true
+
+    - name: Configure
+      run: >
+        cmake -S . -B build -G Ninja
+        -DCMAKE_BUILD_TYPE=Debug
+        -DCMAKE_C_COMPILER=clang-$LLVM_VERSION
+        -DCMAKE_CXX_COMPILER=clang++-$LLVM_VERSION
+        -DFT_CLANG_TIDY_EXECUTABLE=clang-tidy-$LLVM_VERSION
+        -DFT_CLANG_FORMAT_EXECUTABLE=clang-format-$LLVM_VERSION
+
+    - name: Build
+      id: build
+      run: cmake --build build
+
+    - name: Test
+      run: ctest --test-dir build --output-on-failure
+
+    - name: Documentation
+      id: documentation
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      run: cmake --build build --target documentation
+
+    - name: Upload documentation
+      if: ${{ !cancelled() && steps.documentation.outcome == 'success' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: Documentation
+        path: build/documentation/html/
+
+  # Release build with clang-tidy, all tests, and the folder for the data collector. Assertions are
+  # only checked on Linux.
+  windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: pwsh
+    steps:
+    - uses: actions/checkout@v4
+
+    # The runner has an older LLVM of its own; this one is unpacked next to it and put first on the
+    # path.
+    - name: Install LLVM
+      run: |
+        $installer = "LLVM-$env:LLVM_WINDOWS_RELEASE-win64.msi"
+        Invoke-WebRequest "https://github.com/llvm/llvm-project/releases/download/llvmorg-$env:LLVM_WINDOWS_RELEASE/$installer" -OutFile $installer
+        $target = Join-Path $env:RUNNER_TEMP "llvm"
+        Start-Process msiexec -ArgumentList "/a", $installer, "/qn", "TARGETDIR=$target" -Wait -NoNewWindow
+        $clang = Get-ChildItem $target -Recurse -Filter clang.exe | Select-Object -First 1
+        if (-not $clang) { throw "clang.exe not found in $target" }
+        $clang.DirectoryName | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+        & $clang.FullName --version
+
+    - name: Install Ninja
+      run: |
+        if (-not (Get-Command ninja -ErrorAction SilentlyContinue)) { choco install ninja --yes --no-progress }
+
+    - name: Install Qt
+      uses: jurplel/install-qt-action@v4.5.0
+      with:
+        version: ${{ env.QT_VERSION }}
+        arch: win64_msvc2022_64
+        cache: true
+
+    - name: Check tool versions
+      run: |
+        foreach ($tool in "clang", "clang++", "clang-tidy", "clang-format") {
+          $version = & $tool --version | Out-String
+          Write-Output "${tool}: $version"
+          if ($version -notmatch "version $env:LLVM_VERSION\.") { throw "$tool is not version $env:LLVM_VERSION" }
+        }
+
+    - name: Configure
+      run: >
+        cmake -S . -B build -G Ninja
+        -DCMAKE_BUILD_TYPE=Release
+        -DCMAKE_C_COMPILER=clang
+        -DCMAKE_CXX_COMPILER=clang++
+
+    - name: Build
+      id: build
+      run: cmake --build build
+
+    - name: Test
+      id: test
+      run: ctest --test-dir build --output-on-failure
+
+    # Bundles every installed executable with Qt, the German Qt translations and the license. The
+    # Applications add their install rules once they exist; until then the folder holds the license
+    # only.
+    - name: Bundle
+      id: bundle
+      if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+      run: |
+        cmake --install build --prefix deploy
+        New-Item -ItemType Directory -Force deploy | Out-Null
+        Copy-Item LICENSE deploy/LICENSE.txt
+        $windeployqt = Join-Path $env:QT_ROOT_DIR "bin/windeployqt.exe"
+        foreach ($executable in Get-ChildItem deploy -Recurse -Filter *.exe) {
+          & $windeployqt --release --translations de $executable.FullName
+          if ($LASTEXITCODE -ne 0) { throw "windeployqt failed for $($executable.Name)" }
+        }
+        Get-ChildItem deploy -Recurse | Select-Object -ExpandProperty FullName
+
+    # Only a version that passed all tests is handed to the data collector.
+    - name: Upload the folder for the data collector
+      if: ${{ steps.test.outcome == 'success' && steps.bundle.outcome == 'success' }}
+      uses: actions/upload-artifact@v4
+      with:
+        name: FamilyTree-Windows
+        path: deploy/

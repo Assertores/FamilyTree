@@ -1,5 +1,7 @@
 #pragma once
 
+#include <cstddef>
+#include <exception>
 #include <iostream>
 #include <optional>
 #include <sstream>
@@ -143,8 +145,33 @@ CheckExclude(
 	return result;
 }
 
+// The part of a test name that selects the tests to run, from the first command-line argument.
+// Empty runs every test.
+inline std::string_view&
+Filter() {
+	static std::string_view filter;
+	return filter;
+}
+
+// How many tests were selected by the filter and ran.
+inline size_t&
+RunCount() {
+	static size_t count = 0;
+	return count;
+}
+
+// A filter that selected no test is a failure, so that a mistyped name does not look like success.
+inline bool
+NothingSelected() {
+	return !Filter().empty() && RunCount() == 0;
+}
+
 inline bool
 Run(const char* aTestName, bool (*aTest)()) {
+	if (std::string_view(aTestName).find(Filter()) == std::string_view::npos) {
+		return true;
+	}
+	++RunCount();
 	std::cout << "[TEST   ] ===== " << aTestName << '\n';
 	auto result = false;
 	try {
@@ -172,9 +199,12 @@ public:
 		if (!myIsTestSuite && LEAK_CHECK) {
 			std::cout << "\n!!!!! >> A memory leak was detected << !!!!!\n";
 		}
+		if (!myIsTestSuite && NothingSelected()) {
+			std::cout << "\nNo test name contains \"" << Filter() << "\"\n";
+		}
 
 		std::cout << (myIsTestSuite ? "[ SUITE ] " : "\n")
-				  << (myResult ? "All Succeeded" : "Failure detected") << '\n';
+				  << (PrivSucceeded() ? "All Succeeded" : "Failure detected") << '\n';
 		if (!myIsTestSuite) {
 			std::cout << "===== DONE =====\n";
 		}
@@ -186,20 +216,28 @@ public:
 	}
 
 	// NOLINTNEXTLINE
-	operator int() const { return myResult ? 0 : 1; }
+	operator int() const { return PrivSucceeded() ? 0 : 1; }
 	// NOLINTNEXTLINE
-	operator bool() const { return myResult; }
+	operator bool() const { return PrivSucceeded(); }
 
 private:
+	[[nodiscard]] bool PrivSucceeded() const {
+		return myResult && (myIsTestSuite || !NothingSelected());
+	}
+
 	bool myResult = true;
 	bool myIsTestSuite = false;
 };
 
+// The first command-line argument, if any, selects the tests whose name contains it.
 inline ResultTracker
-Setup() {
+Setup(int aArgumentCount, const char* const* aArguments) {
 #if _WIN32
 	(void)signal(SIGSEGV, SignalHandler);
 #endif
+	if (aArgumentCount > 1) {
+		Filter() = aArguments[1];
+	}
 	return ResultTracker(false);
 }
 
@@ -216,5 +254,5 @@ SetupSuite(std::string_view aName) {
 	if (!intern::CheckExclude(__FILE__, __LINE__, #aValue, aValue, __VA_ARGS__)) return false
 #define RUN(aTest) intern::Run(#aTest, &(aTest))
 
-#define SETUP() intern::Setup()
+#define SETUP(aArgumentCount, aArguments) intern::Setup(aArgumentCount, aArguments)
 #define SUITE(aName) intern::SetupSuite(aName)

@@ -5,8 +5,8 @@
 #include <check.hpp>
 
 int
-main() {
-	auto result = SETUP();
+main(int argc, char** argv) { // NOLINT(misc-const-correctness): main must take char**
+	auto result = SETUP(argc, argv);
 	result &= PersonFileDocumentSuite();
 	return result;
 }

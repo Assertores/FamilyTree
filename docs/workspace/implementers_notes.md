@@ -25,7 +25,11 @@ build/library/tests/FamilyTreeTests
 build/applications/data_entry/DataEntryTests
 ```
 
-A single test function cannot be selected yet: `check.hpp` has no filter. Until the package [Continuous Integration](#continuous-integration) adds one, comment out the other suites in `library/tests/main.cpp` while working, and restore them before the package is done.
+Run only the tests whose name contains a text, e.g. one test, or a group such as every test about Generations. A text that no test name contains fails the run, so that a typo does not look like success.
+```
+build/library/tests/FamilyTreeTests SkipsAnEmptyPersonFile
+build/library/tests/FamilyTreeTests Generation
+```
 
 Further targets and options:
 ```
@@ -64,7 +68,7 @@ Before the first package, all 110 tests of the Library fail, and 10 of the 12 te
 | Work Package | Scope | Tests | Depends On | State |
 | ---: | :--- | :--- | :--- | :--- |
 | Migration | move what is still needed out of `original_implimentation/` and `partial_rewrite/`: the example data, converted to the current Format Versions ([ADR 0016](../decisions/adr_0016.md)), the license, and the workflows ([ADR 0015](../decisions/adr_0015.md)); update the references to the old folders; then delete both folders | the build and `ctest` give the same results as before | none | Done |
-| Continuous Integration | Linux and Windows jobs with clang, clang-tidy, the sanitizers on Linux, and the Windows artifact ([ADR 0015](../decisions/adr_0015.md), [DEP 0006](../dependencies/dep_0006.md)); a filter for single test functions in `check.hpp` ([ADR 0014](../decisions/adr_0014.md)) | all tests build and run on both jobs; `Formatting` passes | Migration | Open |
+| Continuous Integration | Linux and Windows jobs with clang, clang-tidy, the sanitizers on Linux, and the Windows artifact ([ADR 0015](../decisions/adr_0015.md), [DEP 0006](../dependencies/dep_0006.md)); a filter for single test functions in `check.hpp` ([ADR 0014](../decisions/adr_0014.md)) | all tests build and run on both jobs; `Formatting` passes | Migration | In Progress |
 | Library Skeleton | Trace writer ([ADR 0007](../decisions/adr_0007.md)), results ([ADR 0008](../decisions/adr_0008.md)), Builder and Questions ([ADR 0005](../decisions/adr_0005.md), [ADR 0016](../decisions/adr_0016.md)), JSON and CSV parsers, Context with Persons and Relations, `FT_Free`, `FT_GetPersonCount`, `FT_GetPerson`, `FT_GetRelations`, `FT_IsDefaultString`; [FTR 0001](../features/ftr_0001.md), [FTR 0003](../features/ftr_0003.md), [FTR 0009](../features/ftr_0009.md) on the Library side | `builder_tests.cpp`, `parsers_tests.cpp`, `trace_tests.cpp` except `TheCallThatFailedShowsFailOnItsFirstLine`; from `queries_tests.cpp` the five tests of Details up to `AnEmptyListInThePersonFileIsNotMissing`; from `context_tests.cpp` `FreeingNoContextIsAnInvalidArgument` and `QueriesWithoutContextAreInvalidArguments`; from `resolver_tests.cpp` `RelationsOfAPersonContainItAsFirstOrSecond` | Continuous Integration | Open |
 | Resolver | Parents, Children, Siblings, Partners, Families and Generations, conflicting Generations ([REQ 0045](../requirements/req_0045.md), [REQ 0047](../requirements/req_0047.md)), Relations to unknown Persons, and their queries: `FT_GetParents`, `FT_GetChildren`, `FT_GetSiblings`, `FT_GetPartners`, `FT_GetFamiliesOf`, `FT_GetFamily`, `FT_GetFamilyCount`, `FT_GetRelativeGeneration`, `FT_GetCommonParents`, `FT_GetCommonChildren`; [FTR 0004](../features/ftr_0004.md) on the Library side | the rest of `resolver_tests.cpp`; `TheCallThatFailedShowsFailOnItsFirstLine`; `AFailedCreationReleasesEverything` | Library Skeleton | Open |
 | Search and Family Tree | `FT_Search` ([REQ 0016](../requirements/req_0016.md)) and `FT_GetFamilyTree` ([ADR 0009](../decisions/adr_0009.md), [REQ 0022](../requirements/req_0022.md)); [FTR 0002](../features/ftr_0002.md), [FTR 0004](../features/ftr_0004.md), [FTR 0009](../features/ftr_0009.md) on the Library side | the rest of `queries_tests.cpp`; `TwoContextsDoNotInfluenceEachOther`, `FreeingOneContextLeavesTheOtherUsable` | Resolver | Open |
@@ -160,7 +164,7 @@ Before the first package, all 110 tests of the Library fail, and 10 of the 12 te
 - Every text in German, kept apart from the code in Qt Linguist files ([REQ 0004](../requirements/req_0004.md), [REQ 0046](../requirements/req_0046.md)); `applications/translations/` is the place shared with the Browsing Application ([conventions](../conventions.md#folder-structure)).
 - Each Detail needs a way to mark it as known not to exist ([REQ 0052](../requirements/req_0052.md)), next to leaving it empty.
 - The remark field of the old tool did not wrap long lines (TDR 0005 of the original implementation): use a multi-line editor that wraps.
-- Finish the Windows artifact of [Continuous Integration](#continuous-integration) here, and check it on a computer without Qt.
+- Finish the Windows artifact of [Continuous Integration](#continuous-integration) here, and check it on a computer without Qt. The step `Bundle` of the Windows job runs `windeployqt` on every executable that `cmake --install` puts into the folder, so the Data Entry Tool needs an `install(TARGETS …)` rule, with its DLLs next to it. The artifact is only uploaded when all tests pass.
 - Warnings and errors name the file concerned, in words a data collector understands ([conventions](../conventions.md#error-handling)).
 
 ### Browsing Basics
@@ -190,6 +194,7 @@ Before the first package, all 110 tests of the Library fail, and 10 of the 12 te
 - If a test looks wrong, do not change it to make the code pass: point it out, and fix the documentation first if that is where the error is.
 - Each package replaces the stubs of its functions only. Functions of later packages keep returning `FT_ERROR_NOT_SUPPORTED`.
 - Questions that are left to the user are listed in the notes of the package they belong to. Record each answer where it belongs, usually with `/new-record`, before implementing it.
+- Continuous integration builds Linux in Debug and Windows in Release only, both with clang-tidy and `-Werror` ([workflow](../../.github/workflows/continuous_integration.yml)). Code that builds locally in Debug can still fail on Windows: a variable that is only used inside an `assert` is unused once `NDEBUG` removes the assertion, and `-Wunused-variable` turns that into an error. Code inside `#ifdef _WIN32` is only compiled and analyzed by the Windows job.
 <!-- TEMPLATE
 - NOTE
 -->

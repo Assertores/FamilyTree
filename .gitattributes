@@ -1,0 +1,4 @@
+# Test data and templates are checked out byte for byte on every system: their line endings are
+# part of the test cases, e.g. the Windows line endings of tests/data/example/5_Bethany_Barnes.
+tests/data/** -text
+templates/** -text

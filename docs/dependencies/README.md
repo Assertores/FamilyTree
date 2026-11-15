@@ -15,4 +15,5 @@
 - [DEP 0005](dep_0005.md) clang
 - [DEP 0006](dep_0006.md) GitHub Actions
 - [DEP 0007](dep_0007.md) Doxygen
+- [DEP 0008](dep_0008.md) install-qt-action
 

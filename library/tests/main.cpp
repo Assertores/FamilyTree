@@ -12,8 +12,8 @@
 #include <check.hpp>
 
 int
-main() {
-	auto result = SETUP();
+main(int argc, char** argv) { // NOLINT(misc-const-correctness): main must take char**
+	auto result = SETUP(argc, argv);
 	result &= TraceSuite();
 	result &= BuilderSuite();
 	result &= ParsersSuite();
