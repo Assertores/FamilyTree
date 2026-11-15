@@ -8,7 +8,6 @@
 - [REQ 0001](req_0001.md) Reading Person Files
 - [REQ 0002](req_0002.md) Mandatory content of a Person File
 - [REQ 0003](req_0003.md) Optional content of a Person File
-- [REQ 0004](req_0004.md) Supported Format Version
 - [REQ 0005](req_0005.md) Unknown keys in a Person File
 - [REQ 0006](req_0006.md) Reading the Relations File
 - [REQ 0007](req_0007.md) Columns of the Relations File
@@ -29,6 +28,7 @@
 - [REQ 0021](req_0021.md) Relative Generation
 - [REQ 0022](req_0022.md) Family Tree
 - [REQ 0045](req_0045.md) Assigning Generations
+- [REQ 0047](req_0047.md) Conflicting Generations
 
 ## Media
 - [REQ 0023](req_0023.md) Showing Pictures
@@ -50,8 +50,8 @@
 - [REQ 0034](req_0034.md) Choosing where to save
 
 ## Applications
+- [REQ 0004](req_0004.md) Translatable user interface
 - [REQ 0046](req_0046.md) German user interface
-- [REQ 0047](req_0047.md) Translatable user interface
 
 ## Longevity and Portability
 - [REQ 0035](req_0035.md) Programming language of the Library

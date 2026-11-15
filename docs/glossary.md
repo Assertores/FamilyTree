@@ -21,6 +21,9 @@ One independent instance of the [Library](#library) that holds one [Data Set](#d
 ### Data Entry Tool
 The [Application](#application) with which a data collector fills in the [Details](#detail) of a [Person](#person) in a form and saves them as a [Person File](#person-file).
 
+### Data File
+A [Person File](#person-file) or a [Relations File](#relations-file).
+
 ### Data Folder
 A folder that contains one [Person Folder](#person-folder) for every [Person](#person), and a [Relations File](#relations-file).
 
@@ -43,10 +46,10 @@ A group of [Parents](#parent) together with all the [Children](#child) they have
 All [Persons](#person) that are connected to each other by a chain of [Parents](#parent) and [Children](#child). A [Data Set](#data-set) can consist of several Family Graphs that are not connected to each other.
 
 ### Family Tree
-All [Families](#family) within a given [Distance](#distance) of a selected [Person](#person), together with all their members, ordered by [Generation](#generation).
+The selected [Person](#person), and all [Families](#family) within a given [Distance](#distance) of them together with all their members, ordered by [Generation](#generation). The Family Tree always contains the selected Person, also if they are a member of no Family.
 
 ### Format Version
-A UUID in every data file that states which version of the file format the file is written in. Every version of the format has a UUID of its own, so that versions can develop separately from each other without conflicting version numbers.
+A UUID in every data file that states which version of the file format the file is written in. Every version of the format has a UUID of its own, so that versions can develop separately from each other without conflicting version numbers. The [Person File](#person-file) and the [Relations File](#relations-file) are different formats, each with UUIDs of its own.
 
 ### Generation
 The level of a [Person](#person) in their [Family Graph](#family-graph), counted from 0 at the highest level downwards, i.e. towards the [Children](#child). A higher Generation has a smaller number, a lower Generation a larger one.
@@ -103,4 +106,4 @@ A free text that describes a [Relation](#relation) from the point of view of the
 Two [Persons](#person) are Siblings if they have at least one [Parent](#parent) in common.
 
 ### Trace
-A record of the steps the [Library](#library) takes and the failures it runs into, handed to the Library by an [Application](#application).
+A record of the steps the [Library](#library) takes and the failures it runs into, handed to the Library by an [Application](#application). If the Application hands none over, the Library uses a Trace that discards every report.

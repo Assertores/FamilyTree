@@ -85,6 +85,7 @@ Family Tree is a small C library that reads a family's data from plain files, on
 - The data entry tool creates the person's folder and copies the pictures and the recording into it.
 - Run on macOS.
 - A tool that migrates data files from an older format version to the current one.
+- Resolve conflicting relations, e.g. a person who is their own ancestor, instead of refusing to open the data set.
 
 ## Non-Goals
 <!-- What the project deliberately does NOT do, not even as a stretch goal. Prevents scope creep. -->
