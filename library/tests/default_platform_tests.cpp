@@ -5,9 +5,12 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <cstddef>
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <string>
 
 namespace {
@@ -43,7 +46,7 @@ private:
 // docs/requirements/req_0037.md, docs/requirements/req_0001.md, docs/requirements/req_0006.md
 bool
 ReadsADataFolderFromTheDisk() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write("1_Anna/data.json", PersonFile(1, R"("FirstNames": ["Anna"])"));
 	disk.Write("2_Bernd/data.json", PersonFile(2));
 	disk.Write("relations.csv", RelationsFile({"1,2,StrictlyLower"}));
@@ -63,7 +66,7 @@ ReadsADataFolderFromTheDisk() {
 // docs/requirements/req_0037.md, docs/requirements/req_0010.md
 bool
 ReadsFolderNamesWithUmlauts() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write("1_Jürgen_Weiß/data.json", PersonFile(1));
 	disk.Write("relations.csv", RelationsFile({}));
 	ContextGuard context;
@@ -78,7 +81,7 @@ ReadsFolderNamesWithUmlauts() {
 // docs/requirements/req_0025.md, docs/requirements/req_0037.md
 bool
 ChecksWhetherMediaFilesExistOnTheDisk() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write("1_Anna/data.json", PersonFile(1, R"("Images": ["da.png", "fehlt.png"])"));
 	disk.Write("1_Anna/da.png", "");
 	disk.Write("relations.csv", RelationsFile({}));
@@ -108,7 +111,7 @@ AMissingDataFolderIsAPlatformError() {
 // docs/requirements/req_0037.md
 bool
 LeavingEveryQuestionToTheDefaultIsTheSameAsCreate() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write("1_Anna/data.json", PersonFile(1));
 	disk.Write("relations.csv", RelationsFile({}));
 	FT_Builder* builder = nullptr;

@@ -6,7 +6,10 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <algorithm>
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -65,7 +68,7 @@ private:
 // docs/requirements/req_0023.md, docs/requirements/req_0011.md
 bool
 PicturePathsAreResolvedInThePersonFolder() {
-	Media media(
+	const Media media(
 		R"("Images": ["Trohnsaal.png", "Hochzeit.jpg"])",
 		{"Trohnsaal.png", "Hochzeit.jpg"});
 	CHECK(media.result, FT_OK);
@@ -79,7 +82,7 @@ PicturePathsAreResolvedInThePersonFolder() {
 // docs/requirements/req_0023.md, docs/requirements/req_0025.md
 bool
 AMissingPictureFileIsLeftOutAndReported() {
-	Media media(R"("Images": ["Trohnsaal.png", "verloren.png"])", {"Trohnsaal.png"});
+	const Media media(R"("Images": ["Trohnsaal.png", "verloren.png"])", {"Trohnsaal.png"});
 	CHECK(media.result, FT_OK_WITH_WARNINGS);
 	const auto pictures = media.Pictures();
 	CHECK(pictures.size(), 1U);
@@ -91,7 +94,7 @@ AMissingPictureFileIsLeftOutAndReported() {
 // docs/requirements/req_0025.md
 bool
 APersonWithoutPicturesHasNoPaths() {
-	Media media("", {});
+	const Media media("", {});
 	CHECK(media.result, FT_OK);
 	CHECK(media.Pictures().size(), 0U);
 	return true;
@@ -100,7 +103,7 @@ APersonWithoutPicturesHasNoPaths() {
 // docs/requirements/req_0024.md, docs/requirements/req_0011.md
 bool
 TheRecordingPathIsResolvedInThePersonFolder() {
-	Media media(R"("Audio": "Sunday_Plans.mp3")", {"Sunday_Plans.mp3"});
+	const Media media(R"("Audio": "Sunday_Plans.mp3")", {"Sunday_Plans.mp3"});
 	CHECK(media.result, FT_OK);
 	CHECK(EndsWith(media.Recording(), "family/1_Anna/Sunday_Plans.mp3"), true);
 	return true;
@@ -109,7 +112,7 @@ TheRecordingPathIsResolvedInThePersonFolder() {
 // docs/requirements/req_0024.md, docs/requirements/req_0025.md
 bool
 APersonWithoutRecordingHasNoPath() {
-	Media media("", {});
+	const Media media("", {});
 	CHECK(media.result, FT_OK);
 	CHECK(media.Recording(), "<null>");
 	return true;
@@ -118,7 +121,7 @@ APersonWithoutRecordingHasNoPath() {
 // docs/requirements/req_0024.md, docs/requirements/req_0025.md
 bool
 AMissingRecordingFileHasNoPathAndIsReported() {
-	Media media(R"("Audio": "verloren.mp3")", {});
+	const Media media(R"("Audio": "verloren.mp3")", {});
 	CHECK(media.result, FT_OK_WITH_WARNINGS);
 	CHECK(media.Recording(), "<null>");
 	CHECK(media.trace.HasWarning("verloren.mp3"), true);
@@ -136,7 +139,7 @@ TheDefaultsNeedAPath() {
 // docs/decisions/adr_0006.md
 bool
 TheConvenienceFunctionsNeedAKnownPerson() {
-	Media media("", {});
+	const Media media("", {});
 	CHECK(FT_ShowPicturesOfPerson(media.context.Get(), 2, nullptr), FT_ERROR_UNKNOWN_PERSON);
 	CHECK(FT_PlayRecordingOfPerson(media.context.Get(), 2, nullptr), FT_ERROR_UNKNOWN_PERSON);
 	return true;
@@ -145,7 +148,7 @@ TheConvenienceFunctionsNeedAKnownPerson() {
 // docs/requirements/req_0025.md, docs/decisions/adr_0006.md
 bool
 PlayingThePersonWithoutRecordingDoesNothing() {
-	Media media("", {});
+	const Media media("", {});
 	CHECK(FT_PlayRecordingOfPerson(media.context.Get(), 1, nullptr), FT_OK);
 	CHECK(FT_ShowPicturesOfPerson(media.context.Get(), 1, nullptr), FT_OK);
 	return true;

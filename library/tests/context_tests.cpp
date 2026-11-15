@@ -5,7 +5,10 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <cstddef>
+#include <string>
 #include <vector>
 
 namespace {
@@ -28,7 +31,7 @@ Everyone(const FT_Context* aContext) {
 	(void)FT_GetPersonCount(aContext, &capacity, nullptr);
 	std::vector<FT_PersonId> found(capacity);
 	size_t count = 0;
-	FT_Person prototype{};
+	const FT_Person prototype{};
 	if (FT_Search(aContext, &prototype, 0, found.data(), found.size(), &count, nullptr) != FT_OK) {
 		return {-1};
 	}

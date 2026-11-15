@@ -6,7 +6,9 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <cstddef>
 #include <string>
 #include <vector>
 

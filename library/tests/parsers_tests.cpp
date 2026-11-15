@@ -6,7 +6,9 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -65,7 +67,7 @@ struct RelationsOfOne {
 // docs/requirements/req_0003.md, docs/requirements/req_0014.md
 bool
 ReadsEveryKeyOfAPersonFile() {
-	OnePerson one(R"("Title": "Prof. Dr.",
+	const OnePerson one(R"("Title": "Prof. Dr.",
 	"FirstNames": ["Philippa", "Rosa"],
 	"TitleOfNobility": "von und zu",
 	"LastNames": ["Perry", "Figueroa"],
@@ -102,7 +104,7 @@ ReadsEveryKeyOfAPersonFile() {
 // docs/requirements/req_0003.md
 bool
 ReadsSeveralPlacesOfResidenceInTheirOrder() {
-	OnePerson one(R"("PlaceOfResidence": [
+	const OnePerson one(R"("PlaceOfResidence": [
 		{"Name": "Würzburg", "StartDate": "1896"},
 		{"Name": "Bamberg"}])");
 	CHECK(one.result, FT_OK);
@@ -117,7 +119,7 @@ ReadsSeveralPlacesOfResidenceInTheirOrder() {
 // docs/requirements/req_0003.md
 bool
 ReadsRemarksAsOneLinePerString() {
-	OnePerson one(
+	const OnePerson one(
 		R"("Remarks": ["Er wurde nur „der Bäcker“ genannt.", "", "Danach zog er fort."])");
 	CHECK(one.result, FT_OK);
 	CHECK(
@@ -129,7 +131,7 @@ ReadsRemarksAsOneLinePerString() {
 // docs/requirements/req_0003.md
 bool
 SkipsAndReportsAKeyOfTheWrongType() {
-	OnePerson one(R"("FirstNames": "Anna", "LastNames": ["Huber"])");
+	const OnePerson one(R"("FirstNames": "Anna", "LastNames": ["Huber"])");
 	CHECK(one.result, FT_OK_WITH_WARNINGS);
 	CHECK(one.person != nullptr, true);
 	CHECK(one.person->firstNames.count, 0U);
@@ -141,7 +143,7 @@ SkipsAndReportsAKeyOfTheWrongType() {
 // docs/requirements/req_0003.md
 bool
 SkipsATextKeyWithAListValue() {
-	OnePerson one(R"("Gender": ["weiblich"], "PlaceOfBirth": "Würzburg")");
+	const OnePerson one(R"("Gender": ["weiblich"], "PlaceOfBirth": "Würzburg")");
 	CHECK(one.result, FT_OK_WITH_WARNINGS);
 	CHECK(one.IsMissing(one.person->gender), true);
 	CHECK(Text(one.person->placeOfBirth), "Würzburg");
@@ -151,7 +153,7 @@ SkipsATextKeyWithAListValue() {
 // docs/requirements/req_0005.md
 bool
 IgnoresAndReportsAnUnknownKeyAndReadsTheRest() {
-	OnePerson one(R"("death": "11.11.2021", "PlaceOfDeath": "PlaceB")");
+	const OnePerson one(R"("death": "11.11.2021", "PlaceOfDeath": "PlaceB")");
 	CHECK(one.result, FT_OK_WITH_WARNINGS);
 	CHECK(one.person != nullptr, true);
 	CHECK(one.IsMissing(one.person->dateOfDeath), true);
@@ -163,7 +165,7 @@ IgnoresAndReportsAnUnknownKeyAndReadsTheRest() {
 // docs/requirements/req_0005.md
 bool
 ReportsEveryUnknownKey() {
-	OnePerson one(R"("death": "1", "birth": "2")");
+	const OnePerson one(R"("death": "1", "birth": "2")");
 	CHECK(one.trace.HasWarning("death"), true);
 	CHECK(one.trace.HasWarning("birth"), true);
 	return true;
@@ -172,7 +174,7 @@ ReportsEveryUnknownKey() {
 // docs/requirements/req_0007.md
 bool
 ReadsARowWithOnlyTheMandatoryColumns() {
-	RelationsOfOne one({"1,2,StrictlyLower"});
+	const RelationsOfOne one({"1,2,StrictlyLower"});
 	CHECK(one.result, FT_OK);
 	CHECK(one.count, 1U);
 	CHECK(one.relations[0].first, 1);
@@ -189,7 +191,7 @@ ReadsARowWithOnlyTheMandatoryColumns() {
 // docs/requirements/req_0007.md, docs/requirements/req_0009.md
 bool
 ReadsTheOptionalColumnsAsWritten() {
-	RelationsOfOne one({"1,2,Unrestricted,verheiratet,um 1920,1945"});
+	const RelationsOfOne one({"1,2,Unrestricted,verheiratet,um 1920,1945"});
 	CHECK(one.result, FT_OK);
 	CHECK(one.count, 1U);
 	CHECK(Text(one.relations[0].relationship), "verheiratet");
@@ -201,7 +203,7 @@ ReadsTheOptionalColumnsAsWritten() {
 // docs/requirements/req_0007.md
 bool
 ReadsAQuotedFieldWithAComma() {
-	RelationsOfOne one({R"(1,2,Unrestricted,"Stiefvater, später Pate",,)"});
+	const RelationsOfOne one({R"(1,2,Unrestricted,"Stiefvater, später Pate",,)"});
 	CHECK(one.result, FT_OK);
 	CHECK(one.count, 1U);
 	CHECK(Text(one.relations[0].relationship), "Stiefvater, später Pate");
@@ -211,7 +213,7 @@ ReadsAQuotedFieldWithAComma() {
 // docs/requirements/req_0007.md
 bool
 ReadsADoubledQuotationMarkInAQuotedField() {
-	RelationsOfOne one({R"(1,2,Unrestricted,"genannt ""Onkel""",,)"});
+	const RelationsOfOne one({R"(1,2,Unrestricted,"genannt ""Onkel""",,)"});
 	CHECK(one.result, FT_OK);
 	CHECK(one.count, 1U);
 	CHECK(Text(one.relations[0].relationship), "genannt \"Onkel\"");
@@ -221,7 +223,7 @@ ReadsADoubledQuotationMarkInAQuotedField() {
 // docs/requirements/req_0008.md
 bool
 ReadsEveryRelationType() {
-	RelationsOfOne one({"1,2,Unrestricted", "1,3,StrictlyHigher", "2,3,StrictlyLower"});
+	const RelationsOfOne one({"1,2,Unrestricted", "1,3,StrictlyHigher", "2,3,StrictlyLower"});
 	CHECK(one.result, FT_OK);
 	CHECK(one.count, 2U);
 	for (size_t i = 0; i < one.count; ++i) {
@@ -238,7 +240,7 @@ ReadsEveryRelationType() {
 // docs/requirements/req_0008.md
 bool
 ReadsAnUnknownRelationTypeAsUnrestrictedWithAWarning() {
-	RelationsOfOne one({"1,2,Child"});
+	const RelationsOfOne one({"1,2,Child"});
 	CHECK(one.result, FT_OK_WITH_WARNINGS);
 	CHECK(one.count, 1U);
 	CHECK(one.relations[0].type, FT_RELATION_UNRESTRICTED);
@@ -249,7 +251,7 @@ ReadsAnUnknownRelationTypeAsUnrestrictedWithAWarning() {
 // docs/requirements/req_0008.md
 bool
 ReadsAnEmptyRelationTypeAsUnrestrictedWithAWarning() {
-	RelationsOfOne one({"1,2,,Kind,,"});
+	const RelationsOfOne one({"1,2,,Kind,,"});
 	CHECK(one.result, FT_OK_WITH_WARNINGS);
 	CHECK(one.count, 1U);
 	CHECK(one.relations[0].type, FT_RELATION_UNRESTRICTED);
@@ -260,7 +262,7 @@ ReadsAnEmptyRelationTypeAsUnrestrictedWithAWarning() {
 // docs/requirements/req_0009.md
 bool
 KeepsDatesAndPlacesExactlyAsWritten() {
-	OnePerson one(R"("DateOfBirth": "um 1850", "PlaceOfBirth": "  bei Würzburg (?) ")");
+	const OnePerson one(R"("DateOfBirth": "um 1850", "PlaceOfBirth": "  bei Würzburg (?) ")");
 	CHECK(one.result, FT_OK);
 	CHECK(Text(one.person->dateOfBirth), "um 1850");
 	CHECK(Text(one.person->placeOfBirth), "  bei Würzburg (?) ");
@@ -270,7 +272,7 @@ KeepsDatesAndPlacesExactlyAsWritten() {
 // docs/requirements/req_0009.md
 bool
 DecodesTheEscapeSequencesOfJson() {
-	OnePerson one(
+	const OnePerson one(
 		R"("Remarks": ["genannt \"der Bäcker\"", "C:\\Bilder", "Tab\there", "\u00e4\u00f6\u00fc\u00df"])");
 	CHECK(one.result, FT_OK);
 	CHECK(
@@ -282,7 +284,7 @@ DecodesTheEscapeSequencesOfJson() {
 // docs/requirements/req_0009.md, docs/requirements/req_0010.md
 bool
 DecodesASurrogatePairIntoUtf8() {
-	OnePerson one(R"("Remarks": ["\ud83c\udf82"])");
+	const OnePerson one(R"("Remarks": ["\ud83c\udf82"])");
 	CHECK(one.result, FT_OK);
 	CHECK(Texts(one.person->remarks), Strings({"\xF0\x9F\x8E\x82"}));
 	return true;
@@ -291,7 +293,7 @@ DecodesASurrogatePairIntoUtf8() {
 // docs/requirements/req_0010.md
 bool
 ReturnsUtf8TextUnchanged() {
-	OnePerson one(R"("PlaceOfBirth": "Łódź", "LastNames": ["Müller-Šimić"])");
+	const OnePerson one(R"("PlaceOfBirth": "Łódź", "LastNames": ["Müller-Šimić"])");
 	CHECK(one.result, FT_OK);
 	CHECK(Text(one.person->placeOfBirth), "Łódź");
 	CHECK(Texts(one.person->lastNames), Strings({"Müller-Šimić"}));

@@ -4,11 +4,13 @@
 #include "person_file_document_tests.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 #include <person_file_document.hpp>
 #include <support/test_support.hpp>
 
 #include <filesystem>
 #include <fstream>
+#include <ios>
 #include <sstream>
 #include <string>
 #include <vector>
@@ -43,7 +45,7 @@ public:
 	}
 
 	[[nodiscard]] std::string Read(const std::string& aRelativePath) const {
-		std::ifstream file(*this / aRelativePath, std::ios::binary);
+		const std::ifstream file(*this / aRelativePath, std::ios::binary);
 		std::stringstream content;
 		content << file.rdbuf();
 		return content.str();
@@ -73,7 +75,7 @@ Anna() {
 // docs/requirements/req_0032.md
 bool
 SavesTheCurrentFormatVersion() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -89,7 +91,7 @@ SavesTheCurrentFormatVersion() {
 // docs/requirements/req_0032.md, docs/features/ftr_0007.md#recording-a-person
 bool
 TheLibraryReadsEverythingThatWasEntered() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -112,7 +114,7 @@ bool
 WritesRemarksAsOneStringPerLine() {
 	CHECK(PersonFileDocument::SplitIntoLines("erste\n\ndritte"), Strings({"erste", "", "dritte"}));
 	CHECK(PersonFileDocument::JoinLines({"erste", "", "dritte"}), std::string("erste\n\ndritte"));
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -127,7 +129,7 @@ WritesRemarksAsOneStringPerLine() {
 // docs/requirements/req_0052.md, docs/requirements/req_0003.md, docs/requirements/req_0015.md
 bool
 LeavesOutWhatWasNotEntered() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -140,7 +142,7 @@ LeavesOutWhatWasNotEntered() {
 // docs/requirements/req_0052.md, docs/requirements/req_0050.md
 bool
 WritesADetailKnownNotToExist() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -169,7 +171,7 @@ WritesADetailKnownNotToExist() {
 // docs/requirements/req_0052.md, docs/requirements/req_0033.md
 bool
 ShowsAnEmptyDetailOfAReopenedFileAsKnownNotToExist() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write(
 		"1_Anna/data.json",
 		test::PersonFile(1, R"("TitleOfNobility": "", "Profession": [])"));
@@ -184,7 +186,7 @@ ShowsAnEmptyDetailOfAReopenedFileAsKnownNotToExist() {
 // docs/requirements/req_0033.md
 bool
 ReopeningAndSavingKeepsEveryDetail() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -201,7 +203,7 @@ ReopeningAndSavingKeepsEveryDetail() {
 // docs/requirements/req_0033.md, docs/features/ftr_0008.md#keeping-unknown-keys
 bool
 ReopeningAndSavingKeepsUnknownKeys() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write(
 		"1_Anna/data.json",
 		test::PersonFile(1, R"("death": "11.11.2021", "FirstNames": ["Anna"])"));
@@ -217,7 +219,7 @@ ReopeningAndSavingKeepsUnknownKeys() {
 // docs/requirements/req_0033.md, docs/features/ftr_0008.md#adding-a-date-of-death
 bool
 AddingADetailKeepsTheOthers() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "19_Anna/data.json"), true);
@@ -239,7 +241,7 @@ AddingADetailKeepsTheOthers() {
 // docs/features/ftr_0008.md#a-person-file-of-an-unsupported-format-version
 bool
 RefusesAPersonFileOfAnotherFormatVersion() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write(
 		"1_Anna/data.json",
 		std::string(R"({"Version": ")") + test::theOldPersonFileVersion + R"(", "Id": 1})");
@@ -250,7 +252,7 @@ RefusesAPersonFileOfAnotherFormatVersion() {
 // docs/requirements/req_0033.md
 bool
 RefusesAMalformedPersonFile() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	disk.Write("1_Anna/data.json", "{\"Version\": ");
 	CHECK(PersonFileDocument::Open(disk / "1_Anna/data.json").has_value(), false);
 	CHECK(PersonFileDocument::Open(disk / "missing/data.json").has_value(), false);
@@ -260,7 +262,7 @@ RefusesAMalformedPersonFile() {
 // docs/requirements/req_0034.md
 bool
 SavesWhereTheUserChose() {
-	DiskFolder disk;
+	const DiskFolder disk;
 	PersonFileDocument document;
 	document.SetDetails(Anna());
 	CHECK(document.Save(disk / "anywhere/deeper/data.json"), true);

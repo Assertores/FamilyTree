@@ -19,7 +19,7 @@ Checks: >-
     -cppcoreguidelines-pro-bounds-pointer-arithmetic,
     -cppcoreguidelines-pro-type-reinterpret-cast,
     hicpp-*,
-    -hicpp-special-member-functions, # NOTE(andreas): redirects to `cppcoreguidelines-special-member-functions` which has special options
+    -hicpp-special-member-functions,
     misc-*,
     modernize-*,
     -modernize-use-trailing-return-type,
@@ -31,10 +31,19 @@ Checks: >-
     -readability-simplify-boolean-expr,
     -readability-convert-member-functions-to-static
 
+# Why checks are off (comments inside the Checks block above become part of the list and disable
+# the line after them, so they live here):
+#   hicpp-special-member-functions: redirects to cppcoreguidelines-special-member-functions, which
+#       has the options set below.
+
 CheckOptions:
     - key: cppcoreguidelines-special-member-functions.AllowSoleDefaultDtor
       value: true
     - key: hicpp-signed-bitwise.IgnorePositiveIntegerLiterals
+      value: true
+    # A struct whose members are all public is plain data, as its cppcoreguidelines alias already
+    # treats it by default.
+    - key: misc-non-private-member-variables-in-classes.IgnoreClassesWithAllMemberVariablesBeingPublic
       value: true
     - key: readability-identifier-naming.ClassCase
       value: CamelCase
@@ -74,7 +83,9 @@ CheckOptions:
       value: CamelCase
     - key: readability-identifier-naming.ProtectedMemberPrefix
       value: my
-    - key: readability-identifier-naming.StructCase # Note(andreas): clang-tidy does not differentiate between class members and struct members so all class rules also apply to structs
+    # clang-tidy does not tell class members and struct members apart, so all class rules also
+    # apply to structs.
+    - key: readability-identifier-naming.StructCase
       value: CamelCase
     - key: readability-identifier-naming.TypeAliasCase
       value: CamelCase

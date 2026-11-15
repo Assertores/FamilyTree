@@ -5,9 +5,13 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <algorithm>
+#include <cstddef>
 #include <map>
 #include <string>
+#include <utility>
 #include <vector>
 
 namespace {
@@ -126,7 +130,7 @@ EmptyPrototype() {
 // docs/requirements/req_0014.md
 bool
 AnUnknownPersonIdIsAnError() {
-	Data data({{1, ""}}, {});
+	const Data data({{1, ""}}, {});
 	CHECK(data.result, FT_OK);
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(data.context.Get(), 2, &person, nullptr), FT_ERROR_UNKNOWN_PERSON);
@@ -136,7 +140,7 @@ AnUnknownPersonIdIsAnError() {
 // docs/requirements/req_0015.md
 bool
 AMissingDetailIsTheDefaultString() {
-	Data data({{1, R"("FirstNames": ["Anna"])"}}, {});
+	const Data data({{1, R"("FirstNames": ["Anna"])"}}, {});
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(data.context.Get(), 1, &person, nullptr), FT_OK);
 	CHECK(person->title != nullptr, true);
@@ -154,7 +158,7 @@ AMissingDetailIsTheDefaultString() {
 // docs/requirements/req_0050.md, docs/requirements/req_0015.md
 bool
 AnEmptyTextInThePersonFileIsNotMissing() {
-	Data data({{1, R"("Title": "")"}}, {});
+	const Data data({{1, R"("Title": "")"}}, {});
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(data.context.Get(), 1, &person, nullptr), FT_OK);
 	CHECK(Text(person->title), "");
@@ -167,7 +171,7 @@ AnEmptyTextInThePersonFileIsNotMissing() {
 // docs/requirements/req_0015.md
 bool
 AMissingListHasNoItemsButASafeFirstItem() {
-	Data data({{1, ""}}, {});
+	const Data data({{1, ""}}, {});
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(data.context.Get(), 1, &person, nullptr), FT_OK);
 	CHECK(person->firstNames.count, 0U);
@@ -194,7 +198,7 @@ AMissingListHasNoItemsButASafeFirstItem() {
 // docs/requirements/req_0050.md, docs/decisions/adr_0017.md
 bool
 AnEmptyListInThePersonFileIsNotMissing() {
-	Data data({{1, R"("Profession": [], "PlaceOfResidence": [])"}}, {});
+	const Data data({{1, R"("Profession": [], "PlaceOfResidence": [])"}}, {});
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(data.context.Get(), 1, &person, nullptr), FT_OK);
 	CHECK(person->professions.count, 0U);
@@ -222,7 +226,9 @@ AnEmptyListInThePersonFileIsNotMissing() {
 // docs/requirements/req_0016.md
 bool
 SearchFindsAnyOfSeveralFirstNames() {
-	Data data({{1, R"("FirstNames": ["Philippa", "Rosa"])"}, {2, R"("FirstNames": ["Anna"])"}}, {});
+	const Data data(
+		{{1, R"("FirstNames": ["Philippa", "Rosa"])"}, {2, R"("FirstNames": ["Anna"])"}},
+		{});
 	const char* rosa[] = {"Rosa"};
 	auto prototype = EmptyPrototype();
 	prototype.firstNames = {rosa, 1};
@@ -233,7 +239,7 @@ SearchFindsAnyOfSeveralFirstNames() {
 // docs/requirements/req_0016.md
 bool
 SearchFindsPartOfAText() {
-	Data data({{1, R"("LastNames": ["Perry"])"}, {2, R"("LastNames": ["Huber"])"}}, {});
+	const Data data({{1, R"("LastNames": ["Perry"])"}, {2, R"("LastNames": ["Huber"])"}}, {});
 	const char* per[] = {"Per"};
 	auto prototype = EmptyPrototype();
 	prototype.lastNames = {per, 1};
@@ -244,7 +250,7 @@ SearchFindsPartOfAText() {
 // docs/requirements/req_0016.md
 bool
 SearchIgnoresEmptyTexts() {
-	Data data({{1, R"("FirstNames": ["Anna"])"}}, {});
+	const Data data({{1, R"("FirstNames": ["Anna"])"}}, {});
 	const char* anna[] = {"Anna"};
 	auto prototype = EmptyPrototype();
 	prototype.firstNames = {anna, 1};
@@ -256,7 +262,7 @@ SearchIgnoresEmptyTexts() {
 // docs/requirements/req_0016.md
 bool
 AMissingDetailNeverMatches() {
-	Data data({{1, R"("PlaceOfBirth": "Würzburg")"}, {2, ""}}, {});
+	const Data data({{1, R"("PlaceOfBirth": "Würzburg")"}, {2, ""}}, {});
 	auto prototype = EmptyPrototype();
 	prototype.placeOfBirth = "a";
 	CHECK(data.Search(prototype, 1), Ids());
@@ -268,7 +274,7 @@ AMissingDetailNeverMatches() {
 // docs/requirements/req_0016.md
 bool
 SearchNeedsTheMinimumNumberOfMatches() {
-	Data data(
+	const Data data(
 		{
 			{1, R"("FirstNames": ["Anna"], "PlaceOfBirth": "Berlin")"},
 			{2, R"("FirstNames": ["Anna"], "PlaceOfBirth": "Hamburg")"},
@@ -287,7 +293,7 @@ SearchNeedsTheMinimumNumberOfMatches() {
 // docs/requirements/req_0016.md
 bool
 AnEmptySearchWithMinimumZeroFindsEveryPerson() {
-	Data data({{1, ""}, {2, ""}, {5, ""}}, {});
+	const Data data({{1, ""}, {2, ""}, {5, ""}}, {});
 	CHECK(data.Search(EmptyPrototype(), 0), Ids({1, 2, 5}));
 	return true;
 }
@@ -295,7 +301,7 @@ AnEmptySearchWithMinimumZeroFindsEveryPerson() {
 // docs/requirements/req_0016.md, docs/requirements/req_0003.md
 bool
 SearchMatchesAnyLineOfTheRemarks() {
-	Data data({{1, R"("Remarks": ["erste Zeile", "Bäcker in Würzburg"])"}}, {});
+	const Data data({{1, R"("Remarks": ["erste Zeile", "Bäcker in Würzburg"])"}}, {});
 	const char* line[] = {"Bäcker"};
 	auto prototype = EmptyPrototype();
 	prototype.remarks = {line, 1};
@@ -306,10 +312,10 @@ SearchMatchesAnyLineOfTheRemarks() {
 // docs/requirements/req_0016.md
 bool
 SearchMatchesAPlaceOfResidence() {
-	Data data(
+	const Data data(
 		{{1, R"("PlaceOfResidence": [{"Name": "Bamberg", "StartDate": "1946"}])"}, {2, ""}},
 		{});
-	FT_Residence residence{"Bam", nullptr, nullptr};
+	const FT_Residence residence{"Bam", nullptr, nullptr};
 	auto prototype = EmptyPrototype();
 	prototype.placesOfResidence = {&residence, 1};
 	CHECK(data.Search(prototype, 1), Ids({1}));
@@ -319,10 +325,10 @@ SearchMatchesAPlaceOfResidence() {
 // docs/decisions/adr_0004.md
 bool
 SearchFailsWithATooSmallBuffer() {
-	Data data({{1, ""}, {2, ""}}, {});
+	const Data data({{1, ""}, {2, ""}}, {});
 	FT_PersonId found[1] = {};
 	size_t count = 99;
-	auto prototype = EmptyPrototype();
+	const auto prototype = EmptyPrototype();
 	CHECK(
 		FT_Search(data.context.Get(), &prototype, 0, found, 1, &count, nullptr),
 		FT_ERROR_BUFFER_TOO_SMALL);
@@ -334,7 +340,7 @@ SearchFailsWithATooSmallBuffer() {
 bool
 FamilyTreeAtDistanceZeroHoldsTheOwnFamilies() {
 	// A=1 and B=2 are the Parents of C=3 and D=4; E=5 and F=6 are the Parents of A.
-	Data data(
+	const Data data(
 		{{1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}, {6, ""}},
 		{
 			"1,3,StrictlyLower",
@@ -361,10 +367,10 @@ FamilyTreeAtDistanceZeroHoldsTheOwnFamilies() {
 bool
 FamilyTreeOneStepFurtherAddsTheNextFamily() {
 	// A=1 and B=2 are the Parents of C=3; C and G=4 are the Parents of H=5.
-	Data data(
+	const Data data(
 		{{1, ""}, {2, ""}, {3, ""}, {4, ""}, {5, ""}},
 		{"1,3,StrictlyLower", "2,3,StrictlyLower", "3,5,StrictlyLower", "4,5,StrictlyLower"});
-	Tree near(data, 1, 0);
+	const Tree near(data, 1, 0);
 	CHECK(near.result, FT_OK);
 	CHECK(near.Persons(), Ids({1, 2, 3}));
 	Tree far(data, 1, 1);
@@ -378,7 +384,7 @@ FamilyTreeOneStepFurtherAddsTheNextFamily() {
 // docs/requirements/req_0022.md, docs/features/ftr_0004.md#families-stay-whole
 bool
 FamilyTreeKeepsFamiliesWhole() {
-	Data data({{1, ""}, {2, ""}, {3, ""}}, {"1,3,StrictlyLower", "2,3,StrictlyLower"});
+	const Data data({{1, ""}, {2, ""}, {3, ""}}, {"1,3,StrictlyLower", "2,3,StrictlyLower"});
 	Tree tree(data, 3, 0);
 	CHECK(tree.result, FT_OK);
 	CHECK(tree.Persons(), Ids({1, 2, 3}));
@@ -391,7 +397,7 @@ FamilyTreeKeepsFamiliesWhole() {
 // docs/requirements/req_0022.md, docs/features/ftr_0004.md#a-person-without-a-family
 bool
 FamilyTreeOfAPersonWithoutFamilyHoldsOnlyThePerson() {
-	Data data({{1, ""}, {2, ""}, {7, ""}}, {"1,2,StrictlyLower"});
+	const Data data({{1, ""}, {2, ""}, {7, ""}}, {"1,2,StrictlyLower"});
 	Tree tree(data, 7, 3);
 	CHECK(tree.result, FT_OK);
 	CHECK(tree.Persons(), Ids({7}));
@@ -403,7 +409,7 @@ FamilyTreeOfAPersonWithoutFamilyHoldsOnlyThePerson() {
 // docs/decisions/adr_0009.md
 bool
 FamilyTreeFailsWithATooSmallBuffer() {
-	Data data({{1, ""}, {2, ""}, {3, ""}}, {"1,3,StrictlyLower", "2,3,StrictlyLower"});
+	const Data data({{1, ""}, {2, ""}, {3, ""}}, {"1,3,StrictlyLower", "2,3,StrictlyLower"});
 	FT_TreePerson persons[2] = {};
 	FT_FamilyIndex families[1] = {};
 	size_t personCount = 0;
@@ -427,8 +433,8 @@ FamilyTreeFailsWithATooSmallBuffer() {
 // docs/requirements/req_0022.md
 bool
 FamilyTreeOfAnUnknownPersonIsAnError() {
-	Data data({{1, ""}}, {});
-	Tree tree(data, 2, 0);
+	const Data data({{1, ""}}, {});
+	const Tree tree(data, 2, 0);
 	CHECK(tree.result, FT_ERROR_UNKNOWN_PERSON);
 	return true;
 }

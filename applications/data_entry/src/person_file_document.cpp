@@ -3,7 +3,12 @@
 
 #include "person_file_document.hpp"
 
+#include <filesystem>
+#include <memory>
+#include <optional>
+#include <string>
 #include <tuple>
+#include <vector>
 
 struct PersonFileDocument::Content {
 	PersonFileDetails details;

@@ -6,7 +6,9 @@
 #include "support/test_support.hpp"
 
 #include <check.hpp>
+#include <family_tree/api.h>
 
+#include <cstddef>
 #include <string>
 #include <vector>
 
@@ -101,7 +103,7 @@ struct Family {
 // docs/requirements/req_0018.md
 bool
 ChildrenComeFromStrictlyLowerRelations() {
-	Family family(3, {"1,2,StrictlyLower", "1,3,StrictlyLower"});
+	const Family family(3, {"1,2,StrictlyLower", "1,3,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Children(1), Ids({2, 3}));
 	CHECK(family.Parents(2), Ids({1}));
@@ -111,7 +113,7 @@ ChildrenComeFromStrictlyLowerRelations() {
 // docs/requirements/req_0018.md
 bool
 ParentsComeFromStrictlyHigherRelations() {
-	Family family(2, {"2,1,StrictlyHigher"});
+	const Family family(2, {"2,1,StrictlyHigher"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Parents(2), Ids({1}));
 	CHECK(family.Children(1), Ids({2}));
@@ -121,7 +123,7 @@ ParentsComeFromStrictlyHigherRelations() {
 // docs/requirements/req_0018.md
 bool
 UnrestrictedRelationsMakeNoParentsOrChildren() {
-	Family family(2, {"1,2,Unrestricted,verheiratet"});
+	const Family family(2, {"1,2,Unrestricted,verheiratet"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Children(1), Ids());
 	CHECK(family.Parents(2), Ids());
@@ -132,7 +134,7 @@ UnrestrictedRelationsMakeNoParentsOrChildren() {
 bool
 CommonParentsOfHalfSiblings() {
 	// 1 and 2 are the Parents of 4; 1 and 3 are the Parents of 5.
-	Family family(
+	const Family family(
 		5,
 		{"1,4,StrictlyLower", "2,4,StrictlyLower", "1,5,StrictlyLower", "3,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -144,7 +146,7 @@ CommonParentsOfHalfSiblings() {
 // docs/requirements/req_0018.md
 bool
 CommonChildrenOfTwoParents() {
-	Family family(
+	const Family family(
 		5,
 		{"1,4,StrictlyLower", "2,4,StrictlyLower", "1,5,StrictlyLower", "3,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -157,7 +159,7 @@ CommonChildrenOfTwoParents() {
 // docs/requirements/req_0018.md
 bool
 AnEmptySetHasNoCommonParentsOrChildren() {
-	Family family(3, {"1,2,StrictlyLower", "1,3,StrictlyLower"});
+	const Family family(3, {"1,2,StrictlyLower", "1,3,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.CommonParents({}), Ids());
 	CHECK(family.CommonChildren({}), Ids());
@@ -167,7 +169,7 @@ AnEmptySetHasNoCommonParentsOrChildren() {
 // docs/requirements/req_0019.md
 bool
 SiblingsShareAtLeastOneParent() {
-	Family family(
+	const Family family(
 		5,
 		{"1,4,StrictlyLower", "2,4,StrictlyLower", "1,5,StrictlyLower", "3,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -179,7 +181,7 @@ SiblingsShareAtLeastOneParent() {
 // docs/requirements/req_0019.md
 bool
 APersonWithoutParentsHasNoSiblings() {
-	Family family(3, {"1,2,StrictlyLower"});
+	const Family family(3, {"1,2,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Siblings(1), Ids());
 	CHECK(family.Siblings(3), Ids());
@@ -189,7 +191,7 @@ APersonWithoutParentsHasNoSiblings() {
 // docs/requirements/req_0020.md
 bool
 PartnersShareAtLeastOneChild() {
-	Family family(
+	const Family family(
 		5,
 		{"1,4,StrictlyLower", "2,4,StrictlyLower", "1,5,StrictlyLower", "3,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -201,7 +203,7 @@ PartnersShareAtLeastOneChild() {
 // docs/requirements/req_0020.md
 bool
 AnUnrestrictedRelationAloneMakesNoPartners() {
-	Family family(2, {"1,2,Unrestricted,bester Freund"});
+	const Family family(2, {"1,2,Unrestricted,bester Freund"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Partners(1), Ids());
 	return true;
@@ -210,7 +212,7 @@ AnUnrestrictedRelationAloneMakesNoPartners() {
 // docs/requirements/req_0017.md
 bool
 RelationsOfAPersonContainItAsFirstOrSecond() {
-	Family family(3, {"1,2,StrictlyLower", "3,1,Unrestricted", "2,3,Unrestricted"});
+	const Family family(3, {"1,2,StrictlyLower", "3,1,Unrestricted", "2,3,Unrestricted"});
 	CHECK(family.result, FT_OK);
 	const FT_Relation* relations = nullptr;
 	size_t count = 0;
@@ -225,7 +227,7 @@ RelationsOfAPersonContainItAsFirstOrSecond() {
 // docs/decisions/adr_0017.md
 bool
 ARelationToAnUnknownPersonIsLeftOutWithAWarning() {
-	Family family(2, {"1,2,StrictlyLower", "1,99,StrictlyLower"});
+	const Family family(2, {"1,2,StrictlyLower", "1,99,StrictlyLower"});
 	CHECK(family.result, FT_OK_WITH_WARNINGS);
 	CHECK(family.Children(1), Ids({2}));
 	CHECK(family.trace.HasWarning("99"), true);
@@ -235,7 +237,7 @@ ARelationToAnUnknownPersonIsLeftOutWithAWarning() {
 // docs/requirements/req_0021.md, docs/requirements/req_0045.md
 bool
 AChildIsOneGenerationBelowItsParent() {
-	Family family(3, {"1,2,StrictlyLower", "2,3,StrictlyLower"});
+	const Family family(3, {"1,2,StrictlyLower", "2,3,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Generation(2, 1), 1);
 	CHECK(family.Generation(3, 1), 2);
@@ -248,7 +250,7 @@ AChildIsOneGenerationBelowItsParent() {
 bool
 APersonWhoMarriedInIsInTheGenerationOfThePartner() {
 	// 5 and 6 are the Parents of 1; 1 and 2 are the Parents of 3; 2 has no recorded Parents.
-	Family family(
+	const Family family(
 		6,
 		{"5,1,StrictlyLower", "6,1,StrictlyLower", "1,3,StrictlyLower", "2,3,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -262,7 +264,7 @@ bool
 AllParentsOfAChildAreInTheSameGeneration() {
 	// 1 is the Parent of 2, who is the Parent of 3; 4 has no recorded Parents; 3 and 4 are the
 	// Parents of 5. 4 has to move down to the Generation of 3.
-	Family family(
+	const Family family(
 		5,
 		{"1,2,StrictlyLower", "2,3,StrictlyLower", "3,5,StrictlyLower", "4,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
@@ -277,7 +279,7 @@ bool
 EveryPersonIsInTheHighestGenerationTheRulesAllow() {
 	// 1 is the Parent of 2 and 3; 2 is the Parent of 4. 3 has no Children and stays one
 	// Generation below 1, not lower.
-	Family family(4, {"1,2,StrictlyLower", "1,3,StrictlyLower", "2,4,StrictlyLower"});
+	const Family family(4, {"1,2,StrictlyLower", "1,3,StrictlyLower", "2,4,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Generation(3, 1), 1);
 	CHECK(family.Generation(3, 2), 0);
@@ -289,7 +291,7 @@ bool
 GenerationsOfSeparateFamilyGraphsAreCountedFromTheirOwnTop() {
 	// 1 is the Parent of 2; 3 is the Parent of 4, who is the Parent of 5; no Relation connects
 	// the two Family Graphs.
-	Family family(5, {"1,2,StrictlyLower", "3,4,StrictlyLower", "4,5,StrictlyLower"});
+	const Family family(5, {"1,2,StrictlyLower", "3,4,StrictlyLower", "4,5,StrictlyLower"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Generation(3, 1), 0);
 	CHECK(family.Generation(5, 2), 1);
@@ -300,7 +302,7 @@ GenerationsOfSeparateFamilyGraphsAreCountedFromTheirOwnTop() {
 // docs/requirements/req_0045.md
 bool
 AnUnrestrictedRelationDoesNotMoveGenerations() {
-	Family family(3, {"1,2,StrictlyLower", "3,2,Unrestricted"});
+	const Family family(3, {"1,2,StrictlyLower", "3,2,Unrestricted"});
 	CHECK(family.result, FT_OK);
 	CHECK(family.Generation(3, 1), 0);
 	return true;
@@ -309,7 +311,7 @@ AnUnrestrictedRelationDoesNotMoveGenerations() {
 // docs/requirements/req_0047.md
 bool
 APersonWhoIsTheirOwnAncestorPreventsTheContext() {
-	Family family(3, {"1,2,StrictlyLower", "2,3,StrictlyLower", "3,1,StrictlyLower"});
+	const Family family(3, {"1,2,StrictlyLower", "2,3,StrictlyLower", "3,1,StrictlyLower"});
 	CHECK(family.result, FT_ERROR_CONFLICTING_GENERATIONS);
 	CHECK(static_cast<bool>(family.context), false);
 	CHECK(family.trace.HasError(), true);
@@ -320,7 +322,7 @@ APersonWhoIsTheirOwnAncestorPreventsTheContext() {
 bool
 AParentWhoIsAnAncestorOfTheOtherParentPreventsTheContext() {
 	// 1 and 2 are the Parents of 3; 2 is the Parent of 4; 4 is the Parent of 1.
-	Family family(
+	const Family family(
 		4,
 		{"1,3,StrictlyLower", "2,3,StrictlyLower", "2,4,StrictlyLower", "4,1,StrictlyLower"});
 	CHECK(family.result, FT_ERROR_CONFLICTING_GENERATIONS);
@@ -331,7 +333,7 @@ AParentWhoIsAnAncestorOfTheOtherParentPreventsTheContext() {
 // docs/requirements/req_0047.md
 bool
 TheConflictingRelationsAreReportedToTheTrace() {
-	Family family(2, {"1,2,StrictlyLower", "2,1,StrictlyLower"});
+	const Family family(2, {"1,2,StrictlyLower", "2,1,StrictlyLower"});
 	CHECK(family.result, FT_ERROR_CONFLICTING_GENERATIONS);
 	CHECK(family.trace.HasError("1"), true);
 	CHECK(family.trace.HasError("2"), true);
