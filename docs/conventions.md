@@ -15,7 +15,10 @@ Last reviewed: 2026-11-15
 | [clang](dependencies/dep_0005.md) | the compiler for the Library, the Applications and the tests, on Windows and Linux; the Library is compiled with `-std=c99 -pedantic-errors -Wall -Wextra -Werror` | `library/CMakeLists.txt` |
 | AddressSanitizer, LeakSanitizer | memory errors and leaks while the tests run on Linux | `CMakeLists.txt` |
 
-- clang-tidy runs on the C files too, through `CMAKE_C_CLANG_TIDY`; the original implementation only ran it on C++.
+- clang-tidy runs on the C files too, through `CMAKE_C_CLANG_TIDY`; the original implementation only ran it on C++. CMake passes each language its configuration file explicitly (`cmake/ClangTidy.cmake`), because the tests of the Library are C++ but live below `library/.clang-tidy`.
+- Test targets turn off the checks for magic numbers, C arrays and unchecked access (`ft_clang_tidy_for_tests` in `cmake/ClangTidy.cmake`): Person Ids are test data, the tests call the C API with caller buffers, and `CHECK` returns before an unchecked access.
+- clang-tidy runs while building; `-DFT_CLANG_TIDY=OFF` turns it off. The build target `format` formats every file in `library/`, `applications/` and `tests/`, and `check-format` and the test `Formatting` fail if one is not formatted.
+- `CheckFormat.py` checks the same files without CMake, e.g. from a pre-commit hook with `./CheckFormat.py --files staged --fix`; it formats the files it finds and fails, so they can be added again.
 - C++ code that includes the public headers of the Library only gets diagnostics for its own files, through `HeaderFilterRegex`, so the headers need no `NOLINT` blocks.
 
 ## Folder Structure
@@ -30,6 +33,7 @@ applications/
     data_entry/             Data Entry Tool
     command_line/           Command Line Application
     translations/           Qt Linguist files shared by the Applications
+cmake/                      CMake modules: warnings, clang-tidy, clang-format
 tests/
     framework/              the own test framework, check.hpp
     end_to_end/             end-to-end tests from the scenarios of the features

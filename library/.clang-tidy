@@ -1,0 +1,84 @@
+# clang-tidy configuration of the Library, which is written in C99 and follows the Power of Ten
+# rules (docs/decisions/adr_0011.md). The tests and the Applications are C++ and use ../.clang-tidy;
+# CMake passes the right file to each (cmake/ClangTidy.cmake).
+# See https://clang.llvm.org/extra/clang-tidy/checks/list.html
+
+FormatStyle: file
+HeaderFilterRegex: '.*/library/(include|src)/.*\.h$'
+WarningsAsErrors: '*'
+
+Checks: >-
+    -*,
+    bugprone-*,
+    -bugprone-easily-swappable-parameters,
+    cert-*,
+    clang-analyzer-*,
+    -clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling,
+    clang-diagnostic-*,
+    cppcoreguidelines-avoid-goto,
+    cppcoreguidelines-init-variables,
+    hicpp-multiway-paths-covered,
+    hicpp-no-assembler,
+    misc-*,
+    portability-*,
+    readability-*
+
+# Why checks are off:
+#   bugprone-easily-swappable-parameters: the API passes several ids and sizes in a row.
+#   clang-analyzer-security.insecureAPI.DeprecatedOrUnsafeBufferHandling: asks for the bounds
+#       checked functions of C11 Annex K, which C99 does not have.
+# Power of Ten rules checked here:
+#   Rule 1: misc-no-recursion; cppcoreguidelines-avoid-goto only finds backward jumps, forward
+#       jumps and setjmp are left to review
+#   Rule 4: readability-function-size
+#   Rule 6: cppcoreguidelines-init-variables
+#   Rule 7: bugprone-unused-return-value for every function, cert-err33-c
+#   Rule 8: left to review, as cppcoreguidelines-macro-usage only works for C++
+#   Rule 10: WarningsAsErrors
+
+CheckOptions:
+    # Rule 4: no function longer than 60 lines.
+    - key: readability-function-size.LineThreshold
+      value: 60
+    # Rule 7: every return value is checked; (void) marks a value deliberately ignored.
+    - key: bugprone-unused-return-value.CheckedFunctions
+      value: '.*'
+    - key: bugprone-unused-return-value.AllowCastToVoid
+      value: true
+    # Naming, see docs/conventions.md.
+    - key: readability-identifier-naming.GlobalFunctionCase
+      value: CamelCase
+    - key: readability-identifier-naming.GlobalFunctionIgnoredRegexp
+      value: '^FT_[A-Z][a-zA-Z0-9]*$'
+    - key: readability-identifier-naming.FunctionCase
+      value: CamelCase
+    - key: readability-identifier-naming.FunctionPrefix
+      value: Priv
+    - key: readability-identifier-naming.ParameterCase
+      value: CamelCase
+    - key: readability-identifier-naming.ParameterPrefix
+      value: a
+    - key: readability-identifier-naming.VariableCase
+      value: camelBack
+    - key: readability-identifier-naming.MemberCase
+      value: camelBack
+    - key: readability-identifier-naming.GlobalConstantCase
+      value: CamelCase
+    - key: readability-identifier-naming.GlobalConstantPrefix
+      value: the
+    - key: readability-identifier-naming.StructCase
+      value: CamelCase
+    - key: readability-identifier-naming.StructIgnoredRegexp
+      value: '^FT_[A-Z][a-zA-Z0-9]*$'
+    - key: readability-identifier-naming.TypedefCase
+      value: CamelCase
+    - key: readability-identifier-naming.TypedefIgnoredRegexp
+      value: '^FT_[A-Z][a-zA-Z0-9]*$'
+    - key: readability-identifier-naming.EnumCase
+      value: CamelCase
+    - key: readability-identifier-naming.EnumIgnoredRegexp
+      value: '^FT_[A-Z][a-zA-Z0-9]*$'
+    - key: readability-identifier-naming.EnumConstantCase
+      value: UPPER_CASE
+    - key: readability-identifier-naming.MacroDefinitionCase
+      value: UPPER_CASE
