@@ -16,6 +16,9 @@
 - [REQ 0010](req_0010.md) UTF-8 text
 - [REQ 0011](req_0011.md) Media paths
 - [REQ 0013](req_0013.md) Malformed data files
+- [REQ 0049](req_0049.md) Missing Relations File
+- [REQ 0050](req_0050.md) Empty Details
+- [REQ 0051](req_0051.md) Text that is not UTF-8
 
 ## Querying the Data Set
 - [REQ 0014](req_0014.md) Details of a Person
@@ -49,6 +52,7 @@
 - [REQ 0032](req_0032.md) Saving a Person File
 - [REQ 0033](req_0033.md) Reopening a Person File
 - [REQ 0034](req_0034.md) Choosing where to save
+- [REQ 0052](req_0052.md) Entering that a Detail does not exist
 
 ## Applications
 - [REQ 0004](req_0004.md) Translatable user interface

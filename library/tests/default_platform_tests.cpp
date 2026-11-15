@@ -93,7 +93,7 @@ ChecksWhetherMediaFilesExistOnTheDisk() {
 	return true;
 }
 
-// docs/requirements/req_0037.md, docs/decisions/adr_0013.md
+// docs/requirements/req_0037.md, docs/decisions/adr_0017.md
 bool
 AMissingDataFolderIsAPlatformError() {
 	ContextGuard context;

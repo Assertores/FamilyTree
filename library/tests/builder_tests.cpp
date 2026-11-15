@@ -234,21 +234,58 @@ SkipsARelationRowWithTooFewColumns() {
 	return true;
 }
 
-// docs/requirements/req_0010.md, docs/requirements/req_0013.md
+// docs/requirements/req_0051.md, docs/requirements/req_0010.md
 bool
-TextThatIsNoValidUtf8IsMalformed() {
+SkipsOnlyAValueThatIsNotUtf8() {
 	auto folder = ThreePersons();
-	folder.AddPerson("3_Clara", PersonFile(3, "\"PlaceOfBirth\": \"W\xFCrzburg\""));
+	folder.AddPerson(
+		"3_Clara",
+		PersonFile(3, "\"PlaceOfBirth\": \"W\xFCrzburg\", \"PlaceOfDeath\": \"Bamberg\""));
 	ContextGuard context;
 	TraceBuffer trace;
 	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
 	CHECK(trace.HasWarning("3_Clara"), true);
 	const FT_Person* person = nullptr;
-	if (FT_GetPerson(context.Get(), 3, &person, nullptr) == FT_OK) {
-		bool missing = false;
-		CHECK(FT_IsDefaultString(context.Get(), person->placeOfBirth, &missing, nullptr), FT_OK);
-		CHECK(missing, true);
-	}
+	CHECK(FT_GetPerson(context.Get(), 3, &person, nullptr), FT_OK);
+	bool missing = false;
+	CHECK(FT_IsDefaultString(context.Get(), person->placeOfBirth, &missing, nullptr), FT_OK);
+	CHECK(missing, true);
+	CHECK(Text(person->placeOfDeath), "Bamberg");
+	return true;
+}
+
+// docs/requirements/req_0051.md
+bool
+SkipsOnlyARelationRowThatIsNotUtf8() {
+	auto folder = ThreePersons();
+	folder.SetRelations({"1,2,StrictlyLower,M\xFCtter,,", "2,3,StrictlyLower,,,"});
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(trace.HasWarning("relations.csv"), true);
+	const FT_Relation* relations = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetRelations(context.Get(), 1, &relations, &count, nullptr), FT_OK);
+	CHECK(count, 0U);
+	CHECK(FT_GetRelations(context.Get(), 3, &relations, &count, nullptr), FT_OK);
+	CHECK(count, 1U);
+	return true;
+}
+
+// docs/requirements/req_0049.md
+bool
+ADataFolderWithoutRelationsFileHasNoRelations() {
+	DataFolder folder;
+	folder.AddPerson("1_Anna", PersonFile(1)).AddPerson("2_Bernd", PersonFile(2));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 2U);
+	CHECK(trace.HasWarning("relations.csv"), true);
+	const FT_Relation* relations = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetRelations(context.Get(), 1, &relations, &count, nullptr), FT_OK);
+	CHECK(count, 0U);
 	return true;
 }
 
@@ -299,6 +336,42 @@ UsesThePersonAnApplicationParsedItself() {
 	return true;
 }
 
+// docs/requirements/req_0050.md, docs/decisions/adr_0017.md
+bool
+AnAnswerTellsEmptyDetailsFromMissingOnes() {
+	const char* noProfessions[] = {nullptr};
+	FT_PersonRecord record{};
+	record.formatVersion = thePersonFileVersion;
+	record.person.id = 7;
+	record.person.titleOfNobility = "";
+	record.person.professions.items = noProfessions;
+	record.person.professions.count = 0;
+	DataFolder folder;
+	folder.AddPerson("7_Selbst", "this text is never parsed by the Library").SetRelations({});
+	folder.AnswerPersonParsing(record);
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK);
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(context.Get(), 7, &person, nullptr), FT_OK);
+	bool missing = true;
+	CHECK(FT_IsDefaultString(context.Get(), person->titleOfNobility, &missing, nullptr), FT_OK);
+	CHECK(missing, false);
+	CHECK(person->professions.count, 0U);
+	missing = true;
+	CHECK(
+		FT_IsDefaultString(context.Get(), person->professions.items[0], &missing, nullptr),
+		FT_OK);
+	CHECK(missing, false);
+	missing = false;
+	CHECK(FT_IsDefaultString(context.Get(), person->title, &missing, nullptr), FT_OK);
+	CHECK(missing, true);
+	missing = false;
+	CHECK(FT_IsDefaultString(context.Get(), person->lastNames.items[0], &missing, nullptr), FT_OK);
+	CHECK(missing, true);
+	return true;
+}
+
 // docs/decisions/adr_0005.md
 bool
 CancellingACreationReleasesTheBuilder() {
@@ -310,7 +383,7 @@ CancellingACreationReleasesTheBuilder() {
 	return true;
 }
 
-// docs/decisions/adr_0013.md
+// docs/decisions/adr_0017.md
 bool
 ContinueWithoutAnswerIsAnInvalidArgument() {
 	FT_Builder* builder = nullptr;
@@ -322,7 +395,7 @@ ContinueWithoutAnswerIsAnInvalidArgument() {
 	return true;
 }
 
-// docs/decisions/adr_0013.md
+// docs/decisions/adr_0017.md
 bool
 StartCreateWithoutDataFolderIsAnInvalidArgument() {
 	FT_Builder* builder = nullptr;
@@ -349,9 +422,12 @@ BuilderSuite() {
 	result &= RUN(SkipsAMalformedPersonFileAndReadsTheOthers);
 	result &= RUN(SkipsAnEmptyPersonFile);
 	result &= RUN(SkipsARelationRowWithTooFewColumns);
-	result &= RUN(TextThatIsNoValidUtf8IsMalformed);
+	result &= RUN(SkipsOnlyAValueThatIsNotUtf8);
+	result &= RUN(SkipsOnlyARelationRowThatIsNotUtf8);
+	result &= RUN(ADataFolderWithoutRelationsFileHasNoRelations);
 	result &= RUN(ReadsTheDataFolderOnlyThroughQuestions);
 	result &= RUN(UsesThePersonAnApplicationParsedItself);
+	result &= RUN(AnAnswerTellsEmptyDetailsFromMissingOnes);
 	result &= RUN(CancellingACreationReleasesTheBuilder);
 	result &= RUN(ContinueWithoutAnswerIsAnInvalidArgument);
 	result &= RUN(StartCreateWithoutDataFolderIsAnInvalidArgument);

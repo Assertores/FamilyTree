@@ -151,7 +151,7 @@ AMissingDetailIsTheDefaultString() {
 	return true;
 }
 
-// docs/requirements/req_0015.md
+// docs/requirements/req_0050.md, docs/requirements/req_0015.md
 bool
 AnEmptyTextInThePersonFileIsNotMissing() {
 	Data data({{1, R"("Title": "")"}}, {});
@@ -177,6 +177,45 @@ AMissingListHasNoItemsButASafeFirstItem() {
 		FT_IsDefaultString(data.context.Get(), person->firstNames.items[0], &missing, nullptr),
 		FT_OK);
 	CHECK(missing, true);
+	CHECK(person->placesOfResidence.count, 0U);
+	CHECK(person->placesOfResidence.items != nullptr, true);
+	missing = false;
+	CHECK(
+		FT_IsDefaultString(
+			data.context.Get(),
+			person->placesOfResidence.items[0].name,
+			&missing,
+			nullptr),
+		FT_OK);
+	CHECK(missing, true);
+	return true;
+}
+
+// docs/requirements/req_0050.md, docs/decisions/adr_0017.md
+bool
+AnEmptyListInThePersonFileIsNotMissing() {
+	Data data({{1, R"("Profession": [], "PlaceOfResidence": [])"}}, {});
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(data.context.Get(), 1, &person, nullptr), FT_OK);
+	CHECK(person->professions.count, 0U);
+	CHECK(person->professions.items != nullptr, true);
+	CHECK(Text(person->professions.items[0]), "");
+	bool missing = true;
+	CHECK(
+		FT_IsDefaultString(data.context.Get(), person->professions.items[0], &missing, nullptr),
+		FT_OK);
+	CHECK(missing, false);
+	CHECK(person->placesOfResidence.count, 0U);
+	CHECK(person->placesOfResidence.items != nullptr, true);
+	missing = true;
+	CHECK(
+		FT_IsDefaultString(
+			data.context.Get(),
+			person->placesOfResidence.items[0].name,
+			&missing,
+			nullptr),
+		FT_OK);
+	CHECK(missing, false);
 	return true;
 }
 
@@ -403,6 +442,7 @@ QueriesSuite() {
 	result &= RUN(AMissingDetailIsTheDefaultString);
 	result &= RUN(AnEmptyTextInThePersonFileIsNotMissing);
 	result &= RUN(AMissingListHasNoItemsButASafeFirstItem);
+	result &= RUN(AnEmptyListInThePersonFileIsNotMissing);
 	result &= RUN(SearchFindsAnyOfSeveralFirstNames);
 	result &= RUN(SearchFindsPartOfAText);
 	result &= RUN(SearchIgnoresEmptyTexts);

@@ -1,9 +1,8 @@
 #pragma once
 
-// The Person File reader and writer of the Data Entry Tool (docs/architecture.md). Declarations
-// only, invented while writing the tests of step 5; see docs/workspace/interface_draft.md. The
+// The Person File reader and writer of the Data Entry Tool (docs/architecture.md). The
 // implementation uses QJsonDocument, but the interface uses standard types only, so that it can
-// be tested without Qt.
+// be tested without the form.
 
 #include <filesystem>
 #include <memory>
@@ -17,24 +16,29 @@ struct ResidenceEntry {
 	std::string endDate;
 };
 
-// The Details as the form shows them. An empty text or an empty list is not written into the
-// Person File, so the Detail is missing there.
+using Text = std::optional<std::string>;
+using TextList = std::optional<std::vector<std::string>>;
+
+// The Details as the form shows them (docs/requirements/req_0052.md): std::nullopt is a Detail
+// that was not entered, and is left out of the Person File; an empty text or list is a Detail
+// known not to exist, and is written as such.
 struct PersonFileDetails {
 	std::optional<long long> id;
-	std::string title;
-	std::vector<std::string> firstNames;
-	std::string titleOfNobility;
-	std::vector<std::string> lastNames;
-	std::string gender;
-	std::string dateOfBirth;
-	std::string placeOfBirth;
-	std::string dateOfDeath;
-	std::string placeOfDeath;
-	std::vector<std::string> professions;
-	std::vector<ResidenceEntry> placesOfResidence;
+	Text title;
+	TextList firstNames;
+	Text titleOfNobility;
+	TextList lastNames;
+	Text gender;
+	Text dateOfBirth;
+	Text placeOfBirth;
+	Text dateOfDeath;
+	Text placeOfDeath;
+	TextList professions;
+	std::optional<std::vector<ResidenceEntry>> placesOfResidence;
+	TextList remarkLines;
+	// References to the Media; empty means none.
 	std::string recording;
 	std::vector<std::string> pictures;
-	std::vector<std::string> remarkLines;
 };
 
 bool operator==(const ResidenceEntry& aLeft, const ResidenceEntry& aRight);

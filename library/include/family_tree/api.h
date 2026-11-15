@@ -1,6 +1,6 @@
 /// @file
 /// Public API of the Family Tree Library.
-/// Declarations only, taken from docs/decisions/adr_0013.md, so that the tests of step 5 compile.
+/// Declarations, see docs/decisions/adr_0017.md and docs/decisions/adr_0016.md.
 /// The documentation of every function and type (docs/requirements/req_0043.md) is added with the
 /// implementation.
 #ifndef FT_API_H
@@ -42,7 +42,7 @@ typedef enum {
 } FT_Result;
 
 enum {
-	FT_TRACE_MAX_DEPTH = 32
+	FT_TRACE_MAX_DEPTH = 32,
 }; /* an enum, as the preprocessor is reserved (docs/decisions/adr_0011.md) */
 
 /* Set buffer and capacity, and everything else to zero. Format: docs/decisions/adr_0007.md. */
@@ -63,8 +63,10 @@ typedef long long FT_PersonId;		  /* the "Id" of the Person File */
 typedef size_t FT_FamilyIndex;
 
 typedef struct {
-	const char* const* items; /* never NULL; items[0] is the default string if count is 0 */
-	size_t count;			  /* 0 if the Detail is missing */
+	/* never NULL; if count is 0, items[0] is the default string if the Detail is missing, and
+	   another empty text if the list is empty in the Person File (docs/decisions/adr_0017.md) */
+	const char* const* items;
+	size_t count;
 } FT_TextList;
 
 typedef struct {
@@ -74,6 +76,8 @@ typedef struct {
 } FT_Residence;
 
 typedef struct {
+	/* never NULL; if count is 0, items[0] is a placeholder whose texts are all the default
+	   string if the Detail is missing, or all another empty text if the list is empty */
 	const FT_Residence* items;
 	size_t count;
 } FT_ResidenceList;
@@ -133,8 +137,9 @@ typedef struct {
 	const char* text; /* PARSE_PERSON_FILE, PARSE_RELATIONS_FILE */
 } FT_Question;
 
-/* Parsed content of a Person File. Within an answer, NULL or a count of 0 means
-   missing; the Library replaces them with its default string. */
+/* Parsed content of a Person File. Within an answer, a NULL text and a list whose items are
+   NULL mean missing; the Library replaces them with its default string. An empty text, and a
+   list with items set and a count of 0, mean present but empty. */
 typedef struct {
 	const char* formatVersion;
 	FT_Person person;

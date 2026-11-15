@@ -3,10 +3,9 @@
 
 #include "person_file_document_tests.hpp"
 
-#include "../../../library/tests/support/test_support.hpp"
-
 #include <check.hpp>
 #include <person_file_document.hpp>
+#include <support/test_support.hpp>
 
 #include <filesystem>
 #include <fstream>
@@ -60,12 +59,14 @@ PersonFileDetails
 Anna() {
 	PersonFileDetails details;
 	details.id = 19;
-	details.firstNames = {"Anna", "Maria"};
-	details.lastNames = {"Huber"};
+	details.firstNames = Strings{"Anna", "Maria"};
+	details.titleOfNobility = "";
+	details.lastNames = Strings{"Huber"};
 	details.dateOfBirth = "um 1850";
 	details.placeOfBirth = "Würzburg";
-	details.placesOfResidence = {{"Würzburg", "1850", "1870"}};
-	details.remarkLines = {"Er wurde nur „der Bäcker“ genannt.", "", "Danach zog sie fort."};
+	details.professions = Strings{};
+	details.placesOfResidence = std::vector<ResidenceEntry>{{"Würzburg", "1850", "1870"}};
+	details.remarkLines = Strings{"Er wurde nur „der Bäcker“ genannt.", "", "Danach zog sie fort."};
 	return details;
 }
 
@@ -119,11 +120,11 @@ WritesRemarksAsOneStringPerLine() {
 	CHECK(FT_Create(disk.Path().c_str(), &context, nullptr), FT_OK);
 	const FT_Person* person = nullptr;
 	CHECK(FT_GetPerson(context.Get(), 19, &person, nullptr), FT_OK);
-	CHECK(test::Texts(person->remarks), Anna().remarkLines);
+	CHECK(test::Texts(person->remarks), *Anna().remarkLines);
 	return true;
 }
 
-// docs/requirements/req_0003.md, docs/requirements/req_0015.md
+// docs/requirements/req_0052.md, docs/requirements/req_0003.md, docs/requirements/req_0015.md
 bool
 LeavesOutWhatWasNotEntered() {
 	DiskFolder disk;
@@ -133,6 +134,50 @@ LeavesOutWhatWasNotEntered() {
 	const auto text = disk.Read("19_Anna/data.json");
 	CHECK(text.find("\"Title\""), std::string::npos);
 	CHECK(text.find("\"DateOfDeath\""), std::string::npos);
+	return true;
+}
+
+// docs/requirements/req_0052.md, docs/requirements/req_0050.md
+bool
+WritesADetailKnownNotToExist() {
+	DiskFolder disk;
+	PersonFileDocument document;
+	document.SetDetails(Anna());
+	CHECK(document.Save(disk / "19_Anna/data.json"), true);
+	const auto text = disk.Read("19_Anna/data.json");
+	CHECK(text.find("\"TitleOfNobility\"") != std::string::npos, true);
+	CHECK(text.find("\"Profession\"") != std::string::npos, true);
+	test::ContextGuard context;
+	CHECK(FT_Create(disk.Path().c_str(), &context, nullptr), FT_OK);
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(context.Get(), 19, &person, nullptr), FT_OK);
+	bool missing = true;
+	CHECK(FT_IsDefaultString(context.Get(), person->titleOfNobility, &missing, nullptr), FT_OK);
+	CHECK(missing, false);
+	CHECK(person->professions.count, 0U);
+	missing = true;
+	CHECK(
+		FT_IsDefaultString(context.Get(), person->professions.items[0], &missing, nullptr),
+		FT_OK);
+	CHECK(missing, false);
+	missing = false;
+	CHECK(FT_IsDefaultString(context.Get(), person->title, &missing, nullptr), FT_OK);
+	CHECK(missing, true);
+	return true;
+}
+
+// docs/requirements/req_0052.md, docs/requirements/req_0033.md
+bool
+ShowsAnEmptyDetailOfAReopenedFileAsKnownNotToExist() {
+	DiskFolder disk;
+	disk.Write(
+		"1_Anna/data.json",
+		test::PersonFile(1, R"("TitleOfNobility": "", "Profession": [])"));
+	auto document = PersonFileDocument::Open(disk / "1_Anna/data.json");
+	CHECK(document.has_value(), true);
+	CHECK(document->Details().titleOfNobility, Text(""));
+	CHECK(document->Details().professions, TextList(Strings{}));
+	CHECK(document->Details().title.has_value(), false);
 	return true;
 }
 
@@ -232,6 +277,8 @@ PersonFileDocumentSuite() {
 	result &= RUN(TheLibraryReadsEverythingThatWasEntered);
 	result &= RUN(WritesRemarksAsOneStringPerLine);
 	result &= RUN(LeavesOutWhatWasNotEntered);
+	result &= RUN(WritesADetailKnownNotToExist);
+	result &= RUN(ShowsAnEmptyDetailOfAReopenedFileAsKnownNotToExist);
 	result &= RUN(ReopeningAndSavingKeepsEveryDetail);
 	result &= RUN(ReopeningAndSavingKeepsUnknownKeys);
 	result &= RUN(AddingADetailKeepsTheOthers);

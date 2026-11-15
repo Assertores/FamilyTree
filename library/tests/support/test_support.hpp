@@ -1,7 +1,7 @@
 #pragma once
 
-// Helpers shared by the unit tests of the Library. Test code only, invented while writing the
-// tests of step 5; see docs/workspace/interface_draft.md.
+// Helpers shared by the unit tests of the Library and the Data Entry Tool; test code only, see
+// docs/conventions.md.
 
 #include <family_tree/api.h>
 
@@ -17,11 +17,9 @@
 
 namespace test {
 
-// The Format Versions the Library supports. The UUIDs of the new Person File format and of the
-// first Relations File format are not chosen yet (docs/workspace/handover.md); replace both
-// placeholders, and only these, once they are.
-inline constexpr const char* thePersonFileVersion = "00000000-0000-0000-0000-000000000001";
-inline constexpr const char* theRelationsFileVersion = "00000000-0000-0000-0000-000000000002";
+// The Format Versions the Library supports (docs/decisions/adr_0016.md).
+inline constexpr const char* thePersonFileVersion = "1F10B769-08DE-442F-85BA-737B7F2B4803";
+inline constexpr const char* theRelationsFileVersion = "227E82BA-6603-426C-9C95-5BC86A10A642";
 // The Format Version of the Person Files written before "Remarks" became a list of lines; no
 // longer supported.
 inline constexpr const char* theOldPersonFileVersion = "3B5589D2-D9AF-40A8-BC40-574DAB6FFC57";
@@ -152,14 +150,14 @@ public:
 		return *this;
 	}
 
-	// Runs the Questions until the Context is ready, or creation failed. Returns the worst
-	// result of all calls.
+	// Runs the Questions until the Context is ready, or creation failed. Returns the result of the
+	// last call, which covers the whole creation (docs/decisions/adr_0016.md).
 	FT_Result Create(FT_Context** aOutContext, FT_Trace* aOutTrace) {
 		myAsked.clear();
 		FT_Builder* builder = nullptr;
 		FT_Question question{};
-		FT_Result worst = FT_StartCreate(theRoot, &builder, &question, aOutTrace);
-		while (IsSuccess(worst) && question.type != FT_QUESTION_NONE) {
+		FT_Result result = FT_StartCreate(theRoot, &builder, &question, aOutTrace);
+		while (IsSuccess(result) && question.type != FT_QUESTION_NONE) {
 			myAsked.push_back({question.type, question.path != nullptr ? question.path : ""});
 			FT_Answer answer{};
 			std::vector<std::string> names;
@@ -197,11 +195,9 @@ public:
 				answer.useDefault = true;
 				break;
 			}
-			const FT_Result result =
-				FT_Continue(builder, &answer, &question, aOutContext, aOutTrace);
-			worst = PrivWorse(worst, result);
+			result = FT_Continue(builder, &answer, &question, aOutContext, aOutTrace);
 		}
-		return worst;
+		return result;
 	}
 
 	[[nodiscard]] const std::vector<AskedQuestion>& Asked() const { return myAsked; }
@@ -217,18 +213,6 @@ private:
 			aPath.pop_back();
 		}
 		return aPath;
-	}
-
-	static FT_Result PrivWorse(FT_Result aFirst, FT_Result aSecond) {
-		if (!IsSuccess(aSecond)) {
-			return aSecond;
-		}
-		if (!IsSuccess(aFirst)) {
-			return aFirst;
-		}
-		return (aFirst == FT_OK_WITH_WARNINGS || aSecond == FT_OK_WITH_WARNINGS)
-				   ? FT_OK_WITH_WARNINGS
-				   : FT_OK;
 	}
 
 	std::vector<std::string> PrivSubfoldersOf(const char* aPath) const {

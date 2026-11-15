@@ -77,6 +77,8 @@ The Library writes its reports as lines into the Trace buffer of the Application
 | WARNING | a problem in the data that the Library worked around, e.g. a skipped Person File, an unknown key, an unknown Relation Type, or a missing Media file |
 | ERROR | a failure that keeps a call from doing what was asked, e.g. conflicting Generations or an unknown Person Id |
 
+Every warning names the file it is about, e.g. the Person Folder `3_Clara` or `relations.csv`, and, where one applies, the key, the Person Id or the Relation Type concerned. The error of conflicting Generations names the Person Ids of the Relations involved.
+
 ## Comments
 <!-- The comment style, e.g. Doxygen, and what must be documented. -->
 - Every public function and type of the Library is documented in its header file in Doxygen format with `///`, in English, as the original implementation did.
@@ -86,7 +88,7 @@ The Library writes its reports as lines into the Trace buffer of the Application
 ## Tests
 <!-- How test files and test functions are named, where test data lives, and how tests reference the scenarios they cover. -->
 - Tests are written in C++ with the project's own test framework `tests/framework/check.hpp`, see [ADR 0014](decisions/adr_0014.md). Qt Test is only used for the parts of the graphical Applications that need simulated input.
-- Unit tests of the Library live in `library/tests/`, one file per module. Every module has a suite function `bool <Module>Suite()` that runs its tests with `RUN(...)`; every test is a function `bool <Behavior>()` named after the behavior it checks, e.g. `MatchesAnyOfSeveralFirstNames`.
+- Unit tests of the Library live in `library/tests/`, one file per component or topic, e.g. `media_tests.cpp`. They call the public API only, and read their data from an in-memory Data Folder that answers the Questions (`library/tests/support/test_support.hpp`, the CMake target `FamilyTree::TestSupport`), so they stay valid however the Library is built inside. Every module has a suite function `bool <Module>Suite()` that runs its tests with `RUN(...)`; every test is a function `bool <Behavior>()` named after the behavior it checks, e.g. `MatchesAnyOfSeveralFirstNames`.
 - Every test references the requirement it checks by the path of the record, e.g. `docs/requirements/req_0016.md`, in a comment above the test.
 - End-to-end tests live in `tests/end_to_end/`, run the Command Line Application, and reference the scenario they cover by path and anchor, e.g. `docs/features/ftr_0004.md#the-closest-family`.
 - Test data lives in `tests/data/`, one Data Folder per situation, named after what it contains, e.g. `conflicting_generations/`.

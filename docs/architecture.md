@@ -175,7 +175,7 @@ flowchart TB
 | Name | Technology | Description |
 | ---: | :--- | :--- |
 | Form | Qt Widgets | every Detail, the Person Id and the Media references of a Person |
-| Person File reader and writer | QJsonDocument | reads a Person File into the form, and writes it in the current Format Version; keeps the keys it does not know, which the structs of the Library would drop |
+| Person File reader and writer | QJsonDocument | the class `PersonFileDocument`: reads a Person File into the form, and writes it in the current Format Version; keeps the keys it does not know, which the structs of the Library would drop. Its interface uses standard C++ types only, so it is tested without the form |
 | File dialogs | QFileDialog | choose the Person File to open, and where to save it |
 | Translations | Qt Linguist files | all text of the user interface, German first |
 
@@ -183,7 +183,7 @@ flowchart TB
 <!-- The most important high-level interfaces between containers or components, or to external systems. -->
 | Interface | Provider | Consumers | Protocol | Description |
 | ---: | :--- | :--- | :--- | :--- |
-| Public API | Library | Applications | C function calls | creating, querying and freeing a Context; see the overview below, and [ADR 0013](decisions/adr_0013.md) for the signatures |
+| Public API | Library | Applications | C function calls | creating, querying and freeing a Context; see the overview below, and [ADR 0017](decisions/adr_0017.md) for the signatures |
 | Questions | Library | Applications | C function calls, `FT_StartCreate` and `FT_Continue` | the Library asks for folders, files and parsed content while it creates a Context, see [ADR 0005](decisions/adr_0005.md) |
 | Trace | Library | Applications | text buffer | lines of level, function and message, see [ADR 0007](decisions/adr_0007.md) |
 | Person File | Data Entry Tool, data collector | Library | JSON file, UTF-8 | see [REQ 0002](requirements/req_0002.md) and [REQ 0003](requirements/req_0003.md) |
@@ -191,7 +191,7 @@ flowchart TB
 | Commands | Command Line Application | end-to-end tests | text on the standard input and output | see [ADR 0012](decisions/adr_0012.md) |
 
 ### Public API of the Library
-The functions of the Library, by group. The full signatures are in [ADR 0013](decisions/adr_0013.md) until the public headers exist; afterwards, the headers are the specification.
+The functions of the Library, by group. The full signatures are in the public header [api.h](../library/include/family_tree/api.h), see [ADR 0017](decisions/adr_0017.md).
 
 | Group | Function | Purpose |
 | ---: | :--- | :--- |
@@ -214,6 +214,6 @@ The functions of the Library, by group. The full signatures are in [ADR 0013](de
 | Media defaults | `FT_ShowPicturesOfPerson`, `FT_PlayRecordingOfPerson` | look up the Media of a Person and open them the default way, in one call |
 
 ## See Also
- - [ADR 0013](decisions/adr_0013.md) the full Public API of the Library
+ - [ADR 0017](decisions/adr_0017.md) the full Public API of the Library
  - [ADR 0002](decisions/adr_0002.md) why the Library is C99 and the Applications are free
  - [ADR 0011](decisions/adr_0011.md) the rules the Library's code follows

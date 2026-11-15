@@ -1,4 +1,11 @@
 # Unit tests of the Library (docs/conventions.md).
+
+# Helpers shared with the tests of the Data Entry Tool, included as <support/test_support.hpp>.
+add_library(TestSupport INTERFACE)
+add_library(FamilyTree::TestSupport ALIAS TestSupport)
+target_include_directories(TestSupport INTERFACE "${CMAKE_CURRENT_SOURCE_DIR}")
+target_link_libraries(TestSupport INTERFACE FamilyTree::FamilyTree FamilyTree::TestFramework)
+
 add_executable(
 	FamilyTreeTests
 	"main.cpp"
@@ -20,7 +27,7 @@ add_executable(
 	"trace_tests.hpp"
 	"support/test_support.hpp")
 
-target_link_libraries(FamilyTreeTests PRIVATE FamilyTree::FamilyTree FamilyTree::TestFramework)
+target_link_libraries(FamilyTreeTests PRIVATE FamilyTree::TestSupport)
 ft_enable_warnings(FamilyTreeTests)
 ft_clang_tidy_for_tests(FamilyTreeTests)
 

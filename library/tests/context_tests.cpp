@@ -118,14 +118,14 @@ AFailedCreationReleasesEverything() {
 	return true;
 }
 
-// docs/decisions/adr_0013.md
+// docs/decisions/adr_0017.md
 bool
 FreeingNoContextIsAnInvalidArgument() {
 	CHECK(FT_Free(nullptr, nullptr), FT_ERROR_INVALID_ARGUMENT);
 	return true;
 }
 
-// docs/decisions/adr_0013.md
+// docs/decisions/adr_0017.md
 bool
 QueriesWithoutContextAreInvalidArguments() {
 	size_t count = 0;
