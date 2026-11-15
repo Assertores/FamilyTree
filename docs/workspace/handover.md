@@ -9,7 +9,7 @@ Notes from writing the documentation that matter for implementing the source cod
 1. Continuous integration ([ADR 0015](../decisions/adr_0015.md)), because every later step relies on the checks catching mistakes ([ADR 0011](../decisions/adr_0011.md)). The CMake build, the clang-tidy configurations, the compiler flags, the sanitizers and `check.hpp` exist already; the source files of the Library are added to `library/CMakeLists.txt` as they are written.
 2. Trace writer and `FT_Result`, because every other function of the Library reports through them ([ADR 0007](../decisions/adr_0007.md), [ADR 0008](../decisions/adr_0008.md)).
 3. JSON and CSV parsers, because the Builder needs them, and they can be tested on strings alone.
-4. Builder with its Questions and the Default Platform, because it is the only way into a Context ([ADR 0005](../decisions/adr_0005.md)). The question loop of the partial rewrite, `AskNextQuestion` in `partial_rewrite/lib_family_tree/src/setup.c`, is a working model of it.
+4. Builder with its Questions and the Default Platform, because it is the only way into a Context ([ADR 0005](../decisions/adr_0005.md)). The question loop of the partial rewrite, `AskNextQuestion`, was a working model of it; it is described in the [Implementer's Notes](implementers_notes.md#library-skeleton).
 5. Resolver: Parents, Children, Siblings, Partners, Families and Generations, including the detection of conflicting Generations ([REQ 0045](../requirements/req_0045.md), [REQ 0047](../requirements/req_0047.md)).
 6. Queries, including the search and the Family Tree query ([ADR 0004](../decisions/adr_0004.md), [ADR 0009](../decisions/adr_0009.md)).
 7. Command Line Application, because the end-to-end tests of every feature need it ([ADR 0012](../decisions/adr_0012.md)).
@@ -21,7 +21,7 @@ Notes from writing the documentation that matter for implementing the source cod
 <!-- TEMPLATE
 - PITFALL
 -->
-- The original implementation in `original_implimentation/` assigns [Generations](../glossary.md#generation) by walking down from every Person without Parents, pushing each Child below its Parents, and then moving all Parents of a Child to the same Generation. Moving a Parent down can require moving their own ancestors and other descendants as well, so a single pass from the top is not enough. See [REQ 0045](../requirements/req_0045.md).
+- The original implementation assigned [Generations](../glossary.md#generation) by walking down from every Person without Parents, pushing each Child below its Parents, and then moving all Parents of a Child to the same Generation. Moving a Parent down can require moving their own ancestors and other descendants as well, so a single pass from the top is not enough. See [REQ 0045](../requirements/req_0045.md).
 - The original implementation does not detect conflicting Generations and recurses until it runs out of stack. Two cases have to be detected ([REQ 0047](../requirements/req_0047.md)): a Person who is their own ancestor, and two Parents of the same Child where one is an ancestor of the other. When all Parents of a Child are merged into one node, both cases are a cycle. The recursion depth of the original also grows with the number of Generations, so an iterative algorithm is safer.
 - The [Distance](../glossary.md#distance) of the [Family Tree](../glossary.md#family-tree) is counted on a graph in which every Family is a node and every Person is an edge between the Families they are a member of; a Person who is a Parent in several Families connects all of them. Starting from the Families of the selected Person at Distance 0, the walk goes from Family to Family, and collects all members of every Family it reaches. The earlier attempt counted Relations from Person to Person, which tore Families apart and showed Children with only one Parent.
 - The Format Version of the existing data is the UUID `3B5589D2-D9AF-40A8-BC40-574DAB6FFC57`. It is replaced by a new Format Version in which "Remarks" is an array with one string per line ([REQ 0003](../requirements/req_0003.md)); its UUID is `1F10B769-08DE-442F-85BA-737B7F2B4803` ([ADR 0016](../decisions/adr_0016.md)). The Library only supports the new one. The Person Files the data collector has written so far are converted once, by hand or with a small script: the remark split into lines, and the new UUID.
@@ -37,12 +37,29 @@ Notes from writing the documentation that matter for implementing the source cod
 <!-- TEMPLATE
 - NOTE
 -->
-- The example data in `original_implimentation/data/` is useful test data, with these caveats:
-    - `1_Philippa_Perry/data.json` writes its date of death under the unknown key `death` instead of `DateOfDeath`. It is a ready-made case for [REQ 0005](../requirements/req_0005.md): the date of death has to come back as missing, and the key `death` has to be reported to the Trace.
-    - `relations_extra.csv` and `4_Constance_Houghton/data_extra.json` are leftovers of an attempt to add data to a Data Set. They are not valid data and must not be used as examples of how several Data Folders are combined ([OQ 0006](../open_questions.md)).
-    - `relations.csv` has no Format Version line yet ([REQ 0006](../requirements/req_0006.md)). It needs the line `Version,<UUID>` in front of its header before it is valid test data. The UUID of the first Format Version of the Relations File is `227E82BA-6603-426C-9C95-5BC86A10A642` ([ADR 0016](../decisions/adr_0016.md)).
-    - `relations.csv` contains a row with an empty Relationship (`10,11,StrictlyLower,,,`), which tests the optional columns of [REQ 0007](../requirements/req_0007.md).
-    - `macro.txt` is a command script for the original command line interface that loads the whole example data.
+- The example data of the original implementation is in `tests/data/example/`, in the current Format Versions of [ADR 0016](../decisions/adr_0016.md): the same 18 Persons and the same Parents and Children, with Person Files and a Relations File that each cover other edge cases. It loads with warnings, which are all intended. The Generations run from 0 to 7; Melody (10) is two Generations below her Parents and Mary (12) four, because a Child of theirs has a deeper second Parent ([REQ 0045](../requirements/req_0045.md)).
+
+| Data File | Edge Cases |
+| ---: | :--- |
+| `1_Philippa_Perry` | every Detail; the unknown key `death` instead of `DateOfDeath`, a warning, and the date of death missing ([REQ 0005](../requirements/req_0005.md)); a Recording and a Picture |
+| `2_Katy_Santos` | the whole Person File on one line; four first names |
+| `3_Pippa_Ross` | dates and places as free text, e.g. "zwischen 1795 und 1800" ([REQ 0009](../requirements/req_0009.md)) |
+| `4_Constance_Houghton` | an empty title of nobility, empty lists of professions, Places of Residence and remarks ([REQ 0050](../requirements/req_0050.md)); no date of birth |
+| `5_Bethany_Barnes` | Windows line endings; "Id" first and "Version" last |
+| `6_Paige_Ruiz` | the escape sequences `\"`, `\\`, `\/`, `\t`, `ä` and a surrogate pair ([REQ 0009](../requirements/req_0009.md)) |
+| `7_Harmony_Valdez` | Greek, Polish, Cyrillic and an emoji, written directly as UTF-8 ([REQ 0010](../requirements/req_0010.md)) |
+| `8_Megan_Christensen` | a Picture beside the Person File, one in the subfolder `Bilder/` with a space in its name, and a missing one, a warning ([REQ 0011](../requirements/req_0011.md), [REQ 0025](../requirements/req_0025.md)) |
+| `9_Jodie_Mccarthy` | a missing Recording with an umlaut in its name, a warning |
+| `10_Melody_Moran` | Places of Residence with only some of their keys, one without any, and the same place twice |
+| `11_Maia_Salinas` | remarks with empty lines, a line of spaces and a very long line; a place with spaces around it |
+| `12_Mary_Fleming` | keys with values of the wrong type, a string, a list, a number and `null`, each skipped with a warning ([REQ 0003](../requirements/req_0003.md)) |
+| `13_Käthe Ball` | a Person Folder with an umlaut and a space in its name |
+| `14_Leyla_Johns` | no last names; an empty text inside the list of first names |
+| `15_Sara_Paul` | only "Version" and "Id" |
+| `16_Kye_Hall` | an unknown key whose value nests objects, arrays, numbers, `true`, `false` and `null`, a warning; blank lines and unusual whitespace |
+| `17_Ellis_Diaz` | an empty list of Pictures and no Recording |
+| `18_Lee_Snyder` | hyphens and apostrophes in names; every Detail filled in |
+| `relations.csv` | Strictly Higher Relations among the Strictly Lower ones; a row with only three columns, and one with an empty Relationship ([REQ 0007](../requirements/req_0007.md)); quoted fields with a comma and with doubled quotation marks; the Relation Types `Patenschaft` and an empty one, warnings ([REQ 0008](../requirements/req_0008.md)); a Relation to the unknown Person Id 99, a warning; an Unrestricted Relation across seven Generations; the row `3,4,Unrestricted,Marriage,…` twice, whose meaning is still open, see the [Implementer's Notes](implementers_notes.md#resolver) |
 
 ## Other
 <!-- Anything else worth knowing before starting the implementation. -->
@@ -51,8 +68,7 @@ Notes from writing the documentation that matter for implementing the source cod
 -->
 - No requirement says how the Browsing Application shows a Detail that is known not to exist, e.g. "had no title of nobility" ([REQ 0050](../requirements/req_0050.md), [REQ 0052](../requirements/req_0052.md)); [REQ 0028](../requirements/req_0028.md) only tells entered Details from unknown ones. Settle it with the user before the work package of the Browsing Application.
 - CMake passes clang-tidy its configuration explicitly, `library/.clang-tidy` for C and `.clang-tidy` for C++, and turns some checks off for test targets (`cmake/ClangTidy.cmake`). An editor running clangd looks for the nearest configuration file instead, so it may show the C checks of the Library for the C++ tests in `library/tests/`; the build is what counts.
-- The Trace viewer of the original implementation is a development tool only. Check whether it is still needed once the Trace is written in the format of [ADR 0007](../decisions/adr_0007.md), before porting it.
-- `partial_rewrite/` contains a started rewrite of the Library: the program is asked step by step for folder lists, file contents and parsing, and can answer itself or ask for the Library's default; the separate data provider interfaces are gone; text is UTF-8; search returns Person Ids; and merging two Contexts is planned. It is not fully working.
+- The Trace viewer of the original implementation is not ported: the Trace of [ADR 0007](../decisions/adr_0007.md) is readable text. The original implementation and the partial rewrite were removed from the repository; what the implementation still needs from them is in the [Implementer's Notes](implementers_notes.md).
 - The feature records [FTR 0001](../features/ftr_0001.md) to [FTR 0009](../features/ftr_0009.md) were written during step 2, before the architecture. Their scenarios cover the normal cases only. Scenarios for errors, e.g. a Data Folder that cannot be opened because of conflicting Generations, or a missing Media file, are still missing: they waited for how steps, warnings and errors are told apart, which [ADR 0008](../decisions/adr_0008.md) has now decided. They can be written now.
 - Left to the implementation, to be decided with the user when the work package comes up:
     - whether a search ignores upper and lower case, e.g. whether "anna" finds "Anna" ([REQ 0016](../requirements/req_0016.md));

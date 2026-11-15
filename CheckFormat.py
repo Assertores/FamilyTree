@@ -2,8 +2,7 @@
 
 # Checks the C and C++ files of the project with clang-format, e.g. from the pre-commit hook with
 # `--files staged --fix`. Checks the same files as the CMake targets format and check-format
-# (cmake/ClangFormat.cmake): the original implementation, the partial rewrite and spikes are left
-# alone.
+# (cmake/ClangFormat.cmake): spikes are left alone.
 
 import argparse
 import pathlib

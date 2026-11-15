@@ -1,0 +1,15 @@
+{
+	"Version": "1F10B769-08DE-442F-85BA-737B7F2B4803",
+	"Id": 6,
+	"FirstNames": ["Paige", "Kyla"],
+	"LastNames": ["Ruiz"],
+	"Gender": "female",
+	"DateOfBirth": "1802",
+	"Profession": ["N\u00e4herin"],
+	"Remarks": [
+		"Wurde nur \"die Schneiderin\" genannt.",
+		"Ihre Briefe liegen unter C:\\Familie\\Briefe und https:\/\/example.org\/briefe.",
+		"Spalte 1\tSpalte 2",
+		"Geburtstagskuchen: \ud83c\udf82"
+	]
+}

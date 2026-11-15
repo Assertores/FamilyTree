@@ -1,0 +1,16 @@
+
+
+{
+	"Version" : "1F10B769-08DE-442F-85BA-737B7F2B4803" ,
+	"Id" : 16 ,
+
+	"Sources": [
+		{"Archive": "Stadtarchiv Bamberg", "Pages": [12, 13.5, -1e3], "Checked": true, "Copy": null},
+		{"Archive": "Kirchenbuch", "Nested": {"Deeper": [[[]], {}]}, "Checked": false}
+	],
+	"FirstNames"   :   [ "Kye" , "Faye" ],
+	"LastNames":["Hall","Greene"],
+	"Gender": "female",
+	"DateOfBirth": "1905"
+}
+

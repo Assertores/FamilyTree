@@ -1,0 +1,28 @@
+{
+	"Version": "1F10B769-08DE-442F-85BA-737B7F2B4803",
+	"Id": 1,
+	"Title": "Prof. Dr.",
+	"FirstNames": ["Philippa", "Rosa", "Polly"],
+	"TitleOfNobility": "von und zu",
+	"LastNames": ["Perry", "Figueroa", "Russell"],
+	"Gender": "male",
+	"DateOfBirth": "04.05.1796",
+	"PlaceOfBirth": "Würzburg",
+	"death": "11.11.1861",
+	"PlaceOfDeath": "Bamberg",
+	"Profession": ["Hofmalerin", "Lehrerin"],
+	"PlaceOfResidence": [
+		{
+			"Name": "Würzburg",
+			"StartDate": "04.05.1796",
+			"EndDate": "05.05.1820"
+		},
+		{
+			"Name": "Bamberg",
+			"StartDate": "06.05.1820"
+		}
+	],
+	"Audio": "Sunday_Plans.mp3",
+	"Images": ["Trohnsaal.png"],
+	"Remarks": ["Malte den Thronsaal der Residenz.", "Die Aufnahme erzählt von einem Sonntag."]
+}

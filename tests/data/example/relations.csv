@@ -1,0 +1,38 @@
+Version,227E82BA-6603-426C-9C95-5BC86A10A642
+personA,personB,type,relationship,start,end
+1,12,StrictlyLower,Tochter,,
+2,12,StrictlyLower,Tochter,,
+1,3,StrictlyLower,Kind,,
+3,2,StrictlyHigher,Mutter,,
+1,5,StrictlyLower,Tochter,,
+2,5,StrictlyLower,Tochter,,
+3,10,StrictlyLower,Child,,
+10,4,StrictlyHigher,Father,,
+5,7,StrictlyLower,Tochter,,
+7,6,StrictlyHigher,Mutter,,
+8,9,StrictlyLower
+7,9,StrictlyLower,Tochter,,
+10,11,StrictlyLower,,,
+9,11,StrictlyLower,"Tochter, geboren vor der Ehe",,
+13,14,StrictlyLower,Tochter,,
+12,14,StrictlyLower,Tochter,,
+15,16,StrictlyLower,Tochter,,
+14,16,StrictlyLower,Tochter,,
+12,17,StrictlyLower,Tochter,,
+11,17,StrictlyLower,Tochter,,
+16,18,StrictlyLower,Tochter,,
+17,18,StrictlyLower,Tochter,,
+1,2,Unrestricted,verheiratet,01.01.1790,um 1861
+3,4,Unrestricted,Marriage,01.01.1814,01.01.1815
+3,4,Unrestricted,Marriage,01.01.1814,01.01.1815
+5,6,Unrestricted,"genannt ""die Unzertrennlichen""",1820,
+7,8,Unrestricted,Ehe,1846,
+9,10,Unrestricted,Ehe,,
+11,12,Unrestricted,"verheiratet, später geschieden",1901,1910
+12,13,Unrestricted,Ehe,1903,
+14,15,Unrestricted,Ehe,1904,
+16,17,Unrestricted,Ehe,1930,
+2,6,Patenschaft,Patin,1802,
+4,5,,Schwägerin,,
+1,99,Unrestricted,Brieffreundin,,
+18,1,Unrestricted,"Ururur…enkelin, gab die Aufnahme ins Archiv",2020,

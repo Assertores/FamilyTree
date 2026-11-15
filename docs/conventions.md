@@ -39,6 +39,9 @@ tests/
     framework/              the own test framework, check.hpp
     end_to_end/             end-to-end tests from the scenarios of the features
     data/                   Data Folders used as test data
+templates/
+    person/data.json        a Person File to copy and fill in by hand
+    relations.csv           a Relations File to copy and fill in by hand
 spikes/
     spk_<number>/           spike code, never part of the product
 ```

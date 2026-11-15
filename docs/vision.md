@@ -98,7 +98,7 @@ Family Tree is a small C library that reads a family's data from plain files, on
 ## Success Criteria
 <!-- How do we know we got there? Measurable where possible, ideally one or more per Must Have and Should Have goal. -->
 - The library builds from a fresh copy of the repository with only a C99 compiler, without network access.
-- The example data set of 18 persons loads, and every field of every person, every relation, picture and audio recording can be reached from the browsing application.
+- The example data set of 18 persons loads, and every field, relation, picture and audio recording that the library reads without a warning can be reached from the browsing application.
 - The tree view shows every family within the chosen number of steps from the selected person, with all its parents and children, ordered by generation.
 - A data collector who is not a programmer enters a complete person with the data entry tool, and the library reads the saved file without errors.
 - A person file saved by the data entry tool can be reopened, changed and saved again without losing any field.

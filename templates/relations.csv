@@ -1,0 +1,5 @@
+Version,227E82BA-6603-426C-9C95-5BC86A10A642
+personA,personB,type,relationship,start,end
+1,3,StrictlyLower,"child, born before the marriage",,
+3,2,StrictlyHigher,mother,,
+1,2,Unrestricted,marriage,START DATE IN ANY FORMAT,END DATE IN ANY FORMAT

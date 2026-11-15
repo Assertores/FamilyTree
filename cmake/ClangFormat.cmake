@@ -3,7 +3,7 @@ include_guard(GLOBAL)
 # Targets for clang-format, with the configuration .clang-format:
 #   format         formats every C and C++ file of the project in place
 #   check-format   fails if a file is not formatted; also runs as the test "Formatting"
-# Spikes, the original implementation and the partial rewrite are not formatted.
+# Spikes are not formatted.
 
 find_program(FT_CLANG_FORMAT_EXECUTABLE clang-format DOC "Path to clang-format.")
 mark_as_advanced(FT_CLANG_FORMAT_EXECUTABLE)
