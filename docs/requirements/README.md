@@ -42,6 +42,7 @@
 - [REQ 0028](req_0028.md) Showing Details
 - [REQ 0029](req_0029.md) Showing the Family Tree
 - [REQ 0030](req_0030.md) Opening Media
+- [REQ 0048](req_0048.md) Picture carousel
 
 ## Data Entry Tool
 - [REQ 0031](req_0031.md) Entering a Person

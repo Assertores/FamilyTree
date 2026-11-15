@@ -70,6 +70,7 @@ Family Tree is a small C library that reads a family's data from plain files, on
 - Open an existing person file in the data entry tool to correct or extend it.
 - Choose where the data entry tool saves a person file.
 - Play the recordings inside the browsing application, with pause and continue, so that family members go through the family tree by listening to the stories of their ancestors.
+- Show the pictures of a person inside the browsing application in a carousel, in which the user switches from one picture to the next.
 - The text of the applications can be translated into other languages.
 - Every data file carries a version, so that future changes to the format can stay compatible with existing data.
 - All text is handled as UTF-8, so that names and places in any language are kept intact.
@@ -81,7 +82,6 @@ Family Tree is a small C library that reads a family's data from plain files, on
 <!-- What the project would include in a perfect world, if time and resources allow. -->
 - Combine several data sources into one family, e.g. sensitive details kept in a separate folder that is not shared openly, or two separately collected trees.
 - Enter and edit relations in a tool instead of writing the CSV file by hand.
-- Show pictures inside the application instead of handing them to the operating system.
 - The data entry tool creates the person's folder and copies the pictures and the recording into it.
 - Run on macOS.
 - A tool that migrates data files from an older format version to the current one.
