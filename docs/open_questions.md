@@ -8,7 +8,6 @@ Questions about the project that are not answered yet. Once a question is answer
 -->
 - **OQ 0006** (stretch goal) Sensitive Details are kept in a separate Data Folder and combined with the openly shared one by the Library. How does the Library find which Person in one Data Folder is the same as a Person in another? Which value wins if both describe the same Detail?
 - **OQ 0007** (stretch goal) Data Sets are expected to diverge, so the same Person Id can mean different Persons in different Data Folders. How does the Library tell them apart when the Data Folders are combined?
-- **OQ 0008** (stretch goal) The same Person Id in two Person Folders of one Data Folder is an error in the data. What does the Library do with it?
 - **OQ 0020** How does the Browsing Application place the boxes of the Persons within their rows of the Family Tree? Investigated by [SPK 0001](spikes/spk_0001.md).
 
 ## Answered
@@ -21,6 +20,7 @@ Questions about the project that are not answered yet. Once a question is answer
 - **OQ 0003** Is the command line interface still a goal? Answered in the [Handover](workspace/handover.md#testing-notes).
 - **OQ 0004** Is the viewer for recorded Traces part of the product? Answered in the [Handover](workspace/handover.md#other).
 - **OQ 0005** How many Persons will the real Data Set hold? Answered in the [Vision](vision.md#assumptions).
+- **OQ 0008** (stretch goal) The same Person Id in two Person Folders of one Data Folder is an error in the data. What does the Library do with it? Answered in [REQ 0053](requirements/req_0053.md).
 - **OQ 0009** What does the Library do with a Relation whose Relation Type is empty or unknown? Answered in [REQ 0008](requirements/req_0008.md).
 - **OQ 0010** Is `relations_extra.csv` still used? Answered in the [Handover](workspace/handover.md#testing-notes) and the [Vision](vision.md#could-have-stretch).
 - **OQ 0011** Are two Persons with an Unrestricted Relation Partners? Answered in the [Glossary](glossary.md#partner) and [REQ 0020](requirements/req_0020.md).

@@ -108,7 +108,7 @@ flowchart TB
 | Context | data structure | holds the Data Set and everything derived from it; read only after creation, see [ADR 0003](decisions/adr_0003.md) |
 | Queries | module | return views into the Context, or fill caller buffers, see [ADR 0004](decisions/adr_0004.md); includes the Family Tree query, see [ADR 0009](decisions/adr_0009.md) |
 | Default Platform | module | answers Questions on Windows and Linux, and opens Media with the default programs, see [ADR 0006](decisions/adr_0006.md) |
-| Trace writer | module | appends lines to the Application's text buffer, see [ADR 0007](decisions/adr_0007.md) |
+| Trace writer | module | appends lines to the Application's text buffer, compacts every Subtrace that closes without an error, and drops the oldest lines when the buffer is full, see [ADR 0018](decisions/adr_0018.md) |
 
 ### Browsing Application
 ```mermaid
@@ -185,7 +185,7 @@ flowchart TB
 | ---: | :--- | :--- | :--- | :--- |
 | Public API | Library | Applications | C function calls | creating, querying and freeing a Context; see the overview below, and [ADR 0017](decisions/adr_0017.md) for the signatures |
 | Questions | Library | Applications | C function calls, `FT_StartCreate` and `FT_Continue` | the Library asks for folders, files and parsed content while it creates a Context, see [ADR 0005](decisions/adr_0005.md) |
-| Trace | Library | Applications | text buffer | lines of level, function and message, see [ADR 0007](decisions/adr_0007.md) |
+| Trace | Library | Applications | text buffer | lines of level, function and message, see [ADR 0018](decisions/adr_0018.md) |
 | Person File | Data Entry Tool, data collector | Library | JSON file, UTF-8 | see [REQ 0002](requirements/req_0002.md) and [REQ 0003](requirements/req_0003.md) |
 | Relations File | data collector | Library | CSV file, UTF-8 | see [REQ 0006](requirements/req_0006.md) and [REQ 0007](requirements/req_0007.md) |
 | Commands | Command Line Application | end-to-end tests | text on the standard input and output | see [ADR 0012](decisions/adr_0012.md) |

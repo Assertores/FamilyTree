@@ -73,7 +73,7 @@ spikes/
 
 ## Logging
 <!-- What gets logged, and at which level. -->
-The Library writes its reports as lines into the Trace buffer of the Application, see [ADR 0007](decisions/adr_0007.md). Every public function, and every internal function that does a task worth skipping when it worked, e.g. reading one Person File, opens a Subtrace and closes it with its outcome. Decisions the code takes, e.g. which branch of a condition, are reported as steps.
+The Library writes its reports as lines into the Trace buffer of the Application, see [ADR 0018](decisions/adr_0018.md). Only the Trace writer touches the Trace; every other function passes it on, also when it is a null pointer. Every public function, and every internal function that does a task worth skipping when it worked, e.g. reading one Person File, opens a Subtrace and closes it with its result. Decisions the code takes, e.g. which branch of a condition, are reported as steps. A Subtrace that succeeds keeps only a summary of its steps; one with warnings keeps its warnings, and one that fails keeps every line, so steps are what explains a failure, and warnings must make sense on their own.
 
 | Level | Used for |
 | ---: | :--- |

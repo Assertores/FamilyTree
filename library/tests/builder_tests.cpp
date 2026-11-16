@@ -8,6 +8,8 @@
 #include <family_tree/api.h>
 
 #include <cstddef>
+#include <string>
+#include <string_view>
 #include <vector>
 
 namespace {
@@ -210,6 +212,19 @@ SkipsAMalformedPersonFileAndReadsTheOthers() {
 
 // docs/requirements/req_0013.md
 bool
+ReportsAFolderWithoutPersonFile() {
+	auto folder = ThreePersons();
+	folder.AddFile("Bilder/a.png", "");
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 3U);
+	CHECK(trace.HasWarning("Bilder"), true);
+	return true;
+}
+
+// docs/requirements/req_0013.md
+bool
 SkipsAnEmptyPersonFile() {
 	auto folder = ThreePersons();
 	folder.AddPerson("3_Clara", "");
@@ -290,6 +305,124 @@ ADataFolderWithoutRelationsFileHasNoRelations() {
 	size_t count = 0;
 	CHECK(FT_GetRelations(context.Get(), 1, &relations, &count, nullptr), FT_OK);
 	CHECK(count, 0U);
+	return true;
+}
+
+// docs/requirements/req_0053.md
+bool
+KeepsThePersonFileOfTheFirstPersonFolderOfADuplicatePersonId() {
+	DataFolder folder;
+	folder.AddPerson("1_Anna", PersonFile(1, R"("FirstNames": ["Anna"])"))
+		.AddPerson("2_Bernd", PersonFile(1, R"("FirstNames": ["Bernd"])"))
+		.SetRelations({})
+		.ListFoldersInReverse();
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 1U);
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(context.Get(), 1, &person, nullptr), FT_OK);
+	CHECK(Texts(person->firstNames), std::vector<std::string>{"Anna"});
+	CHECK(trace.HasWarning("2_Bernd"), true);
+	return true;
+}
+
+// docs/requirements/req_0053.md
+bool
+SkipsAndReportsEveryFurtherPersonFileWithTheSamePersonId() {
+	DataFolder folder;
+	folder.AddPerson("1_Anna", PersonFile(1, R"("FirstNames": ["Anna"])"))
+		.AddPerson("2_Bernd", PersonFile(1, R"("FirstNames": ["Bernd"])"))
+		.AddPerson("3_Clara", PersonFile(1, R"("FirstNames": ["Clara"])"))
+		.AddPerson("4_Dora", PersonFile(4))
+		.SetRelations({});
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 2U);
+	CHECK(HasPerson(context, 4), true);
+	CHECK(trace.HasWarning("2_Bernd"), true);
+	CHECK(trace.HasWarning("3_Clara"), true);
+	return true;
+}
+
+// docs/requirements/req_0053.md
+bool
+ComparesPersonFolderNamesByTheirBytes() {
+	// In byte order, upper case letters come before lower case ones, and both before "Ä".
+	DataFolder folder;
+	folder.AddPerson("anna", PersonFile(1, R"("FirstNames": ["anna"])"))
+		.AddPerson("Bernd", PersonFile(1, R"("FirstNames": ["Bernd"])"))
+		.AddPerson("Änne", PersonFile(1, R"("FirstNames": ["Änne"])"))
+		.SetRelations({})
+		.ListFoldersInReverse();
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(context.Get(), 1, &person, nullptr), FT_OK);
+	CHECK(Texts(person->firstNames), std::vector<std::string>{"Bernd"});
+	return true;
+}
+
+// The UTF-8 byte order mark, and the start of a file in UTF-16 with its byte order mark. A text in
+// UTF-16 holds zero bytes, so an answer to READ_FILE ends after its first character.
+constexpr std::string_view theUtf8ByteOrderMark{"\xEF\xBB\xBF"};
+constexpr std::string_view theUtf16Start{"\xFF\xFE{\0", 4};
+
+// docs/requirements/req_0054.md
+bool
+ReadsAPersonFileThatStartsWithAByteOrderMark() {
+	auto folder = ThreePersons();
+	folder.AddPerson("3_Clara", std::string(theUtf8ByteOrderMark) + PersonFile(3));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK);
+	CHECK(PersonCount(context), 3U);
+	CHECK(HasPerson(context, 3), true);
+	return true;
+}
+
+// docs/requirements/req_0054.md
+bool
+ReadsARelationsFileThatStartsWithAByteOrderMark() {
+	auto folder = ThreePersons();
+	folder.AddFile(
+		"relations.csv",
+		std::string(theUtf8ByteOrderMark) + RelationsFile({"1,2,StrictlyLower"}));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK);
+	const FT_Relation* relations = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetRelations(context.Get(), 1, &relations, &count, nullptr), FT_OK);
+	CHECK(count, 1U);
+	return true;
+}
+
+// docs/requirements/req_0010.md, docs/requirements/req_0013.md
+bool
+SkipsAPersonFileInUtf16() {
+	auto folder = ThreePersons();
+	folder.AddPerson("3_Clara", std::string(theUtf16Start));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 2U);
+	CHECK(trace.HasWarning("3_Clara"), true);
+	return true;
+}
+
+// docs/requirements/req_0010.md, docs/requirements/req_0006.md
+bool
+SkipsARelationsFileInUtf16() {
+	auto folder = ThreePersons();
+	folder.AddFile("relations.csv", std::string("\xFF\xFEV\0", 4));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 3U);
+	CHECK(trace.HasWarning("relations.csv"), true);
 	return true;
 }
 
@@ -424,11 +557,19 @@ BuilderSuite() {
 	result &= RUN(SkipsAndReportsARelationsFileWithAnUnsupportedFormatVersion);
 	result &= RUN(SkipsARelationsFileWithoutVersionLine);
 	result &= RUN(SkipsAMalformedPersonFileAndReadsTheOthers);
+	result &= RUN(ReportsAFolderWithoutPersonFile);
 	result &= RUN(SkipsAnEmptyPersonFile);
 	result &= RUN(SkipsARelationRowWithTooFewColumns);
 	result &= RUN(SkipsOnlyAValueThatIsNotUtf8);
 	result &= RUN(SkipsOnlyARelationRowThatIsNotUtf8);
 	result &= RUN(ADataFolderWithoutRelationsFileHasNoRelations);
+	result &= RUN(KeepsThePersonFileOfTheFirstPersonFolderOfADuplicatePersonId);
+	result &= RUN(SkipsAndReportsEveryFurtherPersonFileWithTheSamePersonId);
+	result &= RUN(ComparesPersonFolderNamesByTheirBytes);
+	result &= RUN(ReadsAPersonFileThatStartsWithAByteOrderMark);
+	result &= RUN(ReadsARelationsFileThatStartsWithAByteOrderMark);
+	result &= RUN(SkipsAPersonFileInUtf16);
+	result &= RUN(SkipsARelationsFileInUtf16);
 	result &= RUN(ReadsTheDataFolderOnlyThroughQuestions);
 	result &= RUN(UsesThePersonAnApplicationParsedItself);
 	result &= RUN(AnAnswerTellsEmptyDetailsFromMissingOnes);

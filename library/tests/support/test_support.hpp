@@ -148,13 +148,20 @@ public:
 	}
 
 	// The answer given to every Question to parse a Person File, instead of the Library's parser.
+	// Lists folders in reverse byte order, as an operating system may list them in any order.
+	DataFolder& ListFoldersInReverse() {
+		myReverse = true;
+		return *this;
+	}
+
 	DataFolder& AnswerPersonParsing(const FT_PersonRecord& aRecord) {
 		myPersonRecord = aRecord;
 		return *this;
 	}
 
 	// Runs the Questions until the Context is ready, or creation failed. Returns the result of the
-	// last call, which covers the whole creation (docs/decisions/adr_0016.md).
+	// last call, which covers the whole creation, and cancels the creation after an error, which
+	// leaves the Builder to the Application (docs/decisions/adr_0016.md).
 	FT_Result Create(FT_Context** aOutContext, FT_Trace* aOutTrace) {
 		myAsked.clear();
 		FT_Builder* builder = nullptr;
@@ -200,6 +207,9 @@ public:
 			}
 			result = FT_Continue(builder, &answer, &question, aOutContext, aOutTrace);
 		}
+		if (!IsSuccess(result) && builder != nullptr) {
+			(void)FT_CancelCreate(builder, aOutTrace);
+		}
 		return result;
 	}
 
@@ -231,12 +241,16 @@ private:
 				names.insert(rest.substr(0, slash));
 			}
 		}
+		if (myReverse) {
+			return {names.rbegin(), names.rend()};
+		}
 		return {names.begin(), names.end()};
 	}
 
 	std::map<std::string, std::string> myFiles;
 	std::optional<FT_PersonRecord> myPersonRecord;
 	std::vector<AskedQuestion> myAsked;
+	bool myReverse = false;
 };
 
 // Creates a Context from a DataFolder; for tests that only care about the Context.

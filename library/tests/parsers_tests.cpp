@@ -290,6 +290,15 @@ DecodesASurrogatePairIntoUtf8() {
 	return true;
 }
 
+// docs/requirements/req_0054.md, docs/requirements/req_0009.md
+bool
+KeepsAByteOrderMarkInsideAText() {
+	const OnePerson one("\"PlaceOfBirth\": \"\xEF\xBB\xBFW\xC3\xBCrzburg\"");
+	CHECK(one.result, FT_OK);
+	CHECK(Text(one.person->placeOfBirth), "\xEF\xBB\xBFW\xC3\xBCrzburg");
+	return true;
+}
+
 // docs/requirements/req_0010.md
 bool
 ReturnsUtf8TextUnchanged() {
@@ -322,6 +331,7 @@ ParsersSuite() {
 	result &= RUN(KeepsDatesAndPlacesExactlyAsWritten);
 	result &= RUN(DecodesTheEscapeSequencesOfJson);
 	result &= RUN(DecodesASurrogatePairIntoUtf8);
+	result &= RUN(KeepsAByteOrderMarkInsideAText);
 	result &= RUN(ReturnsUtf8TextUnchanged);
 	return result;
 }

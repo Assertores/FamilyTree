@@ -76,12 +76,6 @@ typedef enum {
 									  ///< their own ancestor; no Context was created.
 } FT_Result;
 
-/// @brief Limits of the Trace. An enum, as the preprocessor is reserved for includes, include
-/// guards and the export macro (docs/decisions/adr_0011.md).
-enum {
-	FT_TRACE_MAX_DEPTH = 32, ///< The deepest nesting of Subtraces the Trace keeps track of.
-};
-
 /// @brief A text buffer the Library writes its reports into.
 ///
 /// Set @a buffer and @a capacity, and everything else to zero, then pass a pointer to it to any
@@ -93,15 +87,15 @@ enum {
 /// 		WARNING	unknown key "death"
 /// @endcode
 /// The outcome is `[ OK ]`, `[WARN]` or `[FAIL]`, the worst of everything inside the Subtrace.
-/// Fields are separated by tabs. See docs/decisions/adr_0007.md.
+/// Fields are separated by tabs. A Subtrace that succeeded keeps only its first line and a summary
+/// of its steps; one with warnings also keeps its warnings, and one that failed keeps every line.
+/// When the buffer is full, the oldest lines are dropped. See docs/decisions/adr_0018.md.
 typedef struct {
 	char* buffer;		 ///< Zero terminated text, one Subtrace or report per line.
 	size_t capacity;	 ///< Size of @a buffer in bytes; 0 discards everything.
 	size_t used;		 ///< Bytes written, without the terminating zero.
-	size_t droppedLines; ///< Lines that did not fit into the buffer.
+	size_t droppedLines; ///< Lines that were dropped because the buffer was full, the oldest first.
 	size_t depth;		 ///< Internal: the number of open Subtraces.
-	size_t openSubtraces[FT_TRACE_MAX_DEPTH]; ///< Internal: where the outcome of each open
-											  ///< Subtrace is written.
 } FT_Trace;
 
 /// @}
@@ -294,7 +288,9 @@ FT_API FT_Result FT_StartCreate(
 /// @brief Answers the last Question, and returns the next one.
 ///
 /// When the next Question is @ref FT_QUESTION_NONE, the creation is over: the Context is in
-/// @a aOutContext, or an error was returned. Either way, the Builder has been freed.
+/// @a aOutContext, and the Builder has been freed. On an error, the Builder is left as it was
+/// before the call, and the same Question is still open: answer it again, e.g. after fixing a file,
+/// or stop with @ref FT_CancelCreate.
 /// @param aBuilder The Builder from @ref FT_StartCreate.
 /// @param aAnswer The answer to the last Question; copied before the function returns.
 /// @param aOutQuestion Receives the next Question.
@@ -311,7 +307,7 @@ FT_API FT_Result FT_Continue(
 	FT_Context** aOutContext,
 	FT_Trace* aOutTrace);
 
-/// @brief Stops a creation that is not over, and frees the Builder.
+/// @brief Stops a creation that is not over, also after an error, and frees the Builder.
 /// @param aBuilder The Builder from @ref FT_StartCreate.
 /// @param aOutTrace Optional Trace, or NULL.
 /// @return @ref FT_OK, or @ref FT_ERROR_INVALID_ARGUMENT for a NULL Builder.

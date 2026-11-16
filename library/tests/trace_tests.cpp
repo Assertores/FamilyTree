@@ -1,4 +1,4 @@
-// Unit tests of the Trace writer: the format of docs/decisions/adr_0007.md, and working without a
+// Unit tests of the Trace writer: the format of docs/decisions/adr_0018.md, and working without a
 // Trace.
 
 #include "trace_tests.hpp"
@@ -66,7 +66,7 @@ ReportsItsStepsToTheTrace() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 EverySuccessfulCallShowsOkOnItsFirstLine() {
 	auto folder = TwoPersons();
@@ -84,7 +84,7 @@ EverySuccessfulCallShowsOkOnItsFirstLine() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 AWarningShowsInEverySubtraceAroundIt() {
 	auto folder = TwoPersons();
@@ -114,7 +114,7 @@ AWarningShowsInEverySubtraceAroundIt() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 NoSubtraceIsLeftOpenAfterACall() {
 	auto folder = TwoPersons();
@@ -126,7 +126,7 @@ NoSubtraceIsLeftOpenAfterACall() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 TheCallThatFailedShowsFailOnItsFirstLine() {
 	DataFolder folder;
@@ -146,7 +146,7 @@ TheCallThatFailedShowsFailOnItsFirstLine() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 IndentsWithOneTabPerDepth() {
 	auto folder = TwoPersons();
@@ -165,7 +165,7 @@ IndentsWithOneTabPerDepth() {
 	return true;
 }
 
-// docs/decisions/adr_0007.md
+// docs/decisions/adr_0018.md
 bool
 CountsTheLinesThatDoNotFit() {
 	auto folder = TwoPersons();
@@ -175,6 +175,81 @@ CountsTheLinesThatDoNotFit() {
 	CHECK(trace.Get().droppedLines > 0, true);
 	CHECK(trace.Get().used < trace.Get().capacity, true);
 	CHECK(trace.Get().buffer[trace.Get().used], '\0');
+	return true;
+}
+
+// Whether a line starts with the given text after its indentation, e.g. "STEP\t" or "[ OK ]".
+bool
+StartsWith(const std::string& aLine, const std::string& aText) {
+	return aLine.compare(Depth(aLine), aText.size(), aText) == 0;
+}
+
+// docs/decisions/adr_0018.md
+bool
+ASuccessfulCallKeepsOnlyItsSummary() {
+	auto folder = TwoPersons();
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK);
+	// Every call keeps its first line, followed by at most one summary line.
+	const auto lines = trace.Lines();
+	for (size_t i = 0; i < lines.size(); ++i) {
+		CHECK(Depth(lines[i]) <= 1, true);
+		if (Depth(lines[i]) == 1) {
+			CHECK(StartsWith(lines[i], "STEP\t"), true);
+			CHECK(Depth(lines[i - 1]), 0U);
+		}
+	}
+	return true;
+}
+
+// docs/decisions/adr_0018.md
+bool
+AWarningKeepsItsLinesAfterTheSummary() {
+	auto folder = TwoPersons();
+	folder.AddPerson("2_Bernd", PersonFile(2, R"("death": "1", "birth": "2")"));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(trace.HasWarning("death"), true);
+	CHECK(trace.HasWarning("birth"), true);
+	const auto lines = trace.Lines();
+	for (size_t i = 0; i < lines.size(); ++i) {
+		// Nested Subtraces that succeeded are gone once the Subtrace around them closed.
+		CHECK(Depth(lines[i]) > 0 && StartsWith(lines[i], "[ OK ]"), false);
+		// Within a Subtrace, a summary comes first: no step follows a warning or a nested
+		// Subtrace at the same depth.
+		if (!StartsWith(lines[i], "STEP\t")) {
+			continue;
+		}
+		for (size_t j = i; j > 0 && Depth(lines[j - 1]) >= Depth(lines[i]); --j) {
+			CHECK(Depth(lines[j - 1]) == Depth(lines[i]), false);
+		}
+	}
+	return true;
+}
+
+// docs/decisions/adr_0018.md
+bool
+ATooSmallTraceKeepsTheNewestLines() {
+	auto fullFolder = TwoPersons();
+	ContextGuard fullContext;
+	TraceBuffer full;
+	CHECK(Create(fullFolder, fullContext, full), FT_OK);
+	auto smallFolder = TwoPersons();
+	ContextGuard smallContext;
+	TraceBuffer small(512);
+	CHECK(Create(smallFolder, smallContext, small), FT_OK);
+	CHECK(small.Get().droppedLines > 0, true);
+	// The first call is dropped, and the last call is kept as a whole.
+	CHECK(small.Lines().front() == full.Lines().front(), false);
+	const auto fullText = full.Text();
+	const auto smallText = small.Text();
+	const auto lastCall = fullText.rfind("\n[") + 1;
+	CHECK(smallText.size() >= fullText.size() - lastCall, true);
+	CHECK(
+		smallText.substr(smallText.size() - (fullText.size() - lastCall)),
+		fullText.substr(lastCall));
 	return true;
 }
 
@@ -192,5 +267,8 @@ TraceSuite() {
 	result &= RUN(TheCallThatFailedShowsFailOnItsFirstLine);
 	result &= RUN(IndentsWithOneTabPerDepth);
 	result &= RUN(CountsTheLinesThatDoNotFit);
+	result &= RUN(ASuccessfulCallKeepsOnlyItsSummary);
+	result &= RUN(AWarningKeepsItsLinesAfterTheSummary);
+	result &= RUN(ATooSmallTraceKeepsTheNewestLines);
 	return result;
 }

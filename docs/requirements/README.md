@@ -19,6 +19,8 @@
 - [REQ 0049](req_0049.md) Missing Relations File
 - [REQ 0050](req_0050.md) Empty Details
 - [REQ 0051](req_0051.md) Text that is not UTF-8
+- [REQ 0053](req_0053.md) Duplicate Person Ids
+- [REQ 0054](req_0054.md) Byte order mark
 
 ## Querying the Data Set
 - [REQ 0014](req_0014.md) Details of a Person
