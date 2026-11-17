@@ -224,7 +224,7 @@ RelationsOfAPersonContainItAsFirstOrSecond() {
 	return true;
 }
 
-// docs/decisions/adr_0017.md
+// docs/decisions/adr_0020.md
 bool
 ARelationToAnUnknownPersonIsLeftOutWithAWarning() {
 	const Family family(2, {"1,2,StrictlyLower", "1,99,StrictlyLower"});

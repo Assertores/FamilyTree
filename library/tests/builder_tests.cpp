@@ -449,12 +449,36 @@ ReadsTheDataFolderOnlyThroughQuestions() {
 	return true;
 }
 
+// docs/decisions/adr_0020.md
+bool
+AParsingQuestionNamesTheFileItIsAbout() {
+	auto folder = ThreePersons();
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK);
+	std::string lastRead;
+	bool parsedPersonFile = false;
+	bool parsedRelations = false;
+	for (const auto& asked : folder.Asked()) {
+		if (asked.type == FT_QUESTION_READ_FILE) {
+			lastRead = asked.path;
+		}
+		const bool sameAsRead = !asked.path.empty() && asked.path == lastRead;
+		parsedPersonFile |= asked.type == FT_QUESTION_PARSE_PERSON_FILE && sameAsRead
+							&& asked.path.find("1_Anna/data.json") != std::string::npos;
+		parsedRelations |= asked.type == FT_QUESTION_PARSE_RELATIONS_FILE && sameAsRead
+						   && asked.path.find("relations.csv") != std::string::npos;
+	}
+	CHECK(parsedPersonFile, true);
+	CHECK(parsedRelations, true);
+	return true;
+}
+
 // docs/requirements/req_0037.md, docs/decisions/adr_0005.md
 bool
 UsesThePersonAnApplicationParsedItself() {
 	const char* firstNames[] = {"Selbst"};
 	FT_PersonRecord record{};
-	record.formatVersion = thePersonFileVersion;
 	record.person.id = 7;
 	record.person.firstNames.items = firstNames;
 	record.person.firstNames.count = 1;
@@ -473,12 +497,11 @@ UsesThePersonAnApplicationParsedItself() {
 	return true;
 }
 
-// docs/requirements/req_0050.md, docs/decisions/adr_0017.md
+// docs/requirements/req_0050.md, docs/decisions/adr_0020.md
 bool
 AnAnswerTellsEmptyDetailsFromMissingOnes() {
 	const char* noProfessions[] = {nullptr};
 	FT_PersonRecord record{};
-	record.formatVersion = thePersonFileVersion;
 	record.person.id = 7;
 	record.person.titleOfNobility = "";
 	record.person.professions.items = noProfessions;
@@ -509,6 +532,155 @@ AnAnswerTellsEmptyDetailsFromMissingOnes() {
 	return true;
 }
 
+// Walks through the Questions of a Data Folder with the Person Folder "7_Selbst" and no Relations
+// File, one answer at a time, so that a test can answer the Question to parse the Person File
+// itself.
+class StepByStep {
+public:
+	StepByStep() = default;
+	StepByStep(const StepByStep&) = delete;
+	StepByStep& operator=(const StepByStep&) = delete;
+	StepByStep(StepByStep&&) = delete;
+	StepByStep& operator=(StepByStep&&) = delete;
+	~StepByStep() {
+		if (myBuilder != nullptr && myQuestion.type != FT_QUESTION_NONE) {
+			(void)FT_CancelCreate(myBuilder, nullptr);
+		}
+	}
+
+	// Answers up to the Question to parse the Person File.
+	FT_Result ToParsing(const std::string& aPersonFile) {
+		myPersonFile = aPersonFile;
+		FT_Result result = FT_StartCreate(theRoot, &myBuilder, &myQuestion, &myTrace);
+		const char* folders[] = {"7_Selbst"};
+		FT_Answer list{};
+		list.folderNames = folders;
+		list.folderCount = 1;
+		if (result == FT_OK) {
+			result = Continue(list);
+		}
+		FT_Answer read{};
+		read.found = true;
+		read.content = myPersonFile.c_str();
+		if (result == FT_OK) {
+			result = Continue(read);
+		}
+		return result;
+	}
+
+	// Answers up to the Question to parse the Relations File, leaving the Person File to the
+	// Library.
+	FT_Result ToParsingRelations(
+		const std::string& aPersonFile,
+		const std::string& aRelationsFile) {
+		myRelationsFile = aRelationsFile;
+		FT_Result result = ToParsing(aPersonFile);
+		FT_Answer byDefault{};
+		byDefault.useDefault = true;
+		if (result == FT_OK) {
+			result = Continue(byDefault);
+		}
+		FT_Answer read{};
+		read.found = true;
+		read.content = myRelationsFile.c_str();
+		if (result == FT_OK) {
+			result = Continue(read);
+		}
+		return result;
+	}
+
+	FT_Result Continue(const FT_Answer& aAnswer) {
+		return FT_Continue(myBuilder, &aAnswer, &myQuestion, &myContext, &myTrace);
+	}
+
+	// Answers that there is no Relations File, which ends the creation with a warning.
+	FT_Result Finish() {
+		const FT_Answer missing{};
+		return Continue(missing);
+	}
+
+	[[nodiscard]] FT_Question& Question() { return myQuestion; }
+	[[nodiscard]] FT_Context* Context() const { return myContext.Get(); }
+	[[nodiscard]] const TraceBuffer& Trace() const { return myTrace; }
+
+private:
+	std::string myPersonFile;
+	std::string myRelationsFile;
+	TraceBuffer myTrace;
+	FT_Builder* myBuilder = nullptr;
+	FT_Question myQuestion{};
+	ContextGuard myContext;
+};
+
+// docs/decisions/adr_0020.md
+bool
+KeepsTheTextsAnApplicationParsedInPlace() {
+	StepByStep steps;
+	CHECK(steps.ToParsing(PersonFile(7)), FT_OK);
+	CHECK(steps.Question().type, FT_QUESTION_PARSE_PERSON_FILE);
+	// The Application decodes a first name into the text of the Question.
+	char* text = steps.Question().text;
+	const std::string_view name{"Selbst"};
+	CHECK(std::char_traits<char>::length(text) > name.size(), true);
+	name.copy(text, name.size());
+	text[name.size()] = '\0';
+	const char* firstNames[] = {text};
+	FT_PersonRecord record{};
+	record.person.id = 7;
+	record.person.firstNames.items = firstNames;
+	record.person.firstNames.count = 1;
+	FT_Answer answer{};
+	answer.person = &record;
+	CHECK(steps.Continue(answer), FT_OK);
+	CHECK(steps.Finish(), FT_OK_WITH_WARNINGS);
+	const FT_Person* person = nullptr;
+	CHECK(FT_GetPerson(steps.Context(), 7, &person, nullptr), FT_OK);
+	CHECK(person->firstNames.items[0] == text, true);
+	CHECK(Texts(person->firstNames), std::vector<std::string>{"Selbst"});
+	return true;
+}
+
+// docs/decisions/adr_0020.md
+bool
+ARepeatedAnswerFindsTheTextUnchanged() {
+	StepByStep steps;
+	const std::string relations = RelationsFile({"7,7,Unrestricted,selbst"});
+	CHECK(steps.ToParsingRelations(PersonFile(7), relations), FT_OK);
+	CHECK(steps.Question().type, FT_QUESTION_PARSE_RELATIONS_FILE);
+	// The Application changes the text, and then gives an answer that does not fit.
+	steps.Question().text[0] = 'X';
+	FT_RelationList withoutItems{};
+	withoutItems.count = 1;
+	FT_Answer broken{};
+	broken.relations = &withoutItems;
+	CHECK(steps.Continue(broken), FT_ERROR_UNEXPECTED_ANSWER);
+	CHECK(std::string(steps.Question().text), relations);
+	FT_Answer byDefault{};
+	byDefault.useDefault = true;
+	CHECK(steps.Continue(byDefault), FT_OK);
+	const FT_Relation* found = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetRelations(steps.Context(), 7, &found, &count, nullptr), FT_OK);
+	CHECK(count, 1U);
+	CHECK(Text(found[0].relationship), "selbst");
+	return true;
+}
+
+// docs/decisions/adr_0020.md
+bool
+AnApplicationCanSkipAFileItCannotParse() {
+	StepByStep steps;
+	CHECK(steps.ToParsing(PersonFile(7)), FT_OK);
+	const FT_Answer withoutRecord{};
+	CHECK(steps.Continue(withoutRecord), FT_OK_WITH_WARNINGS);
+	CHECK(steps.Finish(), FT_OK_WITH_WARNINGS);
+	size_t count = 0;
+	CHECK(FT_GetPersonCount(steps.Context(), &count, nullptr), FT_OK);
+	CHECK(count, 0U);
+	CHECK(steps.Trace().HasWarning("7_Selbst"), true);
+	return true;
+}
+
 // docs/decisions/adr_0005.md
 bool
 CancellingACreationReleasesTheBuilder() {
@@ -520,7 +692,7 @@ CancellingACreationReleasesTheBuilder() {
 	return true;
 }
 
-// docs/decisions/adr_0017.md
+// docs/decisions/adr_0020.md
 bool
 ContinueWithoutAnswerIsAnInvalidArgument() {
 	FT_Builder* builder = nullptr;
@@ -532,7 +704,7 @@ ContinueWithoutAnswerIsAnInvalidArgument() {
 	return true;
 }
 
-// docs/decisions/adr_0017.md
+// docs/decisions/adr_0020.md
 bool
 StartCreateWithoutDataFolderIsAnInvalidArgument() {
 	FT_Builder* builder = nullptr;
@@ -571,8 +743,12 @@ BuilderSuite() {
 	result &= RUN(SkipsAPersonFileInUtf16);
 	result &= RUN(SkipsARelationsFileInUtf16);
 	result &= RUN(ReadsTheDataFolderOnlyThroughQuestions);
+	result &= RUN(AParsingQuestionNamesTheFileItIsAbout);
 	result &= RUN(UsesThePersonAnApplicationParsedItself);
 	result &= RUN(AnAnswerTellsEmptyDetailsFromMissingOnes);
+	result &= RUN(KeepsTheTextsAnApplicationParsedInPlace);
+	result &= RUN(ARepeatedAnswerFindsTheTextUnchanged);
+	result &= RUN(AnApplicationCanSkipAFileItCannotParse);
 	result &= RUN(CancellingACreationReleasesTheBuilder);
 	result &= RUN(ContinueWithoutAnswerIsAnInvalidArgument);
 	result &= RUN(StartCreateWithoutDataFolderIsAnInvalidArgument);

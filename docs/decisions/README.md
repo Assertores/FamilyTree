@@ -17,7 +17,8 @@
 - [ADR 0008](adr_0008.md) Result codes, warnings and errors
 - [ADR 0009](adr_0009.md) Family Tree query
 - [ADR 0013](adr_0013.md) Public API of the Library (replaced by [ADR 0017](adr_0017.md))
-- [ADR 0017](adr_0017.md) Public API of the Library
+- [ADR 0017](adr_0017.md) Public API of the Library (replaced by [ADR 0020](adr_0020.md))
+- [ADR 0020](adr_0020.md) Public API of the Library
 - [ADR 0016](adr_0016.md) Details of the creation and the Format Versions
 - [ADR 0018](adr_0018.md) Compacting Trace as a text buffer
 - [ADR 0019](adr_0019.md) Internal structure of the Library

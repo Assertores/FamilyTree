@@ -201,7 +201,8 @@ public:
 					answer.useDefault = true;
 				}
 				break;
-			default:
+			case FT_QUESTION_PARSE_RELATIONS_FILE:
+			case FT_QUESTION_NONE:
 				answer.useDefault = true;
 				break;
 			}

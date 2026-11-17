@@ -195,7 +195,7 @@ AMissingListHasNoItemsButASafeFirstItem() {
 	return true;
 }
 
-// docs/requirements/req_0050.md, docs/decisions/adr_0017.md
+// docs/requirements/req_0050.md, docs/decisions/adr_0020.md
 bool
 AnEmptyListInThePersonFileIsNotMissing() {
 	const Data data({{1, R"("Profession": [], "PlaceOfResidence": [])"}}, {});

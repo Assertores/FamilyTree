@@ -103,7 +103,7 @@ ChecksWhetherMediaFilesExistOnTheDisk() {
 	return true;
 }
 
-// docs/requirements/req_0037.md, docs/decisions/adr_0017.md
+// docs/requirements/req_0037.md, docs/decisions/adr_0020.md
 bool
 AMissingDataFolderIsAPlatformError() {
 	ContextGuard context;
@@ -130,6 +130,11 @@ LeavingEveryQuestionToTheDefaultIsTheSameAsCreate() {
 		FT_Answer answer{};
 		answer.useDefault = true;
 		result = FT_Continue(builder, &answer, &question, &context, nullptr);
+	}
+	// A creation that is not over, e.g. after an error, is left to the Application to cancel
+	// (docs/decisions/adr_0016.md#errors-during-the-creation).
+	if (builder != nullptr && question.type != FT_QUESTION_NONE) {
+		(void)FT_CancelCreate(builder, nullptr);
 	}
 	CHECK(result, FT_OK);
 	CHECK(context != nullptr, true);

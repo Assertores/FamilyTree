@@ -45,6 +45,10 @@ CheckOptions:
       value: '.*'
     - key: bugprone-unused-return-value.AllowCastToVoid
       value: true
+    # In C, && and || yield an int, so every logical expression assigned to a bool would count as an
+    # implicit conversion.
+    - key: readability-implicit-bool-conversion.AllowLogicalOperatorConversion
+      value: true
     # Naming, see docs/conventions.md.
     - key: readability-identifier-naming.GlobalFunctionCase
       value: CamelCase

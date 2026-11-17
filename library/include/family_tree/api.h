@@ -26,7 +26,7 @@
 ///   @ref FT_Free. The API is not thread safe for one Context, but separate Contexts are
 ///   independent of each other.
 ///
-/// See docs/decisions/adr_0017.md and docs/decisions/adr_0016.md.
+/// See docs/decisions/adr_0020.md and docs/decisions/adr_0016.md.
 #ifndef FT_API_H
 #define FT_API_H
 
@@ -129,7 +129,7 @@ typedef size_t FT_FamilyIndex;
 typedef struct {
 	/// The texts. Never NULL: if @a count is 0, @a items[0] still exists. It is the Default String
 	/// if the Detail is missing in the Person File, and another empty text if the list is empty
-	/// there, i.e. known not to exist (docs/decisions/adr_0017.md).
+	/// there, i.e. known not to exist (docs/decisions/adr_0020.md).
 	const char* const* items;
 	size_t count; ///< The number of texts.
 } FT_TextList;
@@ -222,41 +222,56 @@ typedef enum {
 /// @brief A Question of the Library, see @ref FT_QuestionType.
 typedef struct {
 	FT_QuestionType type; ///< What is asked.
-	/// The folder or file asked about, for LIST_FOLDERS, FILE_EXISTS and READ_FILE. The Data
-	/// Folder joined with the relative parts by `/`, which Windows accepts as well.
+	/// The folder or file asked about. The Data Folder joined with the relative parts by `/`,
+	/// which Windows accepts as well. A parsing Question has the path of the file it read before,
+	/// e.g. to name the file in messages (docs/decisions/adr_0020.md).
 	const char* path;
-	/// The text to parse, for PARSE_PERSON_FILE and PARSE_RELATIONS_FILE.
-	const char* text;
+	/// The text to parse, for PARSE_PERSON_FILE and PARSE_RELATIONS_FILE: a copy of the file that
+	/// belongs to the Library, valid until the Question is answered. The Application may change it
+	/// while it parses, e.g. decode its strings in place; strings of the answer that start and end
+	/// within it are kept without a copy. If the answer fails, the Library restores the text, so
+	/// that the Question can be answered again (docs/decisions/adr_0020.md).
+	char* text;
 } FT_Question;
 
 /// @brief The parsed content of a Person File, as an answer to FT_QUESTION_PARSE_PERSON_FILE.
 ///
 /// A NULL text, and a list whose items are NULL, mean missing; the Library replaces them with the
 /// Default String. An empty text, and a list with items set and a count of 0, mean present but
-/// empty.
+/// empty. Its Format Version is checked by whoever parses the file, before the rest is read
+/// (docs/decisions/adr_0020.md).
 typedef struct {
-	const char* formatVersion;	 ///< The Format Version of the Person File.
 	FT_Person person;			 ///< The Person Id and the Details.
 	const char* recording;		 ///< The Recording, relative to the Person Folder.
 	const char* const* pictures; ///< The Pictures, relative to the Person Folder.
 	size_t pictureCount;		 ///< The number of Pictures.
 } FT_PersonRecord;
 
+/// @brief The parsed content of a Relations File, as an answer to
+/// FT_QUESTION_PARSE_RELATIONS_FILE. A NULL text of a Relation means missing.
+typedef struct {
+	const FT_Relation* items; ///< The Relations.
+	size_t count;			  ///< The number of Relations.
+} FT_RelationList;
+
 /// @brief The answer to a Question. Only the fields of the Question asked are read.
 ///
 /// The Library copies what it needs from the answer before @ref FT_Continue returns, so the
-/// answer and everything it points to may be freed afterwards.
+/// answer and everything it points to may be freed afterwards. The only exception are strings of a
+/// parsing answer that lie within @ref FT_Question::text, which the Library owns.
 typedef struct {
 	bool useDefault; ///< Leave this Question to the Default Platform; every other field is ignored.
-	const char* const* folderNames;		///< LIST_FOLDERS: the names of the subfolders.
-	size_t folderCount;					///< LIST_FOLDERS: the number of subfolders.
-	bool exists;						///< FILE_EXISTS: whether the file exists.
-	bool found;							///< READ_FILE: whether the file could be read.
-	const char* content;				///< READ_FILE: the content, zero terminated.
-	const FT_PersonRecord* person;		///< PARSE_PERSON_FILE: the parsed Person File.
-	const char* relationsFormatVersion; ///< PARSE_RELATIONS_FILE: its Format Version.
-	const FT_Relation* relations; ///< PARSE_RELATIONS_FILE: the Relations; NULL texts mean missing.
-	size_t relationCount;		  ///< PARSE_RELATIONS_FILE: the number of Relations.
+	const char* const* folderNames; ///< LIST_FOLDERS: the names of the subfolders.
+	size_t folderCount;				///< LIST_FOLDERS: the number of subfolders.
+	bool exists;					///< FILE_EXISTS: whether the file exists.
+	bool found;						///< READ_FILE: whether the file could be read.
+	const char* content;			///< READ_FILE: the content, zero terminated.
+	/// PARSE_PERSON_FILE: the parsed Person File, or NULL if it could not be read, e.g. as its
+	/// Format Version is not supported; the Library then skips the file with a warning.
+	const FT_PersonRecord* person;
+	/// PARSE_RELATIONS_FILE: the parsed Relations File, or NULL if it could not be read, like
+	/// @a person.
+	const FT_RelationList* relations;
 } FT_Answer;
 
 /// @brief Creates a Context from a Data Folder in one call, leaving every Question to the

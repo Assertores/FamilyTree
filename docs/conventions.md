@@ -63,11 +63,16 @@ spikes/
 | C++ member variable | `my` and CamelCase | `myPlayer` |
 | words of the domain | the terms of the [glossary](glossary.md) | `Partner`, not `Spouse` |
 
+## Control Flow
+<!-- Rules for loops and branches beyond what the formatter and the linters enforce. -->
+- A loop whose step is a single statement that ends every pass, e.g. `++i` or `start = end`, is a `for` loop with that step in its head, so that the step cannot be lost or skipped when the body changes; the variables the step needs are declared in the head, e.g. `for (size_t start = 0, end = 0; start < count; start = end)`, or before the loop if the code after it needs them. A loop whose step differs between branches, or is followed by other statements, stays a `while` loop.
+
 ## Error Handling
 <!-- How errors are signaled, where they are caught, and what is reported to the user. -->
 - Every public function of the Library returns `FT_Result`, and returns its results through output parameters, see [ADR 0008](decisions/adr_0008.md).
 - Every public function checks its parameters; internal functions state their preconditions with `assert`, see [ADR 0011](decisions/adr_0011.md).
 - Every return value is checked.
+- A `switch` over an enum lists every value of the enum and has no `default` case, so that the compiler warns (`-Wswitch`) when a value is added to the enum later; a `default` case would silently take the new value. A value outside the enum, e.g. one an Application passed, is handled after the `switch`, which also keeps compilers that cannot see that every case returns from warning about a missing return value.
 - A problem in the data is a warning: the Library works around it, reports it to the Trace, and returns `FT_OK_WITH_WARNINGS`. A call that cannot do what was asked returns an error.
 - The Applications show warnings and errors to the user in German, in words a data collector understands, and name the file concerned.
 

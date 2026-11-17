@@ -91,8 +91,9 @@ flowchart TB
     builder -->|default answers| defaults
     builder -->|text| parsers
     parsers -->|structs| builder
-    builder -->|structs| resolver
-    resolver -->|fills| context
+    builder -->|structs| context
+    context -->|sorted Persons and Relations| resolver
+    resolver -->|Generations, Families, Siblings, Partners| context
     queries -->|read| context
     defaults --> os
     api --> trace
@@ -102,10 +103,10 @@ flowchart TB
 | Name | Technology | Description |
 | ---: | :--- | :--- |
 | Public API | C99 headers in `include/family_tree/` | every function returns `FT_Result` and takes an optional `FT_Trace`, see [ADR 0008](decisions/adr_0008.md) |
-| Builder | module | asks the Questions needed to read a Data Set, checks every answer, has the text parsed, and hands the parsed structs to the Resolver, see [ADR 0005](decisions/adr_0005.md) |
-| Parsers | module | parse the text of Person Files and Relations Files and return their content as structs, without knowing about Contexts or other files; written by hand without external code |
-| Resolver | module | computes Parents, Children, Siblings, Partners, Families and Generations iteratively, and detects conflicting Generations |
-| Context | data structure | holds the Data Set and everything derived from it; read only after creation, see [ADR 0003](decisions/adr_0003.md) |
+| Builder | module | asks the Questions needed to read a Data Set, checks every answer, has the text parsed, and hands the parsed structs to the creation of the Context, see [ADR 0005](decisions/adr_0005.md) |
+| Parsers | module | parse the text of Person Files and Relations Files and return their content as structs, without knowing about Contexts or other files; written by hand without external code, see [ADR 0019](decisions/adr_0019.md) |
+| Resolver | module | computes Parents, Children, Siblings, Partners, Families and Generations iteratively from the sorted Persons and their Relations, and detects conflicting Generations; called by the creation of the Context |
+| Context | data structure | holds the Data Set and everything derived from it; its creation sorts the Persons, removes duplicate Person Ids, collects the Relations of each Person, has the Resolver compute the rest, and builds the Context from all of it; read only after creation, see [ADR 0003](decisions/adr_0003.md); kept in an arena, see [ADR 0019](decisions/adr_0019.md) |
 | Queries | module | return views into the Context, or fill caller buffers, see [ADR 0004](decisions/adr_0004.md); includes the Family Tree query, see [ADR 0009](decisions/adr_0009.md) |
 | Default Platform | module | answers Questions on Windows and Linux, and opens Media with the default programs, see [ADR 0006](decisions/adr_0006.md) |
 | Trace writer | module | appends lines to the Application's text buffer, compacts every Subtrace that closes without an error, and drops the oldest lines when the buffer is full, see [ADR 0018](decisions/adr_0018.md) |
@@ -183,7 +184,7 @@ flowchart TB
 <!-- The most important high-level interfaces between containers or components, or to external systems. -->
 | Interface | Provider | Consumers | Protocol | Description |
 | ---: | :--- | :--- | :--- | :--- |
-| Public API | Library | Applications | C function calls | creating, querying and freeing a Context; see the overview below, and [ADR 0017](decisions/adr_0017.md) for the signatures |
+| Public API | Library | Applications | C function calls | creating, querying and freeing a Context; see the overview below, and [ADR 0020](decisions/adr_0020.md) for the signatures |
 | Questions | Library | Applications | C function calls, `FT_StartCreate` and `FT_Continue` | the Library asks for folders, files and parsed content while it creates a Context, see [ADR 0005](decisions/adr_0005.md) |
 | Trace | Library | Applications | text buffer | lines of level, function and message, see [ADR 0018](decisions/adr_0018.md) |
 | Person File | Data Entry Tool, data collector | Library | JSON file, UTF-8 | see [REQ 0002](requirements/req_0002.md) and [REQ 0003](requirements/req_0003.md) |
@@ -191,7 +192,7 @@ flowchart TB
 | Commands | Command Line Application | end-to-end tests | text on the standard input and output | see [ADR 0012](decisions/adr_0012.md) |
 
 ### Public API of the Library
-The functions of the Library, by group. The full signatures are in the public header [api.h](../library/include/family_tree/api.h), see [ADR 0017](decisions/adr_0017.md).
+The functions of the Library, by group. The full signatures are in the public header [api.h](../library/include/family_tree/api.h), see [ADR 0020](decisions/adr_0020.md).
 
 | Group | Function | Purpose |
 | ---: | :--- | :--- |
@@ -214,6 +215,6 @@ The functions of the Library, by group. The full signatures are in the public he
 | Media defaults | `FT_ShowPicturesOfPerson`, `FT_PlayRecordingOfPerson` | look up the Media of a Person and open them the default way, in one call |
 
 ## See Also
- - [ADR 0017](decisions/adr_0017.md) the full Public API of the Library
+ - [ADR 0020](decisions/adr_0020.md) the full Public API of the Library
  - [ADR 0002](decisions/adr_0002.md) why the Library is C99 and the Applications are free
  - [ADR 0011](decisions/adr_0011.md) the rules the Library's code follows

@@ -73,9 +73,29 @@ FreeingOneContextLeavesTheOtherUsable() {
 	return true;
 }
 
+// Takes every kind of view from Person 1 of the Context.
+bool
+UsesEveryView(const FT_Context* aContext) {
+	const FT_Person* person = nullptr;
+	const FT_PersonId* ids = nullptr;
+	const FT_Relation* relations = nullptr;
+	const char* const* pictures = nullptr;
+	const char* recording = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetPerson(aContext, 1, &person, nullptr), FT_OK);
+	CHECK(FT_GetRelations(aContext, 1, &relations, &count, nullptr), FT_OK);
+	CHECK(FT_GetChildren(aContext, 1, &ids, &count, nullptr), FT_OK);
+	CHECK(FT_GetPartners(aContext, 1, &ids, &count, nullptr), FT_OK);
+	CHECK(FT_GetPicturePaths(aContext, 1, &pictures, &count, nullptr), FT_OK);
+	CHECK(FT_GetRecordingPath(aContext, 1, &recording, nullptr), FT_OK);
+	CHECK(Everyone(aContext).size(), 3U);
+	return true;
+}
+
 // docs/requirements/req_0042.md
 // The leak check of the test runner (tests/framework/check.hpp) fails the run if anything the
-// Library returned here is still allocated after FT_Free.
+// Library returned here is still allocated after FT_Free. The Context is freed before anything is
+// checked, so that a failing check does not leak it.
 bool
 FreeingAContextReleasesEverythingItReturned() {
 	DataFolder folder;
@@ -89,26 +109,21 @@ FreeingAContextReleasesEverythingItReturned() {
 		.AddFile("1/a.mp3", "")
 		.SetRelations({"1,3,StrictlyLower", "2,3,StrictlyLower"});
 	FT_Context* context = nullptr;
-	CHECK(folder.Create(&context, nullptr), FT_OK);
-	const FT_Person* person = nullptr;
-	const FT_PersonId* ids = nullptr;
-	const FT_Relation* relations = nullptr;
-	const char* const* pictures = nullptr;
-	const char* recording = nullptr;
-	size_t count = 0;
-	CHECK(FT_GetPerson(context, 1, &person, nullptr), FT_OK);
-	CHECK(FT_GetRelations(context, 1, &relations, &count, nullptr), FT_OK);
-	CHECK(FT_GetChildren(context, 1, &ids, &count, nullptr), FT_OK);
-	CHECK(FT_GetPartners(context, 1, &ids, &count, nullptr), FT_OK);
-	CHECK(FT_GetPicturePaths(context, 1, &pictures, &count, nullptr), FT_OK);
-	CHECK(FT_GetRecordingPath(context, 1, &recording, nullptr), FT_OK);
-	CHECK(Everyone(context).size(), 3U);
-	CHECK(FT_Free(context, nullptr), FT_OK);
+	const FT_Result created = folder.Create(&context, nullptr);
+	const bool used = context != nullptr && UsesEveryView(context);
+	const FT_Result freed =
+		context != nullptr ? FT_Free(context, nullptr) : FT_ERROR_INVALID_ARGUMENT;
+	CHECK(created, FT_OK);
+	CHECK(used, true);
+	CHECK(freed, FT_OK);
 	return true;
 }
 
 // docs/requirements/req_0047.md
 // The leak check of the test runner fails the run if the failed creation left memory allocated.
+// DataFolder cancels the creation after the error, as the Application has to
+// (docs/decisions/adr_0016.md#errors-during-the-creation). A Context that was created by mistake
+// is freed before anything is checked, so that it does not count as a leak of the failed creation.
 bool
 AFailedCreationReleasesEverything() {
 	DataFolder folder;
@@ -116,19 +131,24 @@ AFailedCreationReleasesEverything() {
 		.AddPerson("2", PersonFile(2))
 		.SetRelations({"1,2,StrictlyLower", "2,1,StrictlyLower"});
 	FT_Context* context = nullptr;
-	CHECK(folder.Create(&context, nullptr), FT_ERROR_CONFLICTING_GENERATIONS);
-	CHECK(context == nullptr, true);
+	const FT_Result result = folder.Create(&context, nullptr);
+	const bool created = context != nullptr;
+	if (created) {
+		(void)FT_Free(context, nullptr);
+	}
+	CHECK(result, FT_ERROR_CONFLICTING_GENERATIONS);
+	CHECK(created, false);
 	return true;
 }
 
-// docs/decisions/adr_0017.md
+// docs/decisions/adr_0020.md
 bool
 FreeingNoContextIsAnInvalidArgument() {
 	CHECK(FT_Free(nullptr, nullptr), FT_ERROR_INVALID_ARGUMENT);
 	return true;
 }
 
-// docs/decisions/adr_0017.md
+// docs/decisions/adr_0020.md
 bool
 QueriesWithoutContextAreInvalidArguments() {
 	size_t count = 0;
