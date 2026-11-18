@@ -13,11 +13,14 @@ Last reviewed: #YYYY-MM-DD
 <!-- The situation and the forces that make a decision necessary. -->
 
 ## Design
-<!-- The parts involved, their responsibilities, and how they work together, e.g. as a flowchart or sequence diagram. -->
+<!-- The parts involved, their responsibilities, and how they work together, e.g. as a sequence diagram of how they interact, an entity relationship diagram of what each part holds, or a state diagram of a part with states. -->
 <div hidden>
 ```mermaid
-flowchart LR
-    a["PART"] -->|INTERACTS WITH| b["PART"]
+sequenceDiagram
+    participant a as PART
+    participant b as PART
+    a->>b: WHAT IT ASKS OR SENDS
+    b->>a: WHAT IT ANSWERS
 ```
 </div>
 
