@@ -26,9 +26,6 @@ enum {
 	DECIMAL_BASE = 10,
 };
 
-const char thePersonFileVersion[] = "1F10B769-08DE-442F-85BA-737B7F2B4803";
-const char theRelationsFileVersion[] = "227E82BA-6603-426C-9C95-5BC86A10A642";
-
 // The length of a sequence that starts with aLead, and the range of its second byte; false if
 // aLead cannot start a sequence.
 typedef struct {

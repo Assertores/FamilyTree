@@ -67,10 +67,6 @@ char* JoinPath(Arena* aArena, const char* aFolder, const char* aFirst, const cha
 // Reads an optional "-" and at least one digit, and nothing else, as an integer.
 bool ParseInteger(const char* aText, size_t aLength, FT_PersonId* aOut);
 
-// The Format Versions the Library reads (docs/decisions/adr_0016.md).
-extern const char thePersonFileVersion[];
-extern const char theRelationsFileVersion[];
-
 // ----- Parsers
 
 // Parses a Person File in place; aFile names it in warnings. The arrays of the record go into
@@ -86,10 +82,12 @@ FT_Result ParsePersonFile(
 	bool* aOutRead,
 	FT_Trace* aTrace);
 
-// Parses a Relations File in place, like ParsePersonFile; the array of Relations goes into aArena.
+// Parses a Relations File in place, like ParsePersonFile; the array of Relations goes into aArena,
+// the array of its lines into aScratch.
 FT_Result ParseRelationsFile(
 	char* aText,
 	const char* aFile,
+	Arena* aScratch,
 	Arena* aArena,
 	FT_RelationList* aOutList,
 	bool* aOutRead,

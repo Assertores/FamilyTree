@@ -180,6 +180,7 @@ PrivParseRelationsByDefault(Call* aCall, FT_Answer* aOut) {
 		aCall->next.question.text,
 		PrivFile(aCall),
 		aCall->scratch,
+		aCall->scratch,
 		&aCall->relations,
 		&read,
 		aCall->trace);

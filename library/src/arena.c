@@ -58,8 +58,14 @@ ArenaGetMark(const Arena* aArena) {
 	return mark;
 }
 
+// The loops over the nodes have no counted bound (docs/decisions/adr_0011.md, Rule 2), as an
+// Arena does not count its nodes. They are bounded by the number of nodes all the same: every node
+// links only to a node allocated before it, so the list has no cycle and ends with NULL after at
+// most as many nodes as were allocated.
+
 void
 ArenaReset(Arena* aArena, ArenaMark aMark) {
+	// Each pass frees one node; the mark is a node of this list, or NULL, so it is reached.
 	while (aArena->last != aMark.last) {
 		ArenaNode* node = aArena->last;
 		assert(node != NULL); // the mark belongs to another Arena
@@ -70,6 +76,8 @@ ArenaReset(Arena* aArena, ArenaMark aMark) {
 
 void
 ArenaMoveAll(Arena* aFrom, Arena* aTo) {
+	// Linking an Arena to itself would make a cycle, which no loop over it could leave.
+	assert(aFrom != aTo);
 	if (aFrom->last == NULL) {
 		return;
 	}

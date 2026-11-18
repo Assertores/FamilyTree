@@ -66,6 +66,7 @@ spikes/
 ## Control Flow
 <!-- Rules for loops and branches beyond what the formatter and the linters enforce. -->
 - A loop whose step is a single statement that ends every pass, e.g. `++i` or `start = end`, is a `for` loop with that step in its head, so that the step cannot be lost or skipped when the body changes; the variables the step needs are declared in the head, e.g. `for (size_t start = 0, end = 0; start < count; start = end)`, or before the loop if the code after it needs them. A loop whose step differs between branches, or is followed by other statements, stays a `while` loop.
+- A loop that makes its progress in the body, e.g. a parser that reads tokens until a closing bracket, gets a counter as its fixed upper bound ([ADR 0011](decisions/adr_0011.md), Rule 2), named `pass`, and leaves from within its body; a comment says why the bound holds, e.g. that each pass consumes at least one character. A loop that walks a structure without a countable bound, e.g. a list, says in a comment why it ends.
 
 ## Error Handling
 <!-- How errors are signaled, where they are caught, and what is reported to the user. -->
