@@ -22,6 +22,7 @@
 - [ADR 0016](adr_0016.md) Details of the creation and the Format Versions
 - [ADR 0018](adr_0018.md) Compacting Trace as a text buffer
 - [ADR 0019](adr_0019.md) Internal structure of the Library
+- [ADR 0021](adr_0021.md) JSON parser of the Library
 
 ## Applications
 - [ADR 0010](adr_0010.md) Applications in C++ with Qt

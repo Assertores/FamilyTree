@@ -104,7 +104,7 @@ flowchart TB
 | ---: | :--- | :--- |
 | Public API | C99 headers in `include/family_tree/` | every function returns `FT_Result` and takes an optional `FT_Trace`, see [ADR 0008](decisions/adr_0008.md) |
 | Builder | module | asks the Questions needed to read a Data Set, checks every answer, has the text parsed, and hands the parsed structs to the creation of the Context, see [ADR 0005](decisions/adr_0005.md) |
-| Parsers | module | parse the text of Person Files and Relations Files and return their content as structs, without knowing about Contexts or other files; written by hand without external code, see [ADR 0019](decisions/adr_0019.md) |
+| Parsers | module | parse the text of Person Files and Relations Files and return their content as structs, without knowing about Contexts or other files; written by hand without external code, see [ADR 0019](decisions/adr_0019.md), and for JSON [ADR 0021](decisions/adr_0021.md) |
 | Resolver | module | computes Parents, Children, Siblings, Partners, Families and Generations iteratively from the sorted Persons and their Relations, and detects conflicting Generations; called by the creation of the Context |
 | Context | data structure | holds the Data Set and everything derived from it; its creation sorts the Persons, removes duplicate Person Ids, collects the Relations of each Person, has the Resolver compute the rest, and builds the Context from all of it; read only after creation, see [ADR 0003](decisions/adr_0003.md); kept in an arena, see [ADR 0019](decisions/adr_0019.md) |
 | Queries | module | return views into the Context, or fill caller buffers, see [ADR 0004](decisions/adr_0004.md); includes the Family Tree query, see [ADR 0009](decisions/adr_0009.md) |
