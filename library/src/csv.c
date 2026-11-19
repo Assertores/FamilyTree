@@ -85,16 +85,19 @@ PrivSplitQuoted(char* aLine, size_t aLength, size_t* aPosition, char** aOutField
 			aLine[write] = aLine[read];
 			++write;
 			++read;
-		} else if (aLine[read + 1] == '"') {
-			aLine[write] = '"';
+			continue;
+		}
+		if (aLine[read + 1] == '"') {
+			aLine[write] = '"'; // a doubled quotation mark
 			++write;
 			read += 2;
-		} else {
-			const char after = aLine[read + 1];
-			aLine[write] = '\0';
-			*aPosition = read + 2;
-			return after == ',' || after == '\0';
+			continue;
 		}
+		// The closing quotation mark, which only a comma or the end of the line may follow.
+		const char after = aLine[read + 1];
+		aLine[write] = '\0';
+		*aPosition = read + 2;
+		return after == ',' || after == '\0';
 	}
 	return false;
 }
@@ -109,11 +112,11 @@ PrivSplitField(char* aLine, size_t aLength, size_t* aPosition, char** aOutField)
 	*aOutField = start;
 	char* comma = strchr(start, ',');
 	if (comma == NULL) {
-		*aPosition = aLength + 1;
-	} else {
-		*comma = '\0';
-		*aPosition = (size_t)(comma - aLine) + 1;
+		*aPosition = aLength + 1; // the last field
+		return true;
 	}
+	*comma = '\0';
+	*aPosition = (size_t)(comma - aLine) + 1;
 	return true;
 }
 
@@ -221,13 +224,19 @@ PrivReadRelation(
 	size_t* aCount) {
 	Row row;
 	(void)memset(&row, 0, sizeof(row));
-	if (aLine[0] == '\0' || !PrivReadRow(aReport, aLine, aLineNumber, &row)) {
-		return;
+	if (aLine[0] == '\0') {
+		return; // an empty line
+	}
+	if (!PrivReadRow(aReport, aLine, aLineNumber, &row)) {
+		return; // skipped, which was reported
 	}
 	FT_Relation relation;
 	(void)memset(&relation, 0, sizeof(relation));
-	if (!ParseInteger(row.fields[0], strlen(row.fields[0]), &relation.first)
-		|| !ParseInteger(row.fields[1], strlen(row.fields[1]), &relation.second)) {
+	if (!ParseInteger(row.fields[0], strlen(row.fields[0]), &relation.first)) {
+		PrivSkipRow(aReport, aLineNumber, "has a Person Id that is not an integer");
+		return;
+	}
+	if (!ParseInteger(row.fields[1], strlen(row.fields[1]), &relation.second)) {
 		PrivSkipRow(aReport, aLineNumber, "has a Person Id that is not an integer");
 		return;
 	}
@@ -244,7 +253,10 @@ static const char*
 PrivReadFormatVersion(char* aLine) {
 	Row row;
 	(void)memset(&row, 0, sizeof(row));
-	if (!PrivSplitRow(aLine, &row) || row.count < 2 || strcmp(row.fields[0], "Version") != 0) {
+	if (!PrivSplitRow(aLine, &row)) {
+		return NULL;
+	}
+	if (row.count < 2 || strcmp(row.fields[0], "Version") != 0) {
 		return NULL;
 	}
 	return row.fields[1];
@@ -256,14 +268,11 @@ static bool
 PrivHasSupportedVersion(CsvReport* aReport, char* aFirstLine) {
 	const char* version = PrivReadFormatVersion(aFirstLine);
 	if (version == NULL) {
-		TraceWarning(
-			aReport->trace,
-			"%s: it has no Format Version in its first line",
-			aReport->file);
+		TraceError(aReport->trace, "%s: it has no Format Version in its first line", aReport->file);
 		return false;
 	}
 	if (!EqualsIgnoringCase(version, theRelationsFileVersion)) {
-		TraceWarning(
+		TraceError(
 			aReport->trace,
 			"%s: the Format Version %s is not supported",
 			aReport->file,
@@ -273,34 +282,36 @@ PrivHasSupportedVersion(CsvReport* aReport, char* aFirstLine) {
 	return true;
 }
 
-FT_Result
+Result
 ParseRelationsFile(
 	char* aText,
 	const char* aFile,
 	Arena* aScratch,
 	Arena* aArena,
 	FT_RelationList* aOutList,
-	bool* aOutRead,
 	FT_Trace* aTrace) {
-	TraceStep(aTrace, "%s: parsing", aFile);
-	*aOutRead = false;
+	TraceOpen(aTrace, "ParseRelationsFile", "%s", aFile);
 	(void)memset(aOutList, 0, sizeof(*aOutList));
 	if (HasOtherByteOrderMark(aText)) {
-		TraceWarning(aTrace, "%s: the file is UTF-16 or UTF-32, save it as UTF-8", aFile);
-		return FT_OK_WITH_WARNINGS;
+		TraceError(aTrace, "%s: the file is UTF-16 or UTF-32, save it as UTF-8", aFile);
+		return TraceCloseResult(aTrace, RESULT_UNREADABLE);
 	}
+	TraceStep(aTrace, "splitting the text into lines");
 	Lines lines = {NULL, 0};
 	if (!PrivSplitLines(aText + ByteOrderMarkLength(aText), aScratch, &lines)) {
-		return FT_ERROR_OUT_OF_MEMORY;
+		TraceError(aTrace, "%s: memory ran out while parsing", aFile);
+		return TraceCloseResult(aTrace, RESULT_OUT_OF_MEMORY);
 	}
 	CsvReport report = {aFile, aTrace, false};
 	if (!PrivHasSupportedVersion(&report, lines.items[0])) {
-		return FT_OK_WITH_WARNINGS;
+		return TraceCloseResult(aTrace, RESULT_UNREADABLE); // reported at the Format Version
 	}
 	const size_t rows = lines.count > CSV_HEADER_LINES ? lines.count - CSV_HEADER_LINES : 0;
+	TraceStep(aTrace, "reading %zu rows", rows);
 	FT_Relation* relations = ArenaAllocate(aArena, rows * sizeof(FT_Relation));
 	if (relations == NULL) {
-		return FT_ERROR_OUT_OF_MEMORY;
+		TraceError(aTrace, "%s: memory ran out while parsing", aFile);
+		return TraceCloseResult(aTrace, RESULT_OUT_OF_MEMORY);
 	}
 	size_t count = 0;
 	for (size_t i = CSV_HEADER_LINES; i < lines.count; ++i) {
@@ -308,6 +319,5 @@ ParseRelationsFile(
 	}
 	aOutList->items = relations;
 	aOutList->count = count;
-	*aOutRead = true;
-	return report.warned ? FT_OK_WITH_WARNINGS : FT_OK;
+	return TraceCloseResult(aTrace, report.warned ? RESULT_OK_WITH_WARNINGS : RESULT_OK);
 }

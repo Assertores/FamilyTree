@@ -35,6 +35,22 @@ void ArenaMoveAll(Arena* aFrom, Arena* aTo);
 // Frees every allocation; the Arena is empty afterwards.
 void ArenaFree(Arena* aArena);
 
+// ----- Internal result (docs/decisions/adr_0022.md)
+
+// The result of an internal function that reports whether it did its task. It never leaves the
+// Library: a failure without a public counterpart is handled by the caller. A value is added when a
+// function needs it.
+typedef enum {
+	RESULT_OK,
+	RESULT_OK_WITH_WARNINGS,
+	RESULT_OUT_OF_MEMORY,
+	RESULT_UNREADABLE, // a data file cannot be read into a record; the reason is in the Trace
+} Result;
+
+// The result of a public function for aResult, whose failures without a public counterpart were
+// handled before.
+FT_Result PublicResult(Result aResult);
+
 // ----- Trace writer, the only code that touches an FT_Trace. Every function does nothing for a
 // NULL Trace or a capacity of 0.
 
@@ -44,6 +60,8 @@ void TraceWarning(FT_Trace* aTrace, const char* aFormat, ...);
 void TraceError(FT_Trace* aTrace, const char* aFormat, ...);
 // Closes the innermost Subtrace with the outcome of aResult, compacts it, and returns aResult.
 FT_Result TraceClose(FT_Trace* aTrace, FT_Result aResult);
+// Closes the innermost Subtrace like TraceClose, with the outcome of an internal result.
+Result TraceCloseResult(FT_Trace* aTrace, Result aResult);
 // Finishes the Trace before a public function returns, and returns aResult.
 FT_Result TraceFinish(FT_Trace* aTrace, FT_Result aResult);
 // Closes the Subtrace of a public function and finishes the Trace; returns aResult.
@@ -69,28 +87,27 @@ bool ParseInteger(const char* aText, size_t aLength, FT_PersonId* aOut);
 
 // ----- Parsers
 
-// Parses a Person File in place; aFile names it in warnings. The arrays of the record go into
-// aArena, the values of an array go into aScratch while it is read. aOutRead is false if the file
-// cannot be read, e.g. as its Format Version is not supported, at which reading stops; the reason
-// was reported as a warning. Returns FT_OK, FT_OK_WITH_WARNINGS or FT_ERROR_OUT_OF_MEMORY.
-FT_Result ParsePersonFile(
+// Parses a Person File in place, in a Subtrace of its own; aFile names it in warnings. The arrays
+// of the record go into aArena, the values of an array go into aScratch while it is read. Returns
+// RESULT_OK or RESULT_OK_WITH_WARNINGS with the record; RESULT_UNREADABLE if the file cannot be
+// read into a record, e.g. as its Format Version is not supported, at which reading stops, with
+// the reason in the Trace; or RESULT_OUT_OF_MEMORY.
+Result ParsePersonFile(
 	char* aText,
 	const char* aFile,
 	Arena* aScratch,
 	Arena* aArena,
 	FT_PersonRecord* aOutRecord,
-	bool* aOutRead,
 	FT_Trace* aTrace);
 
 // Parses a Relations File in place, like ParsePersonFile; the array of Relations goes into aArena,
-// the array of its lines into aScratch.
-FT_Result ParseRelationsFile(
+// the array of its lines into aScratch. A row that cannot be read is skipped with a warning.
+Result ParseRelationsFile(
 	char* aText,
 	const char* aFile,
 	Arena* aScratch,
 	Arena* aArena,
 	FT_RelationList* aOutList,
-	bool* aOutRead,
 	FT_Trace* aTrace);
 
 // ----- Context

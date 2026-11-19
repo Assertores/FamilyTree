@@ -7,6 +7,8 @@
 #include <check.hpp>
 #include <family_tree/api.h>
 
+#include <algorithm>
+#include <cctype>
 #include <cstddef>
 #include <string>
 #include <string_view>
@@ -713,6 +715,156 @@ StartCreateWithoutDataFolderIsAnInvalidArgument() {
 	return true;
 }
 
+// docs/decisions/adr_0020.md
+bool
+AnApplicationCanSkipARelationsFileItCannotParse() {
+	StepByStep steps;
+	const std::string relations = RelationsFile({"7,7,Unrestricted,selbst"});
+	CHECK(steps.ToParsingRelations(PersonFile(7), relations), FT_OK);
+	CHECK(steps.Question().type, FT_QUESTION_PARSE_RELATIONS_FILE);
+	const FT_Answer withoutRelations{};
+	CHECK(steps.Continue(withoutRelations), FT_OK_WITH_WARNINGS);
+	const FT_Relation* found = nullptr;
+	size_t count = 0;
+	CHECK(FT_GetRelations(steps.Context(), 7, &found, &count, nullptr), FT_OK);
+	CHECK(count, 0U);
+	CHECK(steps.Trace().HasWarning("relations.csv"), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsEveryKindOfMalformedPersonFile() {
+	const std::vector<std::string> malformed = {
+		PersonFile(2, R"("Title": "Dr.",)"),		 // a comma after the last entry
+		PersonFile(2, R"("Title" "Dr.")"),			 // no colon after a key
+		PersonFile(2, R"("FirstNames": ["Bernd"})"), // a bracket closed by a brace
+		PersonFile(2, R"("Title": "Dr.)"),			 // a string that is not closed
+		PersonFile(2) + "{}",						 // text after the document
+		"[" + PersonFile(2) + "]",					 // an array instead of an object
+	};
+	for (const auto& file : malformed) {
+		DataFolder folder;
+		folder.AddPerson("1_Anna", PersonFile(1)).AddPerson("2_Bernd", file).SetRelations({});
+		ContextGuard context;
+		TraceBuffer trace;
+		CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+		CHECK(PersonCount(context), 1U);
+		CHECK(HasPerson(context, 1), true);
+		CHECK(trace.HasWarning("2_Bernd"), true);
+	}
+	return true;
+}
+
+// What the Trace shows of a part of a call that failed, and that the call worked around.
+struct FailedPart {
+	bool found = false;				// a failed Subtrace within a call names the file
+	std::string call;				// the first line of the call around it
+	std::vector<std::string> steps; // the steps it kept that name work, not only a summary
+};
+
+FailedPart
+FindFailedPart(const TraceBuffer& aTrace, const std::string& aFile) {
+	const auto lines = aTrace.Lines();
+	FailedPart part;
+	std::string call;
+	for (size_t i = 0; i < lines.size(); ++i) {
+		const size_t depth = lines[i].find_first_not_of('\t');
+		if (depth == 0) {
+			call = lines[i];
+			continue;
+		}
+		if (part.found || depth == std::string::npos || lines[i].compare(depth, 7, "[FAIL]\t") != 0
+			|| lines[i].find(aFile) == std::string::npos) {
+			continue;
+		}
+		part.found = true;
+		part.call = call;
+		for (size_t j = i + 1; j < lines.size() && lines[j].find_first_not_of('\t') > depth; ++j) {
+			const size_t start = lines[j].find_first_not_of('\t');
+			// A summary of compacted steps starts with their number.
+			if (lines[j].compare(start, 5, "STEP\t") != 0
+				|| std::isdigit(static_cast<unsigned char>(lines[j][start + 5])) != 0) {
+				continue;
+			}
+			part.steps.push_back(lines[j].substr(start + 5));
+		}
+	}
+	return part;
+}
+
+// docs/decisions/adr_0022.md
+bool
+APersonFileThatCannotBeReadFailsWithinTheWarningOfTheCall() {
+	auto folder = ThreePersons();
+	folder.AddPerson("3_Clara", PersonFile(3, R"("FirstNames": ["Clara" "Maria"])"));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 2U);
+	const auto part = FindFailedPart(trace, "3_Clara");
+	CHECK(part.found, true);
+	CHECK(part.call.rfind("[WARN]\t", 0), 0U);
+	CHECK(part.steps.empty(), false);
+	CHECK(trace.HasError("3_Clara"), true);
+	CHECK(trace.HasWarning("3_Clara"), true);
+	return true;
+}
+
+// docs/decisions/adr_0022.md
+bool
+ARelationsFileThatCannotBeReadFailsWithinTheWarningOfTheCall() {
+	auto folder = ThreePersons();
+	folder.AddFile(
+		"relations.csv",
+		"Version,3B5589D2-D9AF-40A8-BC40-574DAB6FFC57\nheader\n1,2,StrictlyLower,,,\n");
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 3U);
+	const auto part = FindFailedPart(trace, "relations.csv");
+	CHECK(part.found, true);
+	CHECK(part.call.rfind("[WARN]\t", 0), 0U);
+	CHECK(part.steps.empty(), false);
+	CHECK(trace.HasError("relations.csv"), true);
+	CHECK(trace.HasWarning("relations.csv"), true);
+	return true;
+}
+
+// docs/decisions/adr_0022.md
+bool
+AFileReadWithWarningsHasNoFailedPart() {
+	auto folder = ThreePersons();
+	folder.AddPerson("3_Clara", PersonFile(3, R"("Nickname": "Clara")"));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(PersonCount(context), 3U);
+	CHECK(trace.Text().find("[FAIL]"), std::string::npos);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+AMalformedPersonFileKeepsTheStepsUpToWhereItBroke() {
+	auto folder = ThreePersons();
+	folder.AddPerson(
+		"3_Clara",
+		PersonFile(3, R"("FirstNames": ["Clara" "Maria"], "Title": "Dr.")"));
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	const auto part = FindFailedPart(trace, "3_Clara");
+	CHECK(part.found, true);
+	// "Maria" stands where a comma or the end of the list was expected.
+	const bool keepsWhereItBroke =
+		std::any_of(part.steps.begin(), part.steps.end(), [](const std::string& aStep) {
+			return aStep.find("\"Maria\"") != std::string::npos;
+		});
+	CHECK(keepsWhereItBroke, true);
+	return true;
+}
+
 } // namespace
 
 bool
@@ -752,5 +904,11 @@ BuilderSuite() {
 	result &= RUN(CancellingACreationReleasesTheBuilder);
 	result &= RUN(ContinueWithoutAnswerIsAnInvalidArgument);
 	result &= RUN(StartCreateWithoutDataFolderIsAnInvalidArgument);
+	result &= RUN(AnApplicationCanSkipARelationsFileItCannotParse);
+	result &= RUN(SkipsEveryKindOfMalformedPersonFile);
+	result &= RUN(APersonFileThatCannotBeReadFailsWithinTheWarningOfTheCall);
+	result &= RUN(ARelationsFileThatCannotBeReadFailsWithinTheWarningOfTheCall);
+	result &= RUN(AFileReadWithWarningsHasNoFailedPart);
+	result &= RUN(AMalformedPersonFileKeepsTheStepsUpToWhereItBroke);
 	return result;
 }

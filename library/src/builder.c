@@ -12,6 +12,7 @@
 
 #include "internal.h"
 
+#include <assert.h>
 #include <family_tree/api.h>
 #include <stdbool.h>
 #include <stddef.h>
@@ -87,6 +88,22 @@ PrivIsSuccess(FT_Result aResult) {
 	return aResult == FT_OK || aResult == FT_OK_WITH_WARNINGS;
 }
 
+FT_Result
+PublicResult(Result aResult) {
+	switch (aResult) {
+	case RESULT_OK:
+		return FT_OK;
+	case RESULT_OK_WITH_WARNINGS:
+		return FT_OK_WITH_WARNINGS;
+	case RESULT_OUT_OF_MEMORY:
+		return FT_ERROR_OUT_OF_MEMORY;
+	case RESULT_UNREADABLE:
+		break; // the caller works around it, e.g. by skipping the file
+	}
+	assert(false && "every failure without a public counterpart is handled by the caller");
+	return FT_ERROR_UNEXPECTED_ANSWER; // ends the call, which rolls the answer back
+}
+
 // The result of two steps of one call: the first error, otherwise any warning.
 static FT_Result
 PrivCombine(FT_Result aFirst, FT_Result aSecond) {
@@ -157,17 +174,22 @@ PrivFile(const Call* aCall) {
 // Person go into the pending Arena, like the copy of an Application's answer.
 static FT_Result
 PrivParsePersonByDefault(Call* aCall, FT_Answer* aOut) {
-	bool read = false;
-	const FT_Result result = ParsePersonFile(
+	const Result result = ParsePersonFile(
 		aCall->next.question.text,
 		PrivFile(aCall),
 		aCall->scratch,
 		&aCall->builder->pending,
 		&aCall->person,
-		&read,
 		aCall->trace);
-	aOut->person = read ? &aCall->person : NULL;
-	return result;
+	if (result == RESULT_UNREADABLE) {
+		TraceStep(aCall->trace, "answering without a record");
+		return FT_OK; // skipped with a warning, like every answer without a record
+	}
+	if (result == RESULT_OUT_OF_MEMORY) {
+		return PublicResult(result);
+	}
+	aOut->person = &aCall->person;
+	return PublicResult(result);
 }
 
 // Parses the Relations File like PrivParsePersonByDefault. The Relations go into the scratch
@@ -175,17 +197,22 @@ PrivParsePersonByDefault(Call* aCall, FT_Answer* aOut) {
 // Persons.
 static FT_Result
 PrivParseRelationsByDefault(Call* aCall, FT_Answer* aOut) {
-	bool read = false;
-	const FT_Result result = ParseRelationsFile(
+	const Result result = ParseRelationsFile(
 		aCall->next.question.text,
 		PrivFile(aCall),
 		aCall->scratch,
 		aCall->scratch,
 		&aCall->relations,
-		&read,
 		aCall->trace);
-	aOut->relations = read ? &aCall->relations : NULL;
-	return result;
+	if (result == RESULT_UNREADABLE) {
+		TraceStep(aCall->trace, "answering without Relations");
+		return FT_OK; // skipped with a warning, like every answer without Relations
+	}
+	if (result == RESULT_OUT_OF_MEMORY) {
+		return PublicResult(result);
+	}
+	aOut->relations = &aCall->relations;
+	return PublicResult(result);
 }
 
 // Answers a Question the Application left to the default, the way an Application would: the
@@ -256,6 +283,17 @@ PrivCopyText(const Call* aCall, const char** aText) {
 	return *aText != NULL;
 }
 
+// Copies several texts like PrivCopyText. Returns false if memory ran out.
+static bool
+PrivCopyEachText(const Call* aCall, const char** const* aTexts, size_t aCount) {
+	for (size_t i = 0; i < aCount; ++i) {
+		if (!PrivCopyText(aCall, aTexts[i])) {
+			return false;
+		}
+	}
+	return true;
+}
+
 // The items of an empty list, which only tell it apart from a missing one and are never read.
 static const char* const theNoTexts[1] = {NULL};
 static const FT_Residence theNoResidences[1] = {{NULL, NULL, NULL}};
@@ -314,8 +352,8 @@ PrivCopyResidences(const Call* aCall, FT_ResidenceList* aList) {
 	}
 	for (size_t i = 0; i < aList->count; ++i) {
 		items[i] = aList->items[i];
-		if (!PrivCopyText(aCall, &items[i].name) || !PrivCopyText(aCall, &items[i].startDate)
-			|| !PrivCopyText(aCall, &items[i].endDate)) {
+		const char** texts[] = {&items[i].name, &items[i].startDate, &items[i].endDate};
+		if (!PrivCopyEachText(aCall, texts, sizeof(texts) / sizeof(texts[0]))) {
 			return false;
 		}
 	}
@@ -325,16 +363,30 @@ PrivCopyResidences(const Call* aCall, FT_ResidenceList* aList) {
 
 static bool
 PrivCopyDetails(const Call* aCall, FT_Person* aPerson) {
-	return PrivCopyText(aCall, &aPerson->title) && PrivCopyTextList(aCall, &aPerson->firstNames)
-		   && PrivCopyText(aCall, &aPerson->titleOfNobility)
-		   && PrivCopyTextList(aCall, &aPerson->lastNames) && PrivCopyText(aCall, &aPerson->gender)
-		   && PrivCopyText(aCall, &aPerson->dateOfBirth)
-		   && PrivCopyText(aCall, &aPerson->placeOfBirth)
-		   && PrivCopyText(aCall, &aPerson->dateOfDeath)
-		   && PrivCopyText(aCall, &aPerson->placeOfDeath)
-		   && PrivCopyTextList(aCall, &aPerson->professions)
-		   && PrivCopyResidences(aCall, &aPerson->placesOfResidence)
-		   && PrivCopyTextList(aCall, &aPerson->remarks);
+	const char** texts[] = {
+		&aPerson->title,
+		&aPerson->titleOfNobility,
+		&aPerson->gender,
+		&aPerson->dateOfBirth,
+		&aPerson->placeOfBirth,
+		&aPerson->dateOfDeath,
+		&aPerson->placeOfDeath,
+	};
+	if (!PrivCopyEachText(aCall, texts, sizeof(texts) / sizeof(texts[0]))) {
+		return false;
+	}
+	FT_TextList* lists[] = {
+		&aPerson->firstNames,
+		&aPerson->lastNames,
+		&aPerson->professions,
+		&aPerson->remarks,
+	};
+	for (size_t i = 0; i < sizeof(lists) / sizeof(lists[0]); ++i) {
+		if (!PrivCopyTextList(aCall, lists[i])) {
+			return false;
+		}
+	}
+	return PrivCopyResidences(aCall, &aPerson->placesOfResidence);
 }
 
 // Copies a parsed Person File into aCall->person, with its Media paths.
@@ -345,10 +397,13 @@ PrivCopyPerson(Call* aCall, const FT_Answer* aAnswer, FT_Answer* aOut) {
 	}
 	FT_PersonRecord* record = &aCall->person;
 	*record = *aAnswer->person;
-	const bool copied = PrivCopyDetails(aCall, &record->person)
-						&& PrivCopyText(aCall, &record->recording)
-						&& PrivCopyTexts(aCall, &record->pictures, record->pictureCount);
-	if (!copied) {
+	if (!PrivCopyDetails(aCall, &record->person)) {
+		return FT_ERROR_OUT_OF_MEMORY;
+	}
+	if (!PrivCopyText(aCall, &record->recording)) {
+		return FT_ERROR_OUT_OF_MEMORY;
+	}
+	if (!PrivCopyTexts(aCall, &record->pictures, record->pictureCount)) {
 		return FT_ERROR_OUT_OF_MEMORY;
 	}
 	aOut->person = record;
@@ -380,9 +435,12 @@ PrivCopyRelations(Call* aCall, const FT_Answer* aAnswer, FT_Answer* aOut) {
 	}
 	for (size_t i = 0; i < count; ++i) {
 		relations[i] = from->items[i];
-		if (!PrivCopyText(aCall, &relations[i].relationship)
-			|| !PrivCopyText(aCall, &relations[i].startDate)
-			|| !PrivCopyText(aCall, &relations[i].endDate)) {
+		const char** texts[] = {
+			&relations[i].relationship,
+			&relations[i].startDate,
+			&relations[i].endDate,
+		};
+		if (!PrivCopyEachText(aCall, texts, sizeof(texts) / sizeof(texts[0]))) {
 			return FT_ERROR_OUT_OF_MEMORY;
 		}
 	}

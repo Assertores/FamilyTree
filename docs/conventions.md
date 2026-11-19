@@ -66,6 +66,8 @@ spikes/
 ## Control Flow
 <!-- Rules for loops and branches beyond what the formatter and the linters enforce. -->
 - A loop whose step is a single statement that ends every pass, e.g. `++i` or `start = end`, is a `for` loop with that step in its head, so that the step cannot be lost or skipped when the body changes; the variables the step needs are declared in the head, e.g. `for (size_t start = 0, end = 0; start < count; start = end)`, or before the loop if the code after it needs them. A loop whose step differs between branches, or is followed by other statements, stays a `while` loop.
+- Early returns are preferred: a function handles the cases it cannot or need not work on first, each with its own `return`, and does its actual work afterwards, without nesting it in an `else`. Within a loop, `continue` does the same: the passes that are skipped are handled first, and the work of the loop follows unindented.
+- A function with side effects is not called within a condition joined by `&&` or `||`, nor in such a `return`, because whether it runs then depends on the conditions before it, and the condition hides where the actual work happens and that the state after it has changed. It is called in a statement of its own, e.g. `const bool goesOn = PrivStep(aReader, token);`, and its result is checked afterwards. A single checked call, e.g. `if (!PrivReadHex(aText, &value))`, is fine.
 - A loop that makes its progress in the body, e.g. a parser that reads tokens until a closing bracket, gets a counter as its fixed upper bound ([ADR 0011](decisions/adr_0011.md), Rule 2), named `pass`, and leaves from within its body; a comment says why the bound holds, e.g. that each pass consumes at least one character. A loop that walks a structure without a countable bound, e.g. a list, says in a comment why it ends.
 
 ## Error Handling
@@ -75,6 +77,7 @@ spikes/
 - Every return value is checked.
 - A `switch` over an enum lists every value of the enum and has no `default` case, so that the compiler warns (`-Wswitch`) when a value is added to the enum later; a `default` case would silently take the new value. A value outside the enum, e.g. one an Application passed, is handled after the `switch`, which also keeps compilers that cannot see that every case returns from warning about a missing return value.
 - A problem in the data is a warning: the Library works around it, reports it to the Trace, and returns `FT_OK_WITH_WARNINGS`. A call that cannot do what was asked returns an error.
+- Every function judges its own task: a function that cannot do what it was asked returns a failure, also when its caller works around it, e.g. a Person File that cannot be read is a failure of the parser and a warning of the creation. Internal functions return the internal `Result` for that, which never leaves the Library, see [ADR 0022](decisions/adr_0022.md).
 - The Applications show warnings and errors to the user in German, in words a data collector understands, and name the file concerned.
 
 ## Logging

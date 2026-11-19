@@ -182,15 +182,16 @@ PrivRemoveDuplicates(ContextPerson* aPersons, size_t aCount, FT_Trace* aTrace, b
 			}
 		}
 		for (size_t i = start; i < end; ++i) {
-			if (i != best) {
-				TraceWarning(
-					aTrace,
-					"%s/data.json: skipped, Person Id %lld is also used by %s/data.json",
-					aPersons[i].folder,
-					aPersons[i].person.id,
-					aPersons[best].folder);
-				*aWarned = true;
+			if (i == best) {
+				continue; // the one that is kept
 			}
+			TraceWarning(
+				aTrace,
+				"%s/data.json: skipped, Person Id %lld is also used by %s/data.json",
+				aPersons[i].folder,
+				aPersons[i].person.id,
+				aPersons[best].folder);
+			*aWarned = true;
 		}
 		aPersons[kept] = aPersons[best];
 		++kept;

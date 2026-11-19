@@ -86,10 +86,19 @@ typedef enum {
 /// 	[WARN]	ReadPersonFile	1_Philippa_Perry/data.json
 /// 		WARNING	unknown key "death"
 /// @endcode
-/// The outcome is `[ OK ]`, `[WARN]` or `[FAIL]`, the worst of everything inside the Subtrace.
-/// Fields are separated by tabs. A Subtrace that succeeded keeps only its first line and a summary
-/// of its steps; one with warnings also keeps its warnings, and one that failed keeps every line.
-/// When the buffer is full, the oldest lines are dropped. See docs/decisions/adr_0018.md.
+/// The outcome is `[ OK ]`, `[WARN]` if the work worked around problems in the data, or `[FAIL]`
+/// if it could not be done; a part that failed and was worked around shows `[FAIL]` within a
+/// `[WARN]`, e.g. a Person File that could not be parsed and was skipped. Fields are separated by
+/// tabs. A Subtrace that succeeded keeps only its first line and a summary of its steps; one with
+/// warnings also keeps its warnings and the parts that failed, and one that failed keeps every
+/// line. When the buffer is full, the oldest lines are dropped. See docs/decisions/adr_0018.md and
+/// docs/decisions/adr_0022.md.
+///
+/// The Trace is meant for people, e.g. in a log; its wording changes between versions, so do not
+/// make decisions by reading it, but by the results.
+/// @note We recommend a buffer of 1 MiB, which keeps every line of the creation of a Context of a
+/// few thousand Persons. A smaller buffer works as well: it loses the oldest lines first, and
+/// @a droppedLines tells how many.
 typedef struct {
 	char* buffer;		 ///< Zero terminated text, one Subtrace or report per line.
 	size_t capacity;	 ///< Size of @a buffer in bytes; 0 discards everything.

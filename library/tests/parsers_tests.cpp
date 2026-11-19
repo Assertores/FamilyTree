@@ -309,6 +309,86 @@ ReturnsUtf8TextUnchanged() {
 	return true;
 }
 
+// docs/decisions/adr_0021.md
+bool
+KeepsTheFirstOfTwoEqualKeys() {
+	const OnePerson one(R"("Title": "Dr.", "Title": "Prof.")");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(Text(one.person->title), "Dr.");
+	CHECK(one.trace.HasWarning("\"Title\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsAListWithAnItemOfTheWrongType() {
+	const OnePerson one(R"("Remarks": ["erste Zeile", 2], "FirstNames": ["Anna"])");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(one.person->remarks.count, 0U);
+	CHECK(one.IsMissing(one.person->remarks.items[0]), true);
+	CHECK(Texts(one.person->firstNames), Strings({"Anna"}));
+	CHECK(one.trace.HasWarning("\"Remarks\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsAListWithAnArrayAmongItsItems() {
+	const OnePerson one(R"("FirstNames": ["Anna", ["Maria"]], "LastNames": ["Huber"])");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(one.person->firstNames.count, 0U);
+	CHECK(one.IsMissing(one.person->firstNames.items[0]), true);
+	CHECK(Texts(one.person->lastNames), Strings({"Huber"}));
+	CHECK(one.trace.HasWarning("\"FirstNames\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsATextKeyWithAnObjectValue() {
+	const OnePerson one(R"("Gender": {"text": "weiblich"}, "PlaceOfBirth": "Würzburg")");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(one.IsMissing(one.person->gender), true);
+	CHECK(Text(one.person->placeOfBirth), "Würzburg");
+	CHECK(one.trace.HasWarning("\"Gender\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsAnUnknownKeyWithNestedValuesAndReadsTheRest() {
+	const OnePerson one(
+		R"("Extra": {"a": [1, {"b": [[true, null], "c"]}], "d": {}}, "Title": "Dr.")");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(Text(one.person->title), "Dr.");
+	CHECK(one.trace.HasWarning("\"Extra\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+KnowsTheKeysOfEachObjectApart() {
+	const OnePerson one(
+		R"("StartDate": "1900", "PlaceOfResidence": [{"Name": "Würzburg", "Version": "x"}])");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(one.person->placesOfResidence.count, 1U);
+	CHECK(Text(one.person->placesOfResidence.items[0].name), "Würzburg");
+	CHECK(one.trace.HasWarning("\"StartDate\""), true);
+	CHECK(one.trace.HasWarning("\"Version\""), true);
+	return true;
+}
+
+// docs/decisions/adr_0021.md
+bool
+SkipsAPlaceOfResidenceListWithAnItemThatIsNoObject() {
+	const OnePerson one(R"("PlaceOfResidence": [{"Name": "Würzburg"}, "Bamberg"])");
+	CHECK(one.result, FT_OK_WITH_WARNINGS);
+	CHECK(one.person->placesOfResidence.count, 0U);
+	CHECK(one.IsMissing(one.person->placesOfResidence.items[0].name), true);
+	CHECK(one.trace.HasWarning("\"PlaceOfResidence\""), true);
+	return true;
+}
+
 } // namespace
 
 bool
@@ -333,5 +413,12 @@ ParsersSuite() {
 	result &= RUN(DecodesASurrogatePairIntoUtf8);
 	result &= RUN(KeepsAByteOrderMarkInsideAText);
 	result &= RUN(ReturnsUtf8TextUnchanged);
+	result &= RUN(KeepsTheFirstOfTwoEqualKeys);
+	result &= RUN(SkipsAListWithAnItemOfTheWrongType);
+	result &= RUN(SkipsAListWithAnArrayAmongItsItems);
+	result &= RUN(SkipsATextKeyWithAnObjectValue);
+	result &= RUN(SkipsAnUnknownKeyWithNestedValuesAndReadsTheRest);
+	result &= RUN(KnowsTheKeysOfEachObjectApart);
+	result &= RUN(SkipsAPlaceOfResidenceListWithAnItemThatIsNoObject);
 	return result;
 }

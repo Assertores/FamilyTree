@@ -211,13 +211,20 @@ PrivFindFirstLine(const FT_Trace* aTrace, size_t aIndentation) {
 	return theNotFound;
 }
 
-static const char*
+// How a Subtrace ended, whichever type of result it was closed with.
+typedef enum {
+	OUTCOME_OK,
+	OUTCOME_WARNING,
+	OUTCOME_FAIL,
+} Outcome;
+
+static Outcome
 PrivOutcome(FT_Result aResult) {
 	switch (aResult) {
 	case FT_OK:
-		return theOkOutcome;
+		return OUTCOME_OK;
 	case FT_OK_WITH_WARNINGS:
-		return theWarningOutcome;
+		return OUTCOME_WARNING;
 	case FT_ERROR_INVALID_ARGUMENT:
 	case FT_ERROR_UNKNOWN_PERSON:
 	case FT_ERROR_UNKNOWN_FAMILY:
@@ -227,6 +234,33 @@ PrivOutcome(FT_Result aResult) {
 	case FT_ERROR_PLATFORM:
 	case FT_ERROR_NOT_SUPPORTED:
 	case FT_ERROR_CONFLICTING_GENERATIONS:
+		return OUTCOME_FAIL;
+	}
+	return OUTCOME_FAIL;
+}
+
+static Outcome
+PrivResultOutcome(Result aResult) {
+	switch (aResult) {
+	case RESULT_OK:
+		return OUTCOME_OK;
+	case RESULT_OK_WITH_WARNINGS:
+		return OUTCOME_WARNING;
+	case RESULT_OUT_OF_MEMORY:
+	case RESULT_UNREADABLE:
+		return OUTCOME_FAIL;
+	}
+	return OUTCOME_FAIL;
+}
+
+static const char*
+PrivOutcomeText(Outcome aOutcome) {
+	switch (aOutcome) {
+	case OUTCOME_OK:
+		return theOkOutcome;
+	case OUTCOME_WARNING:
+		return theWarningOutcome;
+	case OUTCOME_FAIL:
 		return theFailOutcome;
 	}
 	return theFailOutcome;
@@ -330,20 +364,34 @@ PrivCompact(FT_Trace* aTrace, size_t aFirst, bool aKeepWarnings) {
 	PrivInsertSummary(aTrace, start, indentation, removed);
 }
 
-FT_Result
-TraceClose(FT_Trace* aTrace, FT_Result aResult) {
+// Writes the outcome into the first line of the innermost Subtrace, and compacts it unless it
+// failed, as a failed Subtrace keeps every line.
+static void
+PrivCloseWith(FT_Trace* aTrace, Outcome aOutcome) {
 	if (!PrivIsActive(aTrace) || aTrace->depth == 0) {
-		return aResult;
+		return;
 	}
 	--aTrace->depth;
 	const size_t first = PrivFindFirstLine(aTrace, aTrace->depth);
 	if (first == theNotFound) {
-		return aResult;
+		return;
 	}
-	(void)PrivCopyField(aTrace->buffer + first + aTrace->depth, PrivOutcome(aResult));
-	if (aResult == FT_OK || aResult == FT_OK_WITH_WARNINGS) {
-		PrivCompact(aTrace, first, aResult == FT_OK_WITH_WARNINGS);
+	(void)PrivCopyField(aTrace->buffer + first + aTrace->depth, PrivOutcomeText(aOutcome));
+	if (aOutcome == OUTCOME_FAIL) {
+		return;
 	}
+	PrivCompact(aTrace, first, aOutcome == OUTCOME_WARNING);
+}
+
+FT_Result
+TraceClose(FT_Trace* aTrace, FT_Result aResult) {
+	PrivCloseWith(aTrace, PrivOutcome(aResult));
+	return aResult;
+}
+
+Result
+TraceCloseResult(FT_Trace* aTrace, Result aResult) {
+	PrivCloseWith(aTrace, PrivResultOutcome(aResult));
 	return aResult;
 }
 

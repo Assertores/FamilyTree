@@ -8,6 +8,7 @@
 #include <check.hpp>
 #include <family_tree/api.h>
 
+#include <cctype>
 #include <cstddef>
 #include <string>
 #include <vector>
@@ -253,6 +254,53 @@ ATooSmallTraceKeepsTheNewestLines() {
 	return true;
 }
 
+// docs/decisions/adr_0018.md
+bool
+AFailedCallKeepsEveryStep() {
+	TraceBuffer trace;
+	FT_Builder* builder = nullptr;
+	FT_Question question{};
+	CHECK(FT_StartCreate(theRoot, &builder, &question, &trace), FT_OK);
+	const char* folders[] = {nullptr};
+	FT_Answer unexpected{};
+	unexpected.folderNames = folders;
+	unexpected.folderCount = 1;
+	FT_Context* context = nullptr;
+	const FT_Result result = FT_Continue(builder, &unexpected, &question, &context, &trace);
+	(void)FT_CancelCreate(builder, nullptr);
+	CHECK(result, FT_ERROR_UNEXPECTED_ANSWER);
+	const auto lines = trace.Lines();
+	size_t call = 0;
+	for (size_t i = 0; i < lines.size(); ++i) {
+		if (Depth(lines[i]) == 0) {
+			call = i;
+		}
+	}
+	CHECK(lines[call].rfind("[FAIL]\t", 0), 0U);
+	// A summary of compacted steps starts with their number; a step that names work does not.
+	bool keepsStep = false;
+	for (size_t i = call + 1; i < lines.size(); ++i) {
+		const size_t start = Depth(lines[i]);
+		keepsStep = keepsStep
+					|| (lines[i].compare(start, 5, "STEP\t") == 0
+						&& std::isdigit(static_cast<unsigned char>(lines[i][start + 5])) == 0);
+	}
+	CHECK(keepsStep, true);
+	return true;
+}
+
+// docs/decisions/adr_0018.md
+bool
+AReportStaysOnOneLine() {
+	DataFolder folder;
+	folder.AddPerson("1_Anna", PersonFile(1, R"("a\nb\tc": "x")")).SetRelations({});
+	ContextGuard context;
+	TraceBuffer trace;
+	CHECK(Create(folder, context, trace), FT_OK_WITH_WARNINGS);
+	CHECK(trace.HasWarning("\"a b c\""), true);
+	return true;
+}
+
 } // namespace
 
 bool
@@ -270,5 +318,7 @@ TraceSuite() {
 	result &= RUN(ASuccessfulCallKeepsOnlyItsSummary);
 	result &= RUN(AWarningKeepsItsLinesAfterTheSummary);
 	result &= RUN(ATooSmallTraceKeepsTheNewestLines);
+	result &= RUN(AFailedCallKeepsEveryStep);
+	result &= RUN(AReportStaysOnOneLine);
 	return result;
 }
